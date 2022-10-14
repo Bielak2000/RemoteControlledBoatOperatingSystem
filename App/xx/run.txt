@@ -1,2 +1,0 @@
-java -jar /home/kacperbielak/Pulpit/xx/SystemObslugiLodziZdalnieSterowanej-1.0-SNAPSHOT-shaded.jar
-Copierd dls from com in GMapsFX to com in src.
