@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<SplitPane dividerPositions="0.5368421052631579" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="97.0" prefWidth="370.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+  <items>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+         <children>
+            <Label layoutX="50.0" layoutY="14.0" prefHeight="20.0" prefWidth="268.0" text="Czy chcesz zamknac aplikacje?">
+               <font>
+                  <Font size="17.0" />
+               </font>
+            </Label>
+         </children></AnchorPane>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="61.0" prefWidth="348.0">
+         <children>
+            <Button fx:id="confirmExit" layoutX="105.0" layoutY="8.0" mnemonicParsing="false" onAction="#exit" prefHeight="25.0" prefWidth="60.0" text="TAK" textFill="#dd4040" />
+            <Button fx:id="noConfirmExit" layoutX="200.0" layoutY="8.0" mnemonicParsing="false" onAction="#notExit" prefHeight="25.0" prefWidth="60.0" text="NIE" textFill="#41a425" />
+         </children></AnchorPane>
+  </items>
+</SplitPane>

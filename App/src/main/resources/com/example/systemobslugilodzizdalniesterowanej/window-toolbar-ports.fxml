@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="217.0" prefWidth="552.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label layoutX="14.0" layoutY="14.0" prefHeight="20.0" prefWidth="601.0" text="Wybierz port z radionadajnikiem oraz system na jakim pracujesz:">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Label>
+      <TableView fx:id="portsTable" layoutX="174.0" layoutY="49.0" prefHeight="107.0" prefWidth="215.0">
+        <columns>
+          <TableColumn fx:id="column" prefWidth="213.0" text="Porty" />
+        </columns>
+      </TableView>
+      <Button fx:id="connectButton" layoutX="252.0" layoutY="169.0" mnemonicParsing="false" onAction="#connect" text="Polacz" textFill="#0a9413" />
+      <Button fx:id="exit" layoutX="470.0" layoutY="182.0" mnemonicParsing="false" onAction="#exit" text="Wyjscie" />
+      <CheckBox fx:id="linuxBox" layoutX="429.0" layoutY="85.0" mnemonicParsing="false" onAction="#chooseLinux" text="Linux" />
+      <CheckBox fx:id="windowsBox" layoutX="429.0" layoutY="110.0" mnemonicParsing="false" onAction="#chooseWindows" text="Windows" />
+   </children>
+</Pane>
