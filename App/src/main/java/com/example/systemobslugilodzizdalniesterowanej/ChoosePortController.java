@@ -118,34 +118,34 @@ public class ChoosePortController implements Initializable {
                         case UP:
                             controller.getMoveUp().arm();
                             engines.movingForward();
-                            if(!engines.x) {
+                            if(!engines.getTemp()) {
                                 connection.sentParameters();
-                              engines.x=true;
+                              engines.setTemp(true);
                             }
                             //controller.getLightPower().setText("2");
                             break;
                         case DOWN:
                             controller.getMoveDown().arm();
                             engines.movingBack();
-                            if(!engines.x) {
+                            if(!engines.getTemp()) {
                                 connection.sentParameters();
-                                engines.x=true;
+                                engines.setTemp(true);
                             }
                             break;
                         case LEFT:
                             controller.getMoveLeft().arm();
                             engines.turnLeft();
-                            if(!engines.x) {
+                            if(!engines.getTemp()) {
                                 connection.sentParameters();
-                                engines.x=true;
+                                engines.setTemp(true);
                             }
                             break;
                         case RIGHT:
                             controller.getMoveRight().arm();
                             engines.turnRight();
-                            if(!engines.x) {
+                            if(!engines.getTemp()) {
                                 connection.sentParameters();
-                                engines.x=true;
+                                engines.setTemp(true);
                             }
                             break;
                         case T:
@@ -166,18 +166,18 @@ public class ChoosePortController implements Initializable {
                             break;
                         case Q:
                             controller.getLightDown().arm();
-                            if(!lighting.x) {
+                            if(!lighting.getTemp()) {
                                 lighting.setPower(0);
                                 connection.sentParameters();
-                                lighting.x=true;
+                                lighting.setTemp(true);
                             }
                             break;
                         case E:
                             controller.getLightUp().arm();
-                            if(!lighting.x) {
+                            if(!lighting.getTemp()) {
                                 lighting.setPower(100);
                                 connection.sentParameters();
-                                lighting.x=true;
+                                lighting.setTemp(true);
                             }
                             break;
                     }
@@ -192,25 +192,25 @@ public class ChoosePortController implements Initializable {
                             controller.getMoveUp().disarm();
                             engines.turnOff();
                             connection.sentParameters();
-                            engines.x=false;
+                            engines.setTemp(false);
                             break;
                         case DOWN:
                             controller.getMoveDown().disarm();
                             engines.turnOff();
                             connection.sentParameters();
-                            engines.x=false;
+                            engines.setTemp(false);
                             break;
                         case LEFT:
                             controller.getMoveLeft().disarm();
                             engines.turnOff();
                             connection.sentParameters();
-                            engines.x=false;
+                            engines.setTemp(false);
                             break;
                         case RIGHT:
                             controller.getMoveRight().disarm();
                             engines.turnOff();
                             connection.sentParameters();
-                            engines.x=false;
+                            engines.setTemp(false);
                             break;
                         case T:
                             controller.getLeftFlap().disarm();
@@ -226,13 +226,13 @@ public class ChoosePortController implements Initializable {
                             controller.getLightDown().disarm();
                             lighting.setPower(-1);
                             connection.sentParameters();
-                            lighting.x=false;
+                            lighting.setTemp(false);
                             break;
                         case E:
                             controller.getLightUp().disarm();
                             lighting.setPower(-1);
                             connection.sentParameters();
-                            lighting.x=false;
+                            lighting.setTemp(false);
                             break;
                     }
                 }

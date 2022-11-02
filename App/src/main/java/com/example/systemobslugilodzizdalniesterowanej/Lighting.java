@@ -2,11 +2,11 @@ package com.example.systemobslugilodzizdalniesterowanej;
 
 public class Lighting {
     private int power;
-    public boolean x;
+    private boolean temp;
 
     public Lighting(){
         power=0;
-        x=false;
+        temp =false;
     }
 
     public void setPower(int power) {
@@ -15,6 +15,13 @@ public class Lighting {
 
     public int getPower(){
         return this.power;
+    }
+
+    public void setTemp(boolean temp) {
+        this.temp = temp;
+    }
+    public boolean getTemp() {
+        return temp;
     }
 }
 
