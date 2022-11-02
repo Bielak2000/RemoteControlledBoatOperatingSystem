@@ -86,7 +86,7 @@ public class Connection {
         }
     }
 
-    public void sentParameters(){
+    public void sendParameters(){
         try {
             String sentInfo = (String.valueOf((int) engines.getMotorOne()) + "_" + String.valueOf((int) engines.getMotorTwo()) + "_"
                     + String.valueOf((int) lighting.getPower()) + "_"
