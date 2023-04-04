@@ -3,12 +3,12 @@ package com.example.systemobslugilodzizdalniesterowanej;
 public class Engines {
     private int motorOne;
     private int motorTwo;
-    public boolean x;
+    private boolean temp;
 
     public Engines(){
         motorOne=0;
         motorTwo=0;
-        x=false;
+        temp =false;
     }
 
     public void movingForward(){
@@ -42,5 +42,12 @@ public class Engines {
 
     public double getMotorTwo() {
         return motorTwo;
+    }
+
+    public void setTemp(boolean temp) {
+        this.temp = temp;
+    }
+    public boolean getTemp() {
+        return temp;
     }
 }

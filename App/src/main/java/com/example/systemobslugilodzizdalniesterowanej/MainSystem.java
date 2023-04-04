@@ -10,10 +10,6 @@ import jssc.SerialPortException;
 import java.io.IOException;
 
 public class MainSystem extends Application {
-    Lighting lighting = new Lighting();
-    Engines engines = new Engines();
-    Flaps flaps = new Flaps();
-
     public static void main(String[] args) throws SerialPortException {
         launch();
     }
