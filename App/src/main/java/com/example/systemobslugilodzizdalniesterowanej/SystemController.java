@@ -34,8 +34,7 @@ public class SystemController implements Initializable{
     public SystemController(Stage stage1){
         this.stage=stage1;
         markerList.add(Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(50.0650887, 19.9245536)).setVisible(true));
-        markerList.add(new Marker(getClass().getResource("/markerLogo.png"), -20, -20).setPosition(new Coordinate(50.0750887, 19.9345536))
-                .setVisible(true));
+        markerList.add(Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(50.0750887, 19.9345536)).setVisible(true));
     }
 
     @Override
