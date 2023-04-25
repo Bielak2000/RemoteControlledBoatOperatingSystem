@@ -3,40 +3,42 @@ package com.example.systemobslugilodzizdalniesterowanej;
 import com.dlsc.gmapsfx.MapComponentInitializedListener;
 import com.dlsc.gmapsfx.javascript.object.*;
 import com.dlsc.gmapsfx.GoogleMapView;
-import com.dlsc.gmapsfx.service.directions.DirectionsService;
+import com.dlsc.gmapsfx.service.directions.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Map implements MapComponentInitializedListener {
+public class Map implements MapComponentInitializedListener, DirectionsServiceCallback {
 
- GoogleMapView mapView;
- GoogleMap map;
- Marker marker;
- List<Marker> markerList;
- MarkerOptions markerOptions;
- DirectionsService directionsService;
+    protected GoogleMapView mapView;
+    protected GoogleMap map;
+    protected Marker marker;
+    protected List<Marker> markerList;
+    protected MarkerOptions markerOptions;
+    protected DirectionsService directionsService;
+    protected DirectionsRenderer directionsRenderer = null;
+    protected DirectionsPane directionsPane;
 
- public Map(){
-  mapView = new GoogleMapView();
-  mapView.addMapInitializedListener(this);
-  markerOptions = new MarkerOptions();
-  markerList = new ArrayList<>();
- }
+    public Map() {
+        mapView = new GoogleMapView();
+        mapView.addMapInitializedListener(this);
+        markerOptions = new MarkerOptions();
+        markerList = new ArrayList<>();
+    }
 
- @Override
- public void mapInitialized() {
-  MapOptions mapOptions = new MapOptions();
-  mapOptions.mapType(MapTypeIdEnum.ROADMAP).zoom(18).keyboardShortcuts(false);
-  map = mapView.createMap(mapOptions);
-  LatLong latLong = new LatLong(50.0650887,19.9245536);
-//  marker = new Marker(markerOptions);
-//  marker.setPosition(latLong);
-//  map.addMarker(marker);
-  map.panTo(latLong);
-  directionsService = new DirectionsService();
-  directionsService.getRoute();
-  new Poly
+    @Override
+    public void mapInitialized() {
+        MapOptions mapOptions = new MapOptions();
+        mapOptions.mapType(MapTypeIdEnum.ROADMAP).overviewMapControl(false).zoom(18).keyboardShortcuts(false);
+        map = mapView.createMap(mapOptions);
+        LatLong latLong = new LatLong(50.0650887, 19.9245536);
+        map.setCenter(latLong);
+
+        Marker marker1 = new Marker(markerOptions);
+        Marker marker2 = new Marker(markerOptions);
+        marker1.setPosition(new LatLong(50.0750887, 19.9345536));
+        marker2.setPosition(new LatLong(50.0850887, 19.9445536));
+        map.addMarker(marker1);
 
 //  Marker marker1 = new Marker(markerOptions);
 //  Marker marker2 = new Marker(markerOptions);
@@ -51,26 +53,29 @@ public class Map implements MapComponentInitializedListener {
 //  map.addMarker(marker3);
 //  map.addMarker(marker4);
 
-  map.setCenter(latLong);
- }
 
- public void setPosition(LatLong latLong){
-  marker.setPosition(latLong);
-  map.setCenter(latLong);
- }
+    }
 
- public void addNewMarker(LatLong latLong){
-  Marker marker1 = new Marker(markerOptions);
-  marker1.setPosition(latLong);
-  markerList.add(marker1);
-  map.addMarker(marker1);
-  map.setCenter(latLong);
-//  if(markerList.size()>1) {
-//   map.panTo();
-//  }
- }
+    @Override
+    public void directionsReceived(DirectionsResult results, DirectionStatus status) {
+        System.out.println(results);
+        System.out.println(status);
+    }
 
- public GoogleMapView getMapView() {
-  return mapView;
- }
+    public void setPosition(LatLong latLong) {
+        marker.setPosition(latLong);
+        map.setCenter(latLong);
+    }
+
+    public void addNewMarker(LatLong latLong) {
+        Marker marker1 = new Marker(markerOptions);
+        marker1.setPosition(latLong);
+        markerList.add(marker1);
+        map.addMarker(marker1);
+        map.setCenter(latLong);
+    }
+
+    public GoogleMapView getMapView() {
+        return mapView;
+    }
 }

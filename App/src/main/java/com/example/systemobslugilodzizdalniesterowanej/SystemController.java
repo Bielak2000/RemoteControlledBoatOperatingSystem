@@ -1,5 +1,8 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
+import com.sothawo.mapjfx.Coordinate;
+import com.sothawo.mapjfx.MapView;
+import com.sothawo.mapjfx.Marker;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -9,12 +12,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class SystemController implements Initializable{
@@ -22,11 +26,16 @@ public class SystemController implements Initializable{
     Stage stage;
     Boolean networkStatus;
     Map map = new Map();
+    List<Marker> markerList = new ArrayList<>();
+    Marker marker;
     public Stage getStage() {
         return stage;
     }
     public SystemController(Stage stage1){
         this.stage=stage1;
+        markerList.add(Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(50.0650887, 19.9245536)).setVisible(true));
+        markerList.add(new Marker(getClass().getResource("/markerLogo.png"), -20, -20).setPosition(new Coordinate(50.0750887, 19.9345536))
+                .setVisible(true));
     }
 
     @Override
@@ -37,22 +46,32 @@ public class SystemController implements Initializable{
         exit.setFocusTraversable(false);
         try {
             checkConnectionWithInternet();
-            gps.getChildren().add(map.getMapView());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
+//            gps.getChildren().add(new MapView());
+            mapView.initialize();
+            mapView.initializedProperty().addListener((observable, oldValue, newValue)->{
+                if(newValue) {
+                    markerList.forEach((marker)->{
+                        mapView.addMarker(marker);
+                    });
+                    mapView.setCenter(new Coordinate(50.0650887, 19.9245536));
+                }
+            });
+        } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
-
     }
+
     @FXML
     private Label connectionStatus;
 
     @FXML
     private Label networkConnection;
 
+//    @FXML
+//    private AnchorPane gps;
+
     @FXML
-    private AnchorPane gps;
+    private MapView mapView;
 
     @FXML
     private Button leftFlap;
