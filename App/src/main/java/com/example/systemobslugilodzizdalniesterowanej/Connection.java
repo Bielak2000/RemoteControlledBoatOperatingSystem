@@ -67,6 +67,7 @@ public class Connection {
                             String[] finalLocalization = localization;
                             Platform.runLater(() -> {
                                 if (!finalLocalization[0].startsWith("INV") && !finalLocalization[0].equals("") && !finalLocalization[0].isEmpty()) {
+                                    // TODO: dane lokalizacyjne przychodzace z lodzi
                                     controller.getMap().addNewMarker(new LatLong(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1])));
 //                                    controller.getMap().setPosition(new LatLong(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1])));
                                 }

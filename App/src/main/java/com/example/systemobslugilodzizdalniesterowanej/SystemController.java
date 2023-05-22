@@ -1,8 +1,6 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
-import com.sothawo.mapjfx.Coordinate;
 import com.sothawo.mapjfx.MapView;
-import com.sothawo.mapjfx.Marker;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,44 +15,32 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
-public class SystemController implements Initializable{
+public class SystemController implements Initializable {
 
     Stage stage;
     Boolean networkStatus;
     Map map = new Map();
-    List<Marker> markerList = new ArrayList<>();
-    Marker marker;
+    OSM osmMap;
+
     public Stage getStage() {
         return stage;
     }
-    public SystemController(Stage stage1){
-        this.stage=stage1;
-        markerList.add(Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(50.0650887, 19.9245536)).setVisible(true));
-        markerList.add(Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(50.0750887, 19.9345536)).setVisible(true));
+
+    public SystemController(Stage stage1) {
+        this.stage = stage1;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        networkStatus=false;
+        networkStatus = false;
         lightPower.setText("0%");
         exit.setCancelButton(true);
         exit.setFocusTraversable(false);
         try {
             checkConnectionWithInternet();
-//            gps.getChildren().add(new MapView());
-            mapView.initialize();
-            mapView.initializedProperty().addListener((observable, oldValue, newValue)->{
-                if(newValue) {
-                    markerList.forEach((marker)->{
-                        mapView.addMarker(marker);
-                    });
-                    mapView.setCenter(new Coordinate(50.0650887, 19.9245536));
-                }
-            });
+            osmMap = new OSM(mapView);
         } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -167,7 +153,7 @@ public class SystemController implements Initializable{
         dialogStage.show();
     }
 
-    public void dialogNotConnect(String title, String text){
+    public void dialogNotConnect(String title, String text) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
         alert.setHeaderText(text);
@@ -180,10 +166,9 @@ public class SystemController implements Initializable{
             URLConnection connection = url1.openConnection();
             connection.connect();
             networkConnection.setText("Polaczono z internetem!");
-            networkStatus=true;
-        }
-        catch (Exception e) {
-            dialogNotConnect("Brak internetu","Aplikacja nie moze polaczyc sie z internetem!");
+            networkStatus = true;
+        } catch (Exception e) {
+            dialogNotConnect("Brak internetu", "Aplikacja nie moze polaczyc sie z internetem!");
             getNetworkConnection().setTextFill(Color.color(1, 0, 0));
             getNetworkConnection().setText("Brak polaczenia z internetem! Brak lokalizacji!");
         }
