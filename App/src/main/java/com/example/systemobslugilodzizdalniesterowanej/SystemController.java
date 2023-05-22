@@ -88,6 +88,9 @@ public class SystemController implements Initializable {
     @FXML
     private Button exit;
 
+    @FXML
+    private Button clearTrace;
+
     public Button getLeftFlap() {
         return leftFlap;
     }
@@ -151,6 +154,11 @@ public class SystemController implements Initializable {
         dialogStage.setTitle("Zamknij aplikacje");
         dialogStage.setScene(scene);
         dialogStage.show();
+    }
+
+    @FXML
+    void clearTraceButton(ActionEvent event) {
+        osmMap.clearMap();
     }
 
     public void dialogNotConnect(String title, String text) {

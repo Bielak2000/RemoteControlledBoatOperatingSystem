@@ -14,10 +14,10 @@
 <?import javafx.scene.text.Font?>
 
 <?import com.sothawo.mapjfx.MapView?>
-<SplitPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="590.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-  <items>
-    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="424.0" prefWidth="741.0">
-         <children>
+<SplitPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="627.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <items>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="609.0" prefWidth="798.0">
+            <children>
             <SplitPane layoutY="-1.0" prefHeight="400.0" prefWidth="807.0">
                <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="398.0" prefWidth="783.0">
@@ -33,48 +33,49 @@
                   </AnchorPane>
                </items>
             </SplitPane>
-            <SplitPane dividerPositions="0.6984126984126984" layoutX="-2.0" layoutY="399.0" orientation="VERTICAL" prefHeight="191.0" prefWidth="800.0">
-              <items>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="128.0" prefWidth="849.0">
-                     <children>
-                        <Label layoutX="42.0" layoutY="18.0" text="Oświetlenie">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Label>
-                        <Button fx:id="lightDown" layoutX="25.0" layoutY="39.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="Q" />
-                        <Button fx:id="lightUp" layoutX="83.0" layoutY="39.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="E" />
-                        <Button fx:id="moveUp" layoutX="369.0" layoutY="12.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="↑" />
-                        <Button fx:id="moveDown" layoutX="369.0" layoutY="58.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="↓" />
-                        <Button fx:id="moveLeft" layoutX="274.0" layoutY="58.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="←" />
-                        <Button fx:id="moveRight" layoutX="467.0" layoutY="58.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="→" />
-                        <Label layoutX="698.0" layoutY="17.0" prefHeight="20.0" prefWidth="70.0" text="Zapadki">
-                           <font>
-                              <Font size="14.0" />
-                           </font>
-                        </Label>
-                        <Button fx:id="leftFlap" layoutX="674.0" layoutY="39.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="T" />
-                        <Button fx:id="rightFlap" layoutX="733.0" layoutY="39.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="Y" />
-                        <Label layoutX="28.0" layoutY="95.0" text="Poziom oświetlenia:" />
-                        <Label fx:id="lightPower" alignment="CENTER" layoutX="157.0" layoutY="87.0" prefHeight="31.0" prefWidth="40.0" text="-" textFill="#29acc6" />
-                     </children>
-                  </AnchorPane>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="92.0" prefWidth="955.0">
-                     <children>
-                        <Button fx:id="exit" layoutX="702.0" layoutY="14.0" mnemonicParsing="false" onAction="#closeApplication" prefHeight="25.0" prefWidth="82.0" text="Wyjscie" />
-                        <Label fx:id="connectionStatus" alignment="CENTER" layoutX="297.0" layoutY="18.0" prefHeight="17.0" prefWidth="225.0" text="-" textAlignment="CENTER" textFill="#57b53d">
-                           <font>
-                              <Font size="11.0" />
-                           </font></Label>
-                        <Label fx:id="networkConnection" layoutX="30.0" layoutY="19.0" prefHeight="15.0" prefWidth="281.0" text="-" textFill="#57b53d">
-                           <font>
-                              <Font size="11.0" />
-                           </font>
-                        </Label>
-                     </children>
-                  </AnchorPane>
-              </items>
-            </SplitPane>
+                <SplitPane dividerPositions="0.7377777777777778" layoutX="-2.0" layoutY="399.0" orientation="VERTICAL" prefHeight="227.0" prefWidth="800.0">
+                    <items>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="137.0" prefWidth="798.0">
+                            <children>
+                                <Label layoutX="43.0" layoutY="48.0" text="Oświetlenie">
+                                    <font>
+                                        <Font size="14.0" />
+                                    </font>
+                                </Label>
+                                <Button fx:id="lightDown" layoutX="27.0" layoutY="72.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="Q" />
+                                <Button fx:id="lightUp" layoutX="84.0" layoutY="72.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="E" />
+                                <Button fx:id="moveUp" layoutX="357.0" layoutY="26.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="↑" />
+                                <Button fx:id="moveDown" layoutX="357.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="↓" />
+                                <Button fx:id="moveLeft" layoutX="263.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="←" />
+                                <Button fx:id="moveRight" layoutX="449.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="→" />
+                                <Label layoutX="676.0" layoutY="47.0" prefHeight="20.0" prefWidth="70.0" text="Zapadki">
+                                    <font>
+                                        <Font size="14.0" />
+                                    </font>
+                                </Label>
+                                <Button fx:id="leftFlap" layoutX="652.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="T" />
+                                <Button fx:id="rightFlap" layoutX="714.0" layoutY="72.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="Y" />
+                                <Label layoutX="20.0" layoutY="129.0" text="Poziom oświetlenia:" />
+                                <Label fx:id="lightPower" alignment="CENTER" layoutX="160.0" layoutY="121.0" prefHeight="31.0" prefWidth="40.0" text="-" textFill="#29acc6" />
+                                <Button fx:id="clearTrace" layoutX="680.0" layoutY="10.0" mnemonicParsing="false" onAction="#clearTraceButton" text="Wyczyść mape" />
+                            </children>
+                        </AnchorPane>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="74.0" prefWidth="798.0">
+                            <children>
+                                <Button fx:id="exit" layoutX="702.0" layoutY="14.0" mnemonicParsing="false" onAction="#closeApplication" prefHeight="25.0" prefWidth="82.0" text="Wyjscie" />
+                                <Label fx:id="connectionStatus" alignment="CENTER" layoutX="297.0" layoutY="18.0" prefHeight="17.0" prefWidth="225.0" text="-" textAlignment="CENTER" textFill="#57b53d">
+                                    <font>
+                                        <Font size="11.0" />
+                                    </font></Label>
+                                <Label fx:id="networkConnection" layoutX="30.0" layoutY="19.0" prefHeight="15.0" prefWidth="281.0" text="-" textFill="#57b53d">
+                                    <font>
+                                        <Font size="11.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </AnchorPane>
+                    </items>
+                </SplitPane>
          </children></AnchorPane>
   </items>
 </SplitPane>

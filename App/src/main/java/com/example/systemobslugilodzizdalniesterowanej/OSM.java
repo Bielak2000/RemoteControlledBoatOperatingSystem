@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
 public class OSM {
     MapView mapView;
     List<Marker> markerList = new ArrayList<>();
-    CoordinateLine coordinateLine;
+    CoordinateLine coordinateLine = null;
+    List<CoordinateLine> coordinateLines = new ArrayList<>();
 
     public OSM(MapView mapView) {
         this.mapView = mapView;
@@ -23,7 +24,10 @@ public class OSM {
 
     private void mapInitialize() {
         mapView.initialize();
-        mapView.initializedProperty().addListener((observable, oldValue, newValue) -> mapView.setCenter(new Coordinate(50.0650887, 19.9245536)));
+        mapView.initializedProperty().addListener((observable, oldValue, newValue) -> {
+            mapView.setCenter(new Coordinate(50.0650887, 19.9245536));
+            mapView.setZoom(17);
+        });
         setHandlersMap();
     }
 
@@ -39,7 +43,36 @@ public class OSM {
                 coordinateLine.setColor(Color.RED);
                 coordinateLine.setVisible(true);
                 mapView.addCoordinateLine(coordinateLine);
+                coordinateLines.add(coordinateLine);
             }
         });
     }
+
+    public void clearMap() {
+        coordinateLines.forEach((coordinateLine1 -> mapView.removeCoordinateLine(coordinateLine1)));
+        coordinateLines.clear();
+        markerList.forEach((marker -> mapView.removeMarker(marker)));
+        markerList.clear();
+    }
+
+//        public boolean generateTrace() {
+//        if (markerList.size() > 1) {
+//            clearCoordinateLine();
+//            coordinateLine = new CoordinateLine(markerList.stream().map(marker1 -> new Coordinate(marker1.getPosition().getLatitude(), marker1.getPosition().getLongitude())
+//            ).collect(Collectors.toList()));
+//            coordinateLine.setColor(Color.RED);
+//            coordinateLine.setVisible(true);
+//            mapView.addCoordinateLine(coordinateLine);
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
+//
+//    private void clearCoordinateLine() {
+//        if (coordinateLine != null) {
+//            mapView.removeCoordinateLine(coordinateLine);
+//            coordinateLine = null;
+//        }
+//    }
 }
