@@ -56,7 +56,7 @@
                                 <Button fx:id="leftFlap" layoutX="652.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="T" />
                                 <Button fx:id="rightFlap" layoutX="714.0" layoutY="72.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="Y" />
                                 <Label layoutX="20.0" layoutY="129.0" text="Poziom oświetlenia:" />
-                                <Label fx:id="lightPower" alignment="CENTER" layoutX="160.0" layoutY="121.0" prefHeight="31.0" prefWidth="40.0" text="-" textFill="#29acc6" />
+                                <Label fx:id="lightPower" alignment="CENTER" layoutX="149.0" layoutY="121.0" prefHeight="31.0" prefWidth="40.0" text="-" textFill="#29acc6" />
                                 <Button fx:id="clearTrace" layoutX="680.0" layoutY="10.0" mnemonicParsing="false" onAction="#clearTraceButton" text="Wyczyść mape" />
                             </children>
                         </AnchorPane>

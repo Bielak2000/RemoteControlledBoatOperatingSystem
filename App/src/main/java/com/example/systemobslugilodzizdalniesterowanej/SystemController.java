@@ -143,6 +143,10 @@ public class SystemController implements Initializable {
         return networkStatus;
     }
 
+    public OSM getOsmMap() {
+        return this.osmMap;
+    }
+
     @FXML
     void closeApplication(ActionEvent event) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dialog-window.fxml"));

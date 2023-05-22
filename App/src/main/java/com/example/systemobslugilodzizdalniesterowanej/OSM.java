@@ -35,16 +35,10 @@ public class OSM {
         mapView.addEventHandler(MapViewEvent.MAP_RIGHTCLICKED, event -> {
             event.consume();
             System.out.println("Event: map right clicked at: " + event.getCoordinate().getLongitude());
-            markerList.add(Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true));
-            mapView.addMarker(markerList.get(markerList.size() - 1));
-            if (markerList.size() > 1) {
-                coordinateLine = new CoordinateLine(markerList.stream().map(marker1 -> new Coordinate(marker1.getPosition().getLatitude(), marker1.getPosition().getLongitude())
-                ).collect(Collectors.toList()));
-                coordinateLine.setColor(Color.RED);
-                coordinateLine.setVisible(true);
-                mapView.addCoordinateLine(coordinateLine);
-                coordinateLines.add(coordinateLine);
-            }
+            Marker newMarker = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true);
+            markerList.add(newMarker);
+            mapView.addMarker(newMarker);
+            generateTrace();
         });
     }
 
@@ -53,6 +47,25 @@ public class OSM {
         coordinateLines.clear();
         markerList.forEach((marker -> mapView.removeMarker(marker)));
         markerList.clear();
+    }
+
+    public void generateTrace() {
+        if (markerList.size() > 1) {
+            coordinateLine = new CoordinateLine(markerList.stream().map(marker1 -> new Coordinate(marker1.getPosition().getLatitude(), marker1.getPosition().getLongitude())
+            ).collect(Collectors.toList()));
+            coordinateLine.setColor(Color.RED);
+            coordinateLine.setVisible(true);
+            mapView.addCoordinateLine(coordinateLine);
+            coordinateLines.add(coordinateLine);
+        }
+    }
+
+    public void generateTraceFromLongLat(double latitude, double longitude) {
+        Marker newMarker = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
+        markerList.add(newMarker);
+        mapView.addMarker(newMarker);
+        generateTrace();
+        mapView.setCenter(new Coordinate(latitude, longitude));
     }
 
 //        public boolean generateTrace() {
