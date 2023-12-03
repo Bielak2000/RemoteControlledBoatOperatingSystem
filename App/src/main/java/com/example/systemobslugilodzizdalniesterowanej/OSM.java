@@ -1,9 +1,6 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
-import com.sothawo.mapjfx.Coordinate;
-import com.sothawo.mapjfx.CoordinateLine;
-import com.sothawo.mapjfx.MapView;
-import com.sothawo.mapjfx.Marker;
+import com.sothawo.mapjfx.*;
 import com.sothawo.mapjfx.event.MapViewEvent;
 import javafx.scene.paint.Color;
 
@@ -12,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class OSM {
+    private static String WMSUrl = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/HighResolution";
     MapView mapView;
     List<Marker> markerList = new ArrayList<>();
     CoordinateLine coordinateLine = null;
@@ -24,6 +22,8 @@ public class OSM {
 
     private void mapInitialize() {
         mapView.initialize();
+        WMSParam wmsParam = new WMSParam().setUrl(WMSUrl).addParam("LAYERS", "raster");
+        mapView.setWMSParam(wmsParam);
         mapView.initializedProperty().addListener((observable, oldValue, newValue) -> {
             mapView.setCenter(new Coordinate(50.0650887, 19.9245536));
             mapView.setZoom(17);
@@ -51,7 +51,8 @@ public class OSM {
 
     public void generateTrace() {
         if (markerList.size() > 1) {
-            coordinateLine = new CoordinateLine(markerList.stream().map(marker1 -> new Coordinate(marker1.getPosition().getLatitude(), marker1.getPosition().getLongitude())
+            coordinateLine = new CoordinateLine(markerList.stream().map(
+                    marker1 -> new Coordinate(marker1.getPosition().getLatitude(), marker1.getPosition().getLongitude())
             ).collect(Collectors.toList()));
             coordinateLine.setColor(Color.RED);
             coordinateLine.setVisible(true);
@@ -62,10 +63,19 @@ public class OSM {
 
     public void generateTraceFromLongLat(double latitude, double longitude) {
         Marker newMarker = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
+        // trzeba zrobic inwersje, ten marker ma trafiac na poczatek tej listy
         markerList.add(newMarker);
         mapView.addMarker(newMarker);
         generateTrace();
         mapView.setCenter(new Coordinate(latitude, longitude));
+    }
+
+    public void changeMapTypeToOSM() {
+        mapView.setMapType(MapType.OSM);
+    }
+
+    public void changeMapTypeToWMSMap() {
+        mapView.setMapType(MapType.WMS);
     }
 
 //        public boolean generateTrace() {

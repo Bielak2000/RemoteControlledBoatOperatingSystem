@@ -9,6 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -52,9 +53,6 @@ public class SystemController implements Initializable {
     @FXML
     private Label networkConnection;
 
-//    @FXML
-//    private AnchorPane gps;
-
     @FXML
     private MapView mapView;
 
@@ -90,6 +88,9 @@ public class SystemController implements Initializable {
 
     @FXML
     private Button clearTrace;
+
+    @FXML
+    private CheckBox mapOsmCheckBox;
 
     public Button getLeftFlap() {
         return leftFlap;
@@ -163,6 +164,15 @@ public class SystemController implements Initializable {
     @FXML
     void clearTraceButton(ActionEvent event) {
         osmMap.clearMap();
+    }
+
+    @FXML
+    void changeToOsmMap(ActionEvent event) {
+        if(mapOsmCheckBox.isSelected()) {
+            osmMap.changeMapTypeToOSM();
+        } else {
+            osmMap.changeMapTypeToWMSMap();
+        }
     }
 
     public void dialogNotConnect(String title, String text) {

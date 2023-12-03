@@ -28,7 +28,7 @@
                            </font>
                         </Label>
 <!--                        <AnchorPane fx:id="gps" layoutX="-1.0" layoutY="52.0" prefHeight="345.0" prefWidth="800.0" />-->
-                         <MapView fx:id="mapView" layoutX="-1.0" layoutY="52.0" prefHeight="345.0" prefWidth="800.0" BorderPane.alignment="CENTER"/>
+                         <MapView fx:id="mapView" layoutX="-1.0" layoutY="52.0" prefHeight="345.0" prefWidth="800.0" BorderPane.alignment="CENTER" />
                      </children>
                   </AnchorPane>
                </items>
@@ -37,27 +37,28 @@
                     <items>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="137.0" prefWidth="798.0">
                             <children>
-                                <Label layoutX="43.0" layoutY="48.0" text="Oświetlenie">
+                                <Label layoutX="36.0" layoutY="48.0" text="Oświetlenie">
                                     <font>
                                         <Font size="14.0" />
                                     </font>
                                 </Label>
-                                <Button fx:id="lightDown" layoutX="27.0" layoutY="72.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="Q" />
-                                <Button fx:id="lightUp" layoutX="84.0" layoutY="72.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="E" />
+                                <Button fx:id="lightDown" layoutX="20.0" layoutY="70.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="Q" />
+                                <Button fx:id="lightUp" layoutX="77.0" layoutY="70.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="E" />
                                 <Button fx:id="moveUp" layoutX="357.0" layoutY="26.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="↑" />
                                 <Button fx:id="moveDown" layoutX="357.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="↓" />
                                 <Button fx:id="moveLeft" layoutX="263.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="←" />
                                 <Button fx:id="moveRight" layoutX="449.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="→" />
-                                <Label layoutX="676.0" layoutY="47.0" prefHeight="20.0" prefWidth="70.0" text="Zapadki">
+                                <Label layoutX="701.0" layoutY="47.0" prefHeight="20.0" prefWidth="70.0" text="Zapadki">
                                     <font>
                                         <Font size="14.0" />
                                     </font>
                                 </Label>
-                                <Button fx:id="leftFlap" layoutX="652.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="T" />
-                                <Button fx:id="rightFlap" layoutX="714.0" layoutY="72.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="Y" />
+                                <Button fx:id="leftFlap" layoutX="677.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="T" />
+                                <Button fx:id="rightFlap" layoutX="736.0" layoutY="72.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="Y" />
                                 <Label layoutX="20.0" layoutY="129.0" text="Poziom oświetlenia:" />
                                 <Label fx:id="lightPower" alignment="CENTER" layoutX="149.0" layoutY="121.0" prefHeight="31.0" prefWidth="40.0" text="-" textFill="#29acc6" />
-                                <Button fx:id="clearTrace" layoutX="680.0" layoutY="10.0" mnemonicParsing="false" onAction="#clearTraceButton" text="Wyczyść mape" />
+                                <Button fx:id="clearTrace" layoutX="668.0" layoutY="11.0" mnemonicParsing="false" onAction="#clearTraceButton" text="Wyczyść mape" />
+                        <CheckBox fx:id="mapOsmCheckBox" layoutX="20.0" layoutY="15.0" mnemonicParsing="false" onAction="#changeToOsmMap" selected="true" text="Mapa OSM" />
                             </children>
                         </AnchorPane>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="74.0" prefWidth="798.0">

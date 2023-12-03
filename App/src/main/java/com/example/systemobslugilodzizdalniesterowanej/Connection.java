@@ -67,7 +67,9 @@ public class Connection {
                             String[] finalLocalization = localization;
                             Platform.runLater(() -> {
                                 if (!finalLocalization[0].startsWith("INV") && !finalLocalization[0].equals("") && !finalLocalization[0].isEmpty()) {
-                                    // TODO: dane lokalizacyjne przychodzace z lodzi
+                                    // TODO: dane lokalizacyjne przychodzace z lodzi, za pierwszym razem lub w trybie nie autonomicznym
+                                    // TODO: ma to byc dodane na pcozatek listy markerow i wygenerowac trase,
+                                    //  za kazdym kolejnym razem ma byc pole kotre bedzie to przedstawiac bez usuwania trasy i poczatkowej lokalizacji
                                     controller.getOsmMap().generateTraceFromLongLat(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
 //                                    controller.getMap().addNewMarker(new LatLong(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1])));
 //                                    controller.getMap().setPosition(new LatLong(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1])));
