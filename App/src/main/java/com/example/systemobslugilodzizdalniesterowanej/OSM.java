@@ -14,9 +14,13 @@ public class OSM {
     List<Marker> markerList = new ArrayList<>();
     CoordinateLine coordinateLine = null;
     List<CoordinateLine> coordinateLines = new ArrayList<>();
+    BoatMode boatMode;
+    Boolean foundBoatPosition;
 
     public OSM(MapView mapView) {
         this.mapView = mapView;
+        this.boatMode = BoatMode.KEYBOARD_CONTROL;
+        this.foundBoatPosition = false;
         mapInitialize();
     }
 
@@ -33,20 +37,18 @@ public class OSM {
 
     private void setHandlersMap() {
         mapView.addEventHandler(MapViewEvent.MAP_RIGHTCLICKED, event -> {
-            event.consume();
-            System.out.println("Event: map right clicked at: " + event.getCoordinate().getLongitude());
-            Marker newMarker = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true);
-            markerList.add(newMarker);
-            mapView.addMarker(newMarker);
-            generateTrace();
+            if (boatMode == BoatMode.AUTONOMIC) {
+                event.consume();
+                Marker newMarker = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true);
+                markerList.add(newMarker);
+                mapView.addMarker(newMarker);
+                generateTrace();
+            }
         });
     }
 
     public void clearMap() {
-        coordinateLines.forEach((coordinateLine1 -> mapView.removeCoordinateLine(coordinateLine1)));
-        coordinateLines.clear();
-        markerList.forEach((marker -> mapView.removeMarker(marker)));
-        markerList.clear();
+        removeAllMarkersAndLinesWithoutBoatPosition();
     }
 
     public void generateTrace() {
@@ -61,12 +63,19 @@ public class OSM {
         }
     }
 
-    public void generateTraceFromLongLat(double latitude, double longitude) {
-        Marker newMarker = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
+    public void generateTraceFromBoatPosition(double latitude, double longitude) {
+        Marker newMarker = Marker.createProvided(Marker.Provided.BLUE).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
         // trzeba zrobic inwersje, ten marker ma trafiac na poczatek tej listy
-        markerList.add(newMarker);
+        if(foundBoatPosition) {
+            mapView.removeMarker(markerList.get(0));
+            markerList.remove(0);
+            markerList.add(0, newMarker);
+        } else {
+            markerList.add(newMarker);
+        }
         mapView.addMarker(newMarker);
         generateTrace();
+        foundBoatPosition = true;
         mapView.setCenter(new Coordinate(latitude, longitude));
     }
 
@@ -76,6 +85,25 @@ public class OSM {
 
     public void changeMapTypeToWMSMap() {
         mapView.setMapType(MapType.WMS);
+    }
+
+    public void setBoatMode(BoatMode boatMode) {
+        this.boatMode = boatMode;
+        if(boatMode == BoatMode.KEYBOARD_CONTROL) {
+            removeAllMarkersAndLinesWithoutBoatPosition();
+        }
+    }
+
+    private void removeAllMarkersAndLinesWithoutBoatPosition() {
+        coordinateLines.forEach((coordinateLine1 -> mapView.removeCoordinateLine(coordinateLine1)));
+        coordinateLines.clear();
+        if(foundBoatPosition) {
+            markerList.subList(1, markerList.size()).forEach(marker -> mapView.removeMarker(marker));
+            markerList.subList(1, markerList.size()).clear();
+        } else {
+            markerList.forEach(marker -> mapView.removeMarker(marker));
+            markerList.clear();
+        }
     }
 
 //        public boolean generateTrace() {

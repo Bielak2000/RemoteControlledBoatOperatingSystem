@@ -14,6 +14,7 @@
 <?import javafx.scene.text.Font?>
 
 <?import com.sothawo.mapjfx.MapView?>
+
 <SplitPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="627.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <items>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="609.0" prefWidth="798.0">
@@ -37,7 +38,7 @@
                     <items>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="137.0" prefWidth="798.0">
                             <children>
-                                <Label layoutX="36.0" layoutY="48.0" text="Oświetlenie">
+                                <Label fx:id="lightingText" layoutX="36.0" layoutY="48.0" text="Oświetlenie">
                                     <font>
                                         <Font size="14.0" />
                                     </font>
@@ -48,17 +49,19 @@
                                 <Button fx:id="moveDown" layoutX="357.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="↓" />
                                 <Button fx:id="moveLeft" layoutX="263.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="←" />
                                 <Button fx:id="moveRight" layoutX="449.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="82.0" text="→" />
-                                <Label layoutX="701.0" layoutY="47.0" prefHeight="20.0" prefWidth="70.0" text="Zapadki">
+                                <Label fx:id="flapsText" layoutX="701.0" layoutY="47.0" prefHeight="20.0" prefWidth="70.0" text="Zapadki">
                                     <font>
                                         <Font size="14.0" />
                                     </font>
                                 </Label>
-                                <Button fx:id="leftFlap" layoutX="677.0" layoutY="73.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="T" />
-                                <Button fx:id="rightFlap" layoutX="736.0" layoutY="72.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="Y" />
-                                <Label layoutX="20.0" layoutY="129.0" text="Poziom oświetlenia:" />
-                                <Label fx:id="lightPower" alignment="CENTER" layoutX="149.0" layoutY="121.0" prefHeight="31.0" prefWidth="40.0" text="-" textFill="#29acc6" />
-                                <Button fx:id="clearTrace" layoutX="668.0" layoutY="11.0" mnemonicParsing="false" onAction="#clearTraceButton" text="Wyczyść mape" />
-                        <CheckBox fx:id="mapOsmCheckBox" layoutX="20.0" layoutY="15.0" mnemonicParsing="false" onAction="#changeToOsmMap" selected="true" text="Mapa OSM" />
+                                <Button fx:id="leftFlap" layoutX="677.0" layoutY="70.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="T" />
+                                <Button fx:id="rightFlap" layoutX="736.0" layoutY="70.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="48.0" text="Y" />
+                                <Label layoutX="17.0" layoutY="19.0" text="Poziom oświetlenia:" />
+                                <Label fx:id="lightPower" alignment="CENTER" layoutX="146.0" layoutY="11.0" prefHeight="31.0" prefWidth="40.0" text="-" textFill="#29acc6" />
+                                <Button fx:id="clearTrace" layoutX="320.0" layoutY="18.0" mnemonicParsing="false" onAction="#clearTrace" prefHeight="25.0" prefWidth="154.0" text="Wyczyść mape" visible="false" />
+                        <CheckBox fx:id="mapOsmCheckBox" alignment="BOTTOM_LEFT" layoutX="689.0" layoutY="12.0" mnemonicParsing="false" onAction="#changeToOsmMap" selected="true" text="Mapa OSM" />
+                        <ToggleButton fx:id="modeChooser" layoutX="321.0" layoutY="119.0" mnemonicParsing="false" onAction="#changeMode" prefHeight="25.0" prefWidth="154.0" text="Tryb autonomiczny" />
+                        <Button fx:id="startSwimming" layoutX="321.0" layoutY="69.0" mnemonicParsing="false" onAction="#startSwimming" prefHeight="25.0" prefWidth="154.0" text="Rozpocznij pływanie" visible="false" />
                             </children>
                         </AnchorPane>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="74.0" prefWidth="798.0">

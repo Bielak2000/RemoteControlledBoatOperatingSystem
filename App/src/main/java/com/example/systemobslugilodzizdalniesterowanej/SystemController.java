@@ -7,10 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -22,8 +19,8 @@ public class SystemController implements Initializable {
 
     Stage stage;
     Boolean networkStatus;
-    Map map = new Map();
     OSM osmMap;
+    BoatMode boatMode;
 
     public Stage getStage() {
         return stage;
@@ -37,6 +34,7 @@ public class SystemController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         networkStatus = false;
         lightPower.setText("0%");
+        boatMode = BoatMode.KEYBOARD_CONTROL;
         exit.setCancelButton(true);
         exit.setFocusTraversable(false);
         try {
@@ -52,6 +50,18 @@ public class SystemController implements Initializable {
 
     @FXML
     private Label networkConnection;
+
+    @FXML
+    private Label lightingText;
+
+    @FXML
+    private Label flapsText;
+
+    @FXML
+    private ToggleButton modeChooser;
+
+    @FXML
+    private Button startSwimming;
 
     @FXML
     private MapView mapView;
@@ -132,10 +142,6 @@ public class SystemController implements Initializable {
         return lightPower;
     }
 
-    public Map getMap() {
-        return map;
-    }
-
     public Label getNetworkConnection() {
         return networkConnection;
     }
@@ -162,13 +168,35 @@ public class SystemController implements Initializable {
     }
 
     @FXML
-    void clearTraceButton(ActionEvent event) {
+    void clearTrace(ActionEvent event) {
         osmMap.clearMap();
     }
 
     @FXML
+    void changeMode(ActionEvent event) {
+        if (modeChooser.isSelected()) {
+            changeBoatMode(BoatMode.AUTONOMIC);
+            setViewForAutonomicBoatMode();
+        } else {
+            changeBoatMode(BoatMode.KEYBOARD_CONTROL);
+            setViewForKeyboardControlBoatMode();
+        }
+    }
+
+    @FXML
+    void startSwimming(ActionEvent event) {
+//        if(autonomicMode.isSelected()) {
+//            boatMode = BoatMode.AUTONOMIC;
+//            setViewForAutonomicBoatMode();
+//        } else {
+//            boatMode = BoatMode.KEYBOARD_CONTROL;
+//            setViewForKeyboardControlBoatMode();
+//        }
+    }
+
+    @FXML
     void changeToOsmMap(ActionEvent event) {
-        if(mapOsmCheckBox.isSelected()) {
+        if (mapOsmCheckBox.isSelected()) {
             osmMap.changeMapTypeToOSM();
         } else {
             osmMap.changeMapTypeToWMSMap();
@@ -194,5 +222,48 @@ public class SystemController implements Initializable {
             getNetworkConnection().setTextFill(Color.color(1, 0, 0));
             getNetworkConnection().setText("Brak polaczenia z internetem! Brak lokalizacji!");
         }
+    }
+
+    public void changeBoatPosition(double latitude, double longitude) {
+        osmMap.generateTraceFromBoatPosition(latitude, longitude);
+    }
+
+    public BoatMode getBoatMode() {
+        return this.boatMode;
+    }
+
+    private void changeBoatMode(BoatMode boatMode) {
+        this.boatMode = boatMode;
+        this.osmMap.setBoatMode(boatMode);
+    }
+
+    private void setViewForAutonomicBoatMode() {
+        lightingText.setVisible(false);
+        lightDown.setVisible(false);
+        lightUp.setVisible(false);
+        flapsText.setVisible(false);
+        leftFlap.setVisible(false);
+        rightFlap.setVisible(false);
+        moveDown.setVisible(false);
+        moveLeft.setVisible(false);
+        moveRight.setVisible(false);
+        moveUp.setVisible(false);
+        startSwimming.setVisible(true);
+        clearTrace.setVisible(true);
+    }
+
+    private void setViewForKeyboardControlBoatMode() {
+        lightingText.setVisible(true);
+        lightDown.setVisible(true);
+        lightUp.setVisible(true);
+        flapsText.setVisible(true);
+        leftFlap.setVisible(true);
+        rightFlap.setVisible(true);
+        moveDown.setVisible(true);
+        moveLeft.setVisible(true);
+        moveRight.setVisible(true);
+        moveUp.setVisible(true);
+        startSwimming.setVisible(false);
+        clearTrace.setVisible(false);
     }
 }

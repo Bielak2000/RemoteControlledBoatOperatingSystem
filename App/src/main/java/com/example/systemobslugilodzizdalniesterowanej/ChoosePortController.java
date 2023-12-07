@@ -28,10 +28,10 @@ public class ChoosePortController implements Initializable {
     Flaps flaps = new Flaps();
     String choosenSystem = new String("");
 
-    public ChoosePortController(Stage stage1){
-        stage=stage1;
+    public ChoosePortController(Stage stage1) {
+        stage = stage1;
         com.fazecast.jSerialComm.SerialPort[] ports = com.fazecast.jSerialComm.SerialPort.getCommPorts();
-        for(com.fazecast.jSerialComm.SerialPort port : ports){
+        for (com.fazecast.jSerialComm.SerialPort port : ports) {
             portNames.add(port.getSystemPortName());
         }
     }
@@ -43,8 +43,8 @@ public class ChoosePortController implements Initializable {
         connectButton.setFocusTraversable(false);
         column.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()));
         portsTable.setItems(portNames);
-        portsTable.setOnMouseClicked(e->{
-            choosenPort=portsTable.getSelectionModel().getSelectedItem();
+        portsTable.setOnMouseClicked(e -> {
+            choosenPort = portsTable.getSelectionModel().getSelectedItem();
         });
     }
 
@@ -69,38 +69,35 @@ public class ChoosePortController implements Initializable {
 
     @FXML
     void chooseLinux(ActionEvent event) {
-        if(linuxBox.isSelected()) {
+        if (linuxBox.isSelected()) {
             choosenSystem = "Linux";
             windowsBox.setSelected(false);
-        }
-        else
-            choosenSystem="";
+        } else
+            choosenSystem = "";
     }
 
     @FXML
     void chooseWindows(ActionEvent event) {
-        if(windowsBox.isSelected()) {
+        if (windowsBox.isSelected()) {
             choosenSystem = "Windows";
             linuxBox.setSelected(false);
-        }
-        else
-            choosenSystem="";
+        } else
+            choosenSystem = "";
     }
 
     @FXML
     void connect(ActionEvent event) throws IOException, SerialPortException {
-        if(choosenPort.equals("") || choosenSystem.equals("")){
+        if (choosenPort.equals("") || choosenSystem.equals("")) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Nie wybrano portu lub systemu");
             alert.setHeaderText("Port lub system nie zostal wybrany! Wybierz port oraz system.");
             alert.showAndWait();
-        }
-        else{
+        } else {
             stage.close();
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("application-window.fxml"));
             Stage mainStage = new Stage();
-            SystemController controller = new SystemController(mainStage);
-            fxmlLoader.setController(controller);
+            SystemController systemController = new SystemController(mainStage);
+            fxmlLoader.setController(systemController);
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
             mainStage.setTitle("System obslugi lodzi zdalnie sterowanej");
@@ -108,78 +105,80 @@ public class ChoosePortController implements Initializable {
             mainStage.show();
             root.requestFocus();
 
-            Connection connection = new Connection(controller, engines, lighting, flaps);
+            Connection connection = new Connection(systemController, engines, lighting, flaps);
             connection.connect(choosenPort, choosenSystem);
 
             scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
                 @Override
                 public void handle(KeyEvent keyEvent) {
-                    switch(keyEvent.getCode()){
-                        case UP:
-                            controller.getMoveUp().arm();
-                            engines.movingForward();
-                            if(!engines.getTemp()) {
-                                connection.sendParameters();
-                              engines.setTemp(true);
-                            }
-                            //controller.getLightPower().setText("2");
-                            break;
-                        case DOWN:
-                            controller.getMoveDown().arm();
-                            engines.movingBack();
-                            if(!engines.getTemp()) {
-                                connection.sendParameters();
-                                engines.setTemp(true);
-                            }
-                            break;
-                        case LEFT:
-                            controller.getMoveLeft().arm();
-                            engines.turnLeft();
-                            if(!engines.getTemp()) {
-                                connection.sendParameters();
-                                engines.setTemp(true);
-                            }
-                            break;
-                        case RIGHT:
-                            controller.getMoveRight().arm();
-                            engines.turnRight();
-                            if(!engines.getTemp()) {
-                                connection.sendParameters();
-                                engines.setTemp(true);
-                            }
-                            break;
-                        case T:
-                            controller.getLeftFlap().arm();
-                            flaps.onLeftFlap();
-                            if(!flaps.getTemp()){
-                                connection.sendParameters();
-                                flaps.setTemp(true);
-                            }
-                            break;
-                        case Y:
-                            controller.getRightFlap().arm();
-                            flaps.onRightFlap();
-                            if(!flaps.getTemp()){
-                                connection.sendParameters();
-                                flaps.setTemp(true);
-                            }
-                            break;
-                        case Q:
-                            controller.getLightDown().arm();
-                            if(!lighting.getTemp()) {
-                                lighting.setPower(0);
-                                connection.sendParameters();
-                                lighting.setTemp(true);
-                            }
-                            break;
-                        case E:
-                            controller.getLightUp().arm();
-                            if(!lighting.getTemp()) {
-                                lighting.setPower(100);
-                                connection.sendParameters();
-                                lighting.setTemp(true);
-                            }
-                            break;
+                    if (systemController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
+                        switch (keyEvent.getCode()) {
+                            case UP:
+                                systemController.getMoveUp().arm();
+                                engines.movingForward();
+                                if (!engines.getTemp()) {
+                                    connection.sendParameters();
+                                    engines.setTemp(true);
+                                }
+                                break;
+                            case DOWN:
+                                systemController.getMoveDown().arm();
+                                engines.movingBack();
+                                if (!engines.getTemp()) {
+                                    connection.sendParameters();
+                                    engines.setTemp(true);
+                                }
+                                break;
+                            case LEFT:
+                                systemController.getMoveLeft().arm();
+                                engines.turnLeft();
+                                if (!engines.getTemp()) {
+                                    connection.sendParameters();
+                                    engines.setTemp(true);
+                                }
+                                break;
+                            case RIGHT:
+                                systemController.getMoveRight().arm();
+                                engines.turnRight();
+                                if (!engines.getTemp()) {
+                                    connection.sendParameters();
+                                    engines.setTemp(true);
+                                }
+                                break;
+                            case T:
+                                systemController.getLeftFlap().arm();
+                                flaps.onLeftFlap();
+                                if (!flaps.getTemp()) {
+                                    connection.sendParameters();
+                                    flaps.setTemp(true);
+                                }
+                                break;
+                            case Y:
+                                systemController.getRightFlap().arm();
+                                flaps.onRightFlap();
+                                if (!flaps.getTemp()) {
+                                    connection.sendParameters();
+                                    flaps.setTemp(true);
+                                }
+                                break;
+                            case Q:
+                                systemController.getLightDown().arm();
+                                if (!lighting.getTemp()) {
+                                    lighting.setPower(0);
+                                    connection.sendParameters();
+                                    lighting.setTemp(true);
+                                }
+                                break;
+                            case E:
+                                systemController.getLightUp().arm();
+                                if (!lighting.getTemp()) {
+                                    lighting.setPower(100);
+                                    connection.sendParameters();
+                                    lighting.setTemp(true);
+                                }
+                                break;
+                        }
+                        keyEvent.consume();
                     }
                 }
             });
@@ -187,54 +186,57 @@ public class ChoosePortController implements Initializable {
             scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
                 @Override
                 public void handle(KeyEvent keyEvent) {
-                    switch (keyEvent.getCode()) {
-                        case UP:
-                            controller.getMoveUp().disarm();
-                            engines.turnOff();
-                            connection.sendParameters();
-                            engines.setTemp(false);
-                            break;
-                        case DOWN:
-                            controller.getMoveDown().disarm();
-                            engines.turnOff();
-                            connection.sendParameters();
-                            engines.setTemp(false);
-                            break;
-                        case LEFT:
-                            controller.getMoveLeft().disarm();
-                            engines.turnOff();
-                            connection.sendParameters();
-                            engines.setTemp(false);
-                            break;
-                        case RIGHT:
-                            controller.getMoveRight().disarm();
-                            engines.turnOff();
-                            connection.sendParameters();
-                            engines.setTemp(false);
-                            break;
-                        case T:
-                            controller.getLeftFlap().disarm();
-                            flaps.offLeftFlap();
-                            flaps.setTemp(false);
-                            break;
-                        case Y:
-                            controller.getRightFlap().disarm();
-                            flaps.offRightFlap();
-                            flaps.setTemp(false);
-                            break;
-                        case Q:
-                            controller.getLightDown().disarm();
-                            lighting.setPower(-1);
-                            connection.sendParameters();
-                            lighting.setTemp(false);
-                            break;
-                        case E:
-                            controller.getLightUp().disarm();
-                            lighting.setPower(-1);
-                            connection.sendParameters();
-                            lighting.setTemp(false);
-                            break;
+                    if (systemController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
+                        switch (keyEvent.getCode()) {
+                            case UP:
+                                systemController.getMoveUp().disarm();
+                                engines.turnOff();
+                                connection.sendParameters();
+                                engines.setTemp(false);
+                                break;
+                            case DOWN:
+                                systemController.getMoveDown().disarm();
+                                engines.turnOff();
+                                connection.sendParameters();
+                                engines.setTemp(false);
+                                break;
+                            case LEFT:
+                                systemController.getMoveLeft().disarm();
+                                engines.turnOff();
+                                connection.sendParameters();
+                                engines.setTemp(false);
+                                break;
+                            case RIGHT:
+                                systemController.getMoveRight().disarm();
+                                engines.turnOff();
+                                connection.sendParameters();
+                                engines.setTemp(false);
+                                break;
+                            case T:
+                                systemController.getLeftFlap().disarm();
+                                flaps.offLeftFlap();
+                                flaps.setTemp(false);
+                                break;
+                            case Y:
+                                systemController.getRightFlap().disarm();
+                                flaps.offRightFlap();
+                                flaps.setTemp(false);
+                                break;
+                            case Q:
+                                systemController.getLightDown().disarm();
+                                lighting.setPower(-1);
+                                connection.sendParameters();
+                                lighting.setTemp(false);
+                                break;
+                            case E:
+                                systemController.getLightUp().disarm();
+                                lighting.setPower(-1);
+                                connection.sendParameters();
+                                lighting.setTemp(false);
+                                break;
+                        }
                     }
+                    keyEvent.consume();
                 }
             });
         }
