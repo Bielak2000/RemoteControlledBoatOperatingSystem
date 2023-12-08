@@ -184,14 +184,31 @@ public class SystemController implements Initializable {
     }
 
     @FXML
-    void startSwimming(ActionEvent event) {
-//        if(autonomicMode.isSelected()) {
-//            boatMode = BoatMode.AUTONOMIC;
-//            setViewForAutonomicBoatMode();
-//        } else {
-//            boatMode = BoatMode.KEYBOARD_CONTROL;
-//            setViewForKeyboardControlBoatMode();
-//        }
+    void startSwimming(ActionEvent event) throws IOException {
+        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints()) {
+            if (osmMap.designatedWaypoints()) {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("start-swimming-dialog.fxml"));
+                Stage mainStage = new Stage();
+                StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage);
+                fxmlLoader.setController(startSwimmingDialogController);
+                Parent root = fxmlLoader.load();
+                Scene scene = new Scene(root);
+                mainStage.setScene(scene);
+                mainStage.show();
+            }
+        } else {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("information-dialog.fxml"));
+            Stage mainStage = new Stage();
+            DialogInformationController dialogInformationController = new DialogInformationController(mainStage);
+            fxmlLoader.setController(dialogInformationController);
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root);
+            mainStage.setScene(scene);
+            if (!osmMap.designatedWaypoints() && !osmMap.getFoundBoatPosition()) dialogInformationController.setInformation("Nie wyznaczono pozycji docelowej łódki i jej aktualnego położenia.");
+            else if (!osmMap.designatedWaypoints()) dialogInformationController.setInformation("Nie wyznaczono pozycji docelowej łódki.");
+            else if (!osmMap.getFoundBoatPosition()) dialogInformationController.setInformation("Nie wyznaczono aktualnego położenia łódki.");
+            mainStage.show();
+        }
     }
 
     @FXML

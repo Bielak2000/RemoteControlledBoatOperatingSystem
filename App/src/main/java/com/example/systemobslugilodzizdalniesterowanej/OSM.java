@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 
 public class OSM {
     private static String WMSUrl = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/HighResolution";
-    MapView mapView;
-    List<Marker> markerList = new ArrayList<>();
-    CoordinateLine coordinateLine = null;
-    List<CoordinateLine> coordinateLines = new ArrayList<>();
-    BoatMode boatMode;
-    Boolean foundBoatPosition;
+    private MapView mapView;
+    private List<Marker> markerList = new ArrayList<>();
+    private CoordinateLine coordinateLine = null;
+    private List<CoordinateLine> coordinateLines = new ArrayList<>();
+    private BoatMode boatMode;
+    private Boolean foundBoatPosition;
 
     public OSM(MapView mapView) {
         this.mapView = mapView;
@@ -66,7 +66,7 @@ public class OSM {
     public void generateTraceFromBoatPosition(double latitude, double longitude) {
         Marker newMarker = Marker.createProvided(Marker.Provided.BLUE).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
         // trzeba zrobic inwersje, ten marker ma trafiac na poczatek tej listy
-        if(foundBoatPosition) {
+        if (foundBoatPosition) {
             mapView.removeMarker(markerList.get(0));
             markerList.remove(0);
             markerList.add(0, newMarker);
@@ -89,15 +89,27 @@ public class OSM {
 
     public void setBoatMode(BoatMode boatMode) {
         this.boatMode = boatMode;
-        if(boatMode == BoatMode.KEYBOARD_CONTROL) {
+        if (boatMode == BoatMode.KEYBOARD_CONTROL) {
             removeAllMarkersAndLinesWithoutBoatPosition();
+        }
+    }
+
+    public Boolean getFoundBoatPosition() {
+        return this.foundBoatPosition;
+    }
+
+    public boolean designatedWaypoints() {
+        if (foundBoatPosition) {
+            return markerList.size() > 1;
+        } else {
+            return !markerList.isEmpty();
         }
     }
 
     private void removeAllMarkersAndLinesWithoutBoatPosition() {
         coordinateLines.forEach((coordinateLine1 -> mapView.removeCoordinateLine(coordinateLine1)));
         coordinateLines.clear();
-        if(foundBoatPosition) {
+        if (foundBoatPosition) {
             markerList.subList(1, markerList.size()).forEach(marker -> mapView.removeMarker(marker));
             markerList.subList(1, markerList.size()).clear();
         } else {
