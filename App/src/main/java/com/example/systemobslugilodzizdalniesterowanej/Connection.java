@@ -20,7 +20,7 @@ public class Connection {
     private Flaps flaps;
     private List<String> portNames = new ArrayList<>();
 
-    public Connection(SystemController controller1, Engines engines1, Lighting lighting1, Flaps flaps1) throws SerialPortException {
+    public Connection(SystemController controller1, Engines engines1, Lighting lighting1, Flaps flaps1) {
         com.fazecast.jSerialComm.SerialPort[] ports = com.fazecast.jSerialComm.SerialPort.getCommPorts();
         for (com.fazecast.jSerialComm.SerialPort port : ports) {
             portNames.add(port.getSystemPortName());
@@ -31,7 +31,7 @@ public class Connection {
         flaps = flaps1;
     }
 
-    public void connect(String port, String system) throws SerialPortException {
+    public void connect(String port, String system) {
         try {
 
             if (system.equals("Windows"))
@@ -86,7 +86,6 @@ public class Connection {
             controller.getConnectionStatus().setText("Brak polaczenia z radionadajnikiem!");
             controller.dialogNotConnect("Brak polaczenia", "Aplikacja nie moze sie polaczyc z radionadajnikiem!");
             controller.getStage().close();
-            System.out.println(serialPortException);
         }
     }
 

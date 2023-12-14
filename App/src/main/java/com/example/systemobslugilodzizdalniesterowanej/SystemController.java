@@ -20,7 +20,8 @@ public class SystemController implements Initializable {
     Stage stage;
     Boolean networkStatus;
     OSM osmMap;
-    BoatMode boatMode;
+    BoatModeController boatModeController;
+    Connection connection;
 
     public Stage getStage() {
         return stage;
@@ -28,18 +29,19 @@ public class SystemController implements Initializable {
 
     public SystemController(Stage stage1) {
         this.stage = stage1;
+        this.boatModeController = BoatModeController.getInstance();
+        this.connection = connection;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         networkStatus = false;
         lightPower.setText("0%");
-        boatMode = BoatMode.KEYBOARD_CONTROL;
         exit.setCancelButton(true);
         exit.setFocusTraversable(false);
         try {
             checkConnectionWithInternet();
-            osmMap = new OSM(mapView);
+            osmMap = new OSM(mapView, boatModeController);
         } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -246,12 +248,14 @@ public class SystemController implements Initializable {
     }
 
     public BoatMode getBoatMode() {
-        return this.boatMode;
+        return this.boatModeController.getBoatMode();
     }
 
     private void changeBoatMode(BoatMode boatMode) {
-        this.boatMode = boatMode;
-        this.osmMap.setBoatMode(boatMode);
+        this.boatModeController.setBoatMode(boatMode);
+        if (this.boatModeController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
+            osmMap.removeAllMarkersAndLinesWithoutBoatPosition();
+        }
     }
 
     private void setViewForAutonomicBoatMode() {

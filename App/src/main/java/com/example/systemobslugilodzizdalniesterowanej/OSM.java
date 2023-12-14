@@ -14,12 +14,12 @@ public class OSM {
     private List<Marker> markerList = new ArrayList<>();
     private CoordinateLine coordinateLine = null;
     private List<CoordinateLine> coordinateLines = new ArrayList<>();
-    private BoatMode boatMode;
+    private BoatModeController boatModeController;
     private Boolean foundBoatPosition;
 
-    public OSM(MapView mapView) {
+    public OSM(MapView mapView, BoatModeController boatModeController) {
         this.mapView = mapView;
-        this.boatMode = BoatMode.KEYBOARD_CONTROL;
+        this.boatModeController = boatModeController;
         this.foundBoatPosition = false;
         mapInitialize();
     }
@@ -37,7 +37,7 @@ public class OSM {
 
     private void setHandlersMap() {
         mapView.addEventHandler(MapViewEvent.MAP_RIGHTCLICKED, event -> {
-            if (boatMode == BoatMode.AUTONOMIC) {
+            if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC) {
                 event.consume();
                 Marker newMarker = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true);
                 markerList.add(newMarker);
@@ -87,13 +87,6 @@ public class OSM {
         mapView.setMapType(MapType.WMS);
     }
 
-    public void setBoatMode(BoatMode boatMode) {
-        this.boatMode = boatMode;
-        if (boatMode == BoatMode.KEYBOARD_CONTROL) {
-            removeAllMarkersAndLinesWithoutBoatPosition();
-        }
-    }
-
     public Boolean getFoundBoatPosition() {
         return this.foundBoatPosition;
     }
@@ -106,7 +99,7 @@ public class OSM {
         }
     }
 
-    private void removeAllMarkersAndLinesWithoutBoatPosition() {
+    public void removeAllMarkersAndLinesWithoutBoatPosition() {
         coordinateLines.forEach((coordinateLine1 -> mapView.removeCoordinateLine(coordinateLine1)));
         coordinateLines.clear();
         if (foundBoatPosition) {
