@@ -47,7 +47,7 @@ public class SystemController implements Initializable {
         } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
-        this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage);
+        this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage, boatModeController);
         connection.connect(chosenPort, chosenSystem);
         networkStatus = false;
         lightPower.setText("0%");
@@ -153,17 +153,17 @@ public class SystemController implements Initializable {
 
     @FXML
     void startSwimming(ActionEvent event) throws IOException {
-        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints()) {
-            if (osmMap.designatedWaypoints()) {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("start-swimming-dialog.fxml"));
-                Stage mainStage = new Stage();
-                StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage);
-                fxmlLoader.setController(startSwimmingDialogController);
-                Parent root = fxmlLoader.load();
-                Scene scene = new Scene(root);
-                mainStage.setScene(scene);
-                mainStage.show();
-            }
+//        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints()) {
+            if(true) {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("start-swimming-dialog.fxml"));
+            Stage mainStage = new Stage();
+            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection,
+                    modeChooser, startSwimming, clearTrace, exit);
+            fxmlLoader.setController(startSwimmingDialogController);
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root);
+            mainStage.setScene(scene);
+            mainStage.show();
         } else {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("information-dialog.fxml"));
             Stage mainStage = new Stage();

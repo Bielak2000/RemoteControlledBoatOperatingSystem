@@ -1,5 +1,5 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
 public enum BoatMode {
-    KEYBOARD_CONTROL, AUTONOMIC
+    KEYBOARD_CONTROL, AUTONOMIC, AUTONOMIC_RUNNING;
 }

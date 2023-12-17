@@ -16,6 +16,7 @@ public class OSMMap {
     private List<CoordinateLine> coordinateLines = new ArrayList<>();
     private BoatModeController boatModeController;
     private Boolean foundBoatPosition;
+    private Marker currentBoatPositionWhileRunning = null;
 
     public OSMMap(MapView mapView, BoatModeController boatModeController) {
         this.mapView = mapView;
@@ -39,7 +40,7 @@ public class OSMMap {
         mapView.addEventHandler(MapViewEvent.MAP_RIGHTCLICKED, event -> {
             if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC) {
                 event.consume();
-                Marker newMarker = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true);
+                Marker newMarker = Marker.createProvided(Marker.Provided.GREEN).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true);
                 markerList.add(newMarker);
                 mapView.addMarker(newMarker);
                 generateTrace();
@@ -53,6 +54,7 @@ public class OSMMap {
 
     public void generateTrace() {
         if (markerList.size() > 1) {
+            coordinateLine = null;
             coordinateLine = new CoordinateLine(markerList.stream().map(
                     marker1 -> new Coordinate(marker1.getPosition().getLatitude(), marker1.getPosition().getLongitude())
             ).collect(Collectors.toList()));
@@ -65,7 +67,6 @@ public class OSMMap {
 
     public void generateTraceFromBoatPosition(double latitude, double longitude) {
         Marker newMarker = Marker.createProvided(Marker.Provided.BLUE).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
-        // trzeba zrobic inwersje, ten marker ma trafiac na poczatek tej listy
         if (foundBoatPosition) {
             mapView.removeMarker(markerList.get(0));
             markerList.remove(0);
@@ -109,5 +110,23 @@ public class OSMMap {
             markerList.forEach(marker -> mapView.removeMarker(marker));
             markerList.clear();
         }
+    }
+
+    public List<Marker> getDesignatedWaypoints() {
+        return markerList.subList(1, markerList.size());
+    }
+
+    public void setCurrentBoatPositionWhileRunning(double latitude, double longitude) {
+        if(currentBoatPositionWhileRunning != null) {
+            mapView.removeMarker(currentBoatPositionWhileRunning);
+        }
+        currentBoatPositionWhileRunning = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
+        mapView.addMarker(currentBoatPositionWhileRunning);
+        mapView.setCenter(new Coordinate(latitude, longitude));
+    }
+
+    public void clearCurrentBoatPositionWhileRunning() {
+        mapView.removeMarker(currentBoatPositionWhileRunning);
+        currentBoatPositionWhileRunning = null;
     }
 }

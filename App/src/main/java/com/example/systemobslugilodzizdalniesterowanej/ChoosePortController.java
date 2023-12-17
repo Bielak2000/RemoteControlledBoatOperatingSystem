@@ -88,7 +88,6 @@ public class ChoosePortController implements Initializable {
             alert.setHeaderText("Port lub system nie zostal wybrany! Wybierz port oraz system.");
             alert.showAndWait();
         } else {
-            stage.close();
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("application-window.fxml"));
             Stage mainStage = new Stage();
             SystemController systemController = new SystemController(mainStage, chosenPort, chosenSystem);
@@ -99,6 +98,7 @@ public class ChoosePortController implements Initializable {
             mainStage.setScene(scene);
             mainStage.show();
             root.requestFocus();
+            this.stage.close();
             systemController.initializeKeyboardHandler();
         }
     }
