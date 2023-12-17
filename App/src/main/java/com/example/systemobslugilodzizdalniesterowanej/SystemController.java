@@ -16,35 +16,49 @@ import java.net.*;
 import java.util.ResourceBundle;
 
 public class SystemController implements Initializable {
-
     Stage stage;
     Boolean networkStatus;
-    OSM osmMap;
+    OSMMap osmMap;
     BoatModeController boatModeController;
+    KeyboardHandler keyboardHandler;
     Connection connection;
+    String chosenPort;
+    Lighting lighting = new Lighting();
+    Engines engines = new Engines();
+    Flaps flaps = new Flaps();
+    String chosenSystem;
 
     public Stage getStage() {
         return stage;
     }
 
-    public SystemController(Stage stage1) {
-        this.stage = stage1;
+    public SystemController(Stage stage, String chosenPort, String chosenSystem) {
+        this.stage = stage;
         this.boatModeController = BoatModeController.getInstance();
-        this.connection = connection;
+        this.chosenPort = chosenPort;
+        this.chosenSystem = chosenSystem;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        try {
+            checkConnectionWithInternet();
+            osmMap = new OSMMap(mapView, boatModeController);
+        } catch (InterruptedException | IOException e) {
+            throw new RuntimeException(e);
+        }
+        this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage);
+        connection.connect(chosenPort, chosenSystem);
         networkStatus = false;
         lightPower.setText("0%");
         exit.setCancelButton(true);
         exit.setFocusTraversable(false);
-        try {
-            checkConnectionWithInternet();
-            osmMap = new OSM(mapView, boatModeController);
-        } catch (InterruptedException | IOException e) {
-            throw new RuntimeException(e);
-        }
+    }
+
+    public void initializeKeyboardHandler() {
+        this.keyboardHandler = new KeyboardHandler(stage.getScene(), connection, boatModeController,
+                moveUp, moveDown, moveLeft, moveRight, leftFlap, rightFlap, lightDown, lightUp, engines, lighting, flaps);
+        keyboardHandler.keyboardHandler();
     }
 
     @FXML
@@ -104,64 +118,16 @@ public class SystemController implements Initializable {
     @FXML
     private CheckBox mapOsmCheckBox;
 
-    public Button getLeftFlap() {
-        return leftFlap;
-    }
-
-    public Button getRightFlap() {
-        return rightFlap;
-    }
-
-    public Button getLightDown() {
-        return lightDown;
-    }
-
-    public Button getLightUp() {
-        return lightUp;
-    }
-
-    public Button getMoveDown() {
-        return moveDown;
-    }
-
-    public Button getMoveLeft() {
-        return moveLeft;
-    }
-
-    public Button getMoveRight() {
-        return moveRight;
-    }
-
-    public Button getMoveUp() {
-        return moveUp;
-    }
-
-    public Label getConnectionStatus() {
-        return connectionStatus;
-    }
-
-    public Label getLightPower() {
-        return lightPower;
-    }
-
     public Label getNetworkConnection() {
         return networkConnection;
-    }
-
-    public Boolean getNetworkStatus() {
-        return networkStatus;
-    }
-
-    public OSM getOsmMap() {
-        return this.osmMap;
     }
 
     @FXML
     void closeApplication(ActionEvent event) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dialog-window.fxml"));
         Stage dialogStage = new Stage();
-        DialogController dialogController = new DialogController(stage, dialogStage);
-        fxmlLoader.setController(dialogController);
+        ExitDialogController exitDialogController = new ExitDialogController(stage, dialogStage);
+        fxmlLoader.setController(exitDialogController);
         Parent root = fxmlLoader.load();
         Scene scene = new Scene(root);
         dialogStage.setTitle("Zamknij aplikacje");
@@ -206,9 +172,12 @@ public class SystemController implements Initializable {
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
             mainStage.setScene(scene);
-            if (!osmMap.designatedWaypoints() && !osmMap.getFoundBoatPosition()) dialogInformationController.setInformation("Nie wyznaczono pozycji docelowej łódki i jej aktualnego położenia.");
-            else if (!osmMap.designatedWaypoints()) dialogInformationController.setInformation("Nie wyznaczono pozycji docelowej łódki.");
-            else if (!osmMap.getFoundBoatPosition()) dialogInformationController.setInformation("Nie wyznaczono aktualnego położenia łódki.");
+            if (!osmMap.designatedWaypoints() && !osmMap.getFoundBoatPosition())
+                dialogInformationController.setInformation("Nie wyznaczono pozycji docelowej łódki i jej aktualnego położenia.");
+            else if (!osmMap.designatedWaypoints())
+                dialogInformationController.setInformation("Nie wyznaczono pozycji docelowej łódki.");
+            else if (!osmMap.getFoundBoatPosition())
+                dialogInformationController.setInformation("Nie wyznaczono aktualnego położenia łódki.");
             mainStage.show();
         }
     }
@@ -220,13 +189,6 @@ public class SystemController implements Initializable {
         } else {
             osmMap.changeMapTypeToWMSMap();
         }
-    }
-
-    public void dialogNotConnect(String title, String text) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(title);
-        alert.setHeaderText(text);
-        alert.showAndWait();
     }
 
     public void checkConnectionWithInternet() throws InterruptedException, IOException {
@@ -241,14 +203,6 @@ public class SystemController implements Initializable {
             getNetworkConnection().setTextFill(Color.color(1, 0, 0));
             getNetworkConnection().setText("Brak polaczenia z internetem! Brak lokalizacji!");
         }
-    }
-
-    public void changeBoatPosition(double latitude, double longitude) {
-        osmMap.generateTraceFromBoatPosition(latitude, longitude);
-    }
-
-    public BoatMode getBoatMode() {
-        return this.boatModeController.getBoatMode();
     }
 
     private void changeBoatMode(BoatMode boatMode) {
@@ -286,5 +240,12 @@ public class SystemController implements Initializable {
         moveUp.setVisible(true);
         startSwimming.setVisible(false);
         clearTrace.setVisible(false);
+    }
+
+    private void dialogNotConnect(String title, String text) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(text);
+        alert.showAndWait();
     }
 }

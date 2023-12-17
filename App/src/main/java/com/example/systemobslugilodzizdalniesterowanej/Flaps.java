@@ -5,10 +5,10 @@ public class Flaps {
     private int secondFlap;
     private boolean temp;
 
-    public Flaps(){
-        firstFlap=0;
-        secondFlap=0;
-        temp=false;
+    public Flaps() {
+        firstFlap = 0;
+        secondFlap = 0;
+        temp = false;
     }
 
     public int getFirstFlap() {
@@ -18,9 +18,13 @@ public class Flaps {
     public int getSecondFlap() {
         return secondFlap;
     }
-    public boolean getTemp() {return temp;}
-    public void setTemp(boolean temp1){
-        this.temp=temp1;
+
+    public boolean getTemp() {
+        return temp;
+    }
+
+    public void setTemp(boolean temp1) {
+        this.temp = temp1;
     }
 
     public void onLeftFlap() {

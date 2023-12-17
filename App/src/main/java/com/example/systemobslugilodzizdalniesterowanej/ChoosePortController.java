@@ -4,14 +4,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import jssc.SerialPortException;
 
@@ -22,11 +20,8 @@ import java.util.ResourceBundle;
 public class ChoosePortController implements Initializable {
     Stage stage;
     private ObservableList<String> portNames = FXCollections.observableArrayList();
-    String choosenPort = new String("");
-    Lighting lighting = new Lighting();
-    Engines engines = new Engines();
-    Flaps flaps = new Flaps();
-    String choosenSystem = new String("");
+    String chosenPort = new String("");
+    String chosenSystem = new String("");
 
     public ChoosePortController(Stage stage1) {
         stage = stage1;
@@ -44,7 +39,7 @@ public class ChoosePortController implements Initializable {
         column.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()));
         portsTable.setItems(portNames);
         portsTable.setOnMouseClicked(e -> {
-            choosenPort = portsTable.getSelectionModel().getSelectedItem();
+            chosenPort = portsTable.getSelectionModel().getSelectedItem();
         });
     }
 
@@ -70,24 +65,24 @@ public class ChoosePortController implements Initializable {
     @FXML
     void chooseLinux(ActionEvent event) {
         if (linuxBox.isSelected()) {
-            choosenSystem = "Linux";
+            chosenSystem = "Linux";
             windowsBox.setSelected(false);
         } else
-            choosenSystem = "";
+            chosenSystem = "";
     }
 
     @FXML
     void chooseWindows(ActionEvent event) {
         if (windowsBox.isSelected()) {
-            choosenSystem = "Windows";
+            chosenSystem = "Windows";
             linuxBox.setSelected(false);
         } else
-            choosenSystem = "";
+            chosenSystem = "";
     }
 
     @FXML
     void connect(ActionEvent event) throws IOException, SerialPortException {
-        if (choosenPort.equals("") || choosenSystem.equals("")) {
+        if (chosenPort.equals("") || chosenSystem.equals("")) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Nie wybrano portu lub systemu");
             alert.setHeaderText("Port lub system nie zostal wybrany! Wybierz port oraz system.");
@@ -96,7 +91,7 @@ public class ChoosePortController implements Initializable {
             stage.close();
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("application-window.fxml"));
             Stage mainStage = new Stage();
-            SystemController systemController = new SystemController(mainStage);
+            SystemController systemController = new SystemController(mainStage, chosenPort, chosenSystem);
             fxmlLoader.setController(systemController);
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
@@ -104,141 +99,7 @@ public class ChoosePortController implements Initializable {
             mainStage.setScene(scene);
             mainStage.show();
             root.requestFocus();
-
-            Connection connection = new Connection(systemController, engines, lighting, flaps);
-            connection.connect(choosenPort, choosenSystem);
-
-            scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-                @Override
-                public void handle(KeyEvent keyEvent) {
-                    if (systemController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
-                        switch (keyEvent.getCode()) {
-                            case UP:
-                                systemController.getMoveUp().arm();
-                                engines.movingForward();
-                                if (!engines.getTemp()) {
-                                    connection.sendParameters();
-                                    engines.setTemp(true);
-                                }
-                                break;
-                            case DOWN:
-                                systemController.getMoveDown().arm();
-                                engines.movingBack();
-                                if (!engines.getTemp()) {
-                                    connection.sendParameters();
-                                    engines.setTemp(true);
-                                }
-                                break;
-                            case LEFT:
-                                systemController.getMoveLeft().arm();
-                                engines.turnLeft();
-                                if (!engines.getTemp()) {
-                                    connection.sendParameters();
-                                    engines.setTemp(true);
-                                }
-                                break;
-                            case RIGHT:
-                                systemController.getMoveRight().arm();
-                                engines.turnRight();
-                                if (!engines.getTemp()) {
-                                    connection.sendParameters();
-                                    engines.setTemp(true);
-                                }
-                                break;
-                            case T:
-                                systemController.getLeftFlap().arm();
-                                flaps.onLeftFlap();
-                                if (!flaps.getTemp()) {
-                                    connection.sendParameters();
-                                    flaps.setTemp(true);
-                                }
-                                break;
-                            case Y:
-                                systemController.getRightFlap().arm();
-                                flaps.onRightFlap();
-                                if (!flaps.getTemp()) {
-                                    connection.sendParameters();
-                                    flaps.setTemp(true);
-                                }
-                                break;
-                            case Q:
-                                systemController.getLightDown().arm();
-                                if (!lighting.getTemp()) {
-                                    lighting.setPower(0);
-                                    connection.sendParameters();
-                                    lighting.setTemp(true);
-                                }
-                                break;
-                            case E:
-                                systemController.getLightUp().arm();
-                                if (!lighting.getTemp()) {
-                                    lighting.setPower(100);
-                                    connection.sendParameters();
-                                    lighting.setTemp(true);
-                                }
-                                break;
-                        }
-                        keyEvent.consume();
-                    }
-                }
-            });
-
-            scene.setOnKeyReleased(new EventHandler<KeyEvent>() {
-                @Override
-                public void handle(KeyEvent keyEvent) {
-                    if (systemController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
-                        switch (keyEvent.getCode()) {
-                            case UP:
-                                systemController.getMoveUp().disarm();
-                                engines.turnOff();
-                                connection.sendParameters();
-                                engines.setTemp(false);
-                                break;
-                            case DOWN:
-                                systemController.getMoveDown().disarm();
-                                engines.turnOff();
-                                connection.sendParameters();
-                                engines.setTemp(false);
-                                break;
-                            case LEFT:
-                                systemController.getMoveLeft().disarm();
-                                engines.turnOff();
-                                connection.sendParameters();
-                                engines.setTemp(false);
-                                break;
-                            case RIGHT:
-                                systemController.getMoveRight().disarm();
-                                engines.turnOff();
-                                connection.sendParameters();
-                                engines.setTemp(false);
-                                break;
-                            case T:
-                                systemController.getLeftFlap().disarm();
-                                flaps.offLeftFlap();
-                                flaps.setTemp(false);
-                                break;
-                            case Y:
-                                systemController.getRightFlap().disarm();
-                                flaps.offRightFlap();
-                                flaps.setTemp(false);
-                                break;
-                            case Q:
-                                systemController.getLightDown().disarm();
-                                lighting.setPower(-1);
-                                connection.sendParameters();
-                                lighting.setTemp(false);
-                                break;
-                            case E:
-                                systemController.getLightUp().disarm();
-                                lighting.setPower(-1);
-                                connection.sendParameters();
-                                lighting.setTemp(false);
-                                break;
-                        }
-                    }
-                    keyEvent.consume();
-                }
-            });
+            systemController.initializeKeyboardHandler();
         }
     }
 
@@ -246,8 +107,8 @@ public class ChoosePortController implements Initializable {
     void exit(ActionEvent event) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dialog-window.fxml"));
         Stage dialogStage = new Stage();
-        DialogController dialogController = new DialogController(stage, dialogStage);
-        fxmlLoader.setController(dialogController);
+        ExitDialogController exitDialogController = new ExitDialogController(stage, dialogStage);
+        fxmlLoader.setController(exitDialogController);
         Parent root = fxmlLoader.load();
         Scene scene = new Scene(root);
         dialogStage.setTitle("Zamknij aplikacje");

@@ -8,10 +8,10 @@ import com.dlsc.gmapsfx.service.directions.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Map implements MapComponentInitializedListener, DirectionsServiceCallback {
+public class GoogleMap implements MapComponentInitializedListener, DirectionsServiceCallback {
 
     protected GoogleMapView mapView;
-    protected GoogleMap map;
+    protected com.dlsc.gmapsfx.javascript.object.GoogleMap map;
     protected Marker marker;
     protected List<Marker> markerList;
     protected MarkerOptions markerOptions;
@@ -19,7 +19,7 @@ public class Map implements MapComponentInitializedListener, DirectionsServiceCa
     protected DirectionsRenderer directionsRenderer = null;
     protected DirectionsPane directionsPane;
 
-    public Map() {
+    public GoogleMap() {
         mapView = new GoogleMapView();
         mapView.addMapInitializedListener(this);
         markerOptions = new MarkerOptions();

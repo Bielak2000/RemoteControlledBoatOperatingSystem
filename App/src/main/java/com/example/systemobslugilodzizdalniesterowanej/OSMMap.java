@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class OSM {
+public class OSMMap {
     private static String WMSUrl = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/HighResolution";
     private MapView mapView;
     private List<Marker> markerList = new ArrayList<>();
@@ -17,7 +17,7 @@ public class OSM {
     private BoatModeController boatModeController;
     private Boolean foundBoatPosition;
 
-    public OSM(MapView mapView, BoatModeController boatModeController) {
+    public OSMMap(MapView mapView, BoatModeController boatModeController) {
         this.mapView = mapView;
         this.boatModeController = boatModeController;
         this.foundBoatPosition = false;
@@ -110,25 +110,4 @@ public class OSM {
             markerList.clear();
         }
     }
-
-//        public boolean generateTrace() {
-//        if (markerList.size() > 1) {
-//            clearCoordinateLine();
-//            coordinateLine = new CoordinateLine(markerList.stream().map(marker1 -> new Coordinate(marker1.getPosition().getLatitude(), marker1.getPosition().getLongitude())
-//            ).collect(Collectors.toList()));
-//            coordinateLine.setColor(Color.RED);
-//            coordinateLine.setVisible(true);
-//            mapView.addCoordinateLine(coordinateLine);
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
-//
-//    private void clearCoordinateLine() {
-//        if (coordinateLine != null) {
-//            mapView.removeCoordinateLine(coordinateLine);
-//            coordinateLine = null;
-//        }
-//    }
 }

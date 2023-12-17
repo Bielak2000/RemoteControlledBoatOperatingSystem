@@ -20,7 +20,7 @@ public class StartSwimmingDialogController {
 
     @FXML
     void swimming(ActionEvent event) {
-
+        // TODO: plywanie
     }
 
     @FXML

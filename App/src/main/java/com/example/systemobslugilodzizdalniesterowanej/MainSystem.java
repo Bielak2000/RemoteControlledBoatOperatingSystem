@@ -10,12 +10,12 @@ import jssc.SerialPortException;
 import java.io.IOException;
 
 public class MainSystem extends Application {
-    public static void main(String[] args) throws SerialPortException {
+    public static void main(String[] args) {
         launch();
     }
 
     @Override
-    public void start(Stage stage) throws IOException, SerialPortException {
+    public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("window-toolbar-ports.fxml"));
         ChoosePortController choosePortController = new ChoosePortController(stage);
         fxmlLoader.setController(choosePortController);

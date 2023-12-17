@@ -1,8 +1,10 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
-import com.dlsc.gmapsfx.javascript.object.LatLong;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortException;
@@ -14,21 +16,29 @@ import java.util.List;
 
 public class Connection {
     private SerialPort serialPort;
-    private SystemController controller;
     private Engines engines;
     private Lighting lighting;
     private Flaps flaps;
     private List<String> portNames = new ArrayList<>();
+    private Label connectionStatus;
+    private Label lightPower;
+    private Boolean networkStatus;
+    private OSMMap osmMap;
+    private Stage stage;
 
-    public Connection(SystemController controller1, Engines engines1, Lighting lighting1, Flaps flaps1) {
+    public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap, Stage stage) {
         com.fazecast.jSerialComm.SerialPort[] ports = com.fazecast.jSerialComm.SerialPort.getCommPorts();
         for (com.fazecast.jSerialComm.SerialPort port : ports) {
             portNames.add(port.getSystemPortName());
         }
-        controller = controller1;
-        engines = engines1;
-        lighting = lighting1;
-        flaps = flaps1;
+        this.engines = engines;
+        this.lighting = lighting;
+        this.flaps = flaps;
+        this.connectionStatus = connectionStatus;
+        this.lightPower = lightPower;
+        this.networkStatus = networkStatus;
+        this.osmMap = osmMap;
+        this.stage = stage;
     }
 
     public void connect(String port, String system) {
@@ -40,7 +50,7 @@ public class Connection {
                 serialPort = new SerialPort("/dev/" + port);
 
             serialPort.openPort();
-            controller.getConnectionStatus().setText("Polaczono z radionadajnikiem!");
+            connectionStatus.setText("Polaczono z radionadajnikiem!");
             serialPort.setParams(SerialPort.BAUDRATE_57600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
             serialPort.setEventsMask(MASK_RXCHAR);
 
@@ -61,16 +71,16 @@ public class Connection {
 
 
                         Platform.runLater(() -> {
-                            controller.getLightPower().setText(String.valueOf(lighting.getPower() + "%"));
+                            lightPower.setText(String.valueOf(lighting.getPower() + "%"));
                         });
-                        if (controller.getNetworkStatus()) {
+                        if (networkStatus) {
                             String[] finalLocalization = localization;
                             Platform.runLater(() -> {
                                 if (!finalLocalization[0].startsWith("INV") && !finalLocalization[0].equals("") && !finalLocalization[0].isEmpty()) {
                                     // TODO: dane lokalizacyjne przychodzace z lodzi, za pierwszym razem lub w trybie nie autonomicznym
                                     // TODO: ma to byc dodane na pcozatek listy markerow i wygenerowac trase,
                                     //  za kazdym kolejnym razem ma byc pole kotre bedzie to przedstawiac bez usuwania trasy i poczatkowej lokalizacji
-                                    controller.changeBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
+                                    osmMap.generateTraceFromBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
 //                                    controller.getMap().addNewMarker(new LatLong(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1])));
 //                                    controller.getMap().setPosition(new LatLong(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1])));
                                 }
@@ -82,10 +92,10 @@ public class Connection {
                 }
             });
         } catch (SerialPortException serialPortException) {
-            controller.getConnectionStatus().setTextFill(Color.color(1, 0, 0));
-            controller.getConnectionStatus().setText("Brak polaczenia z radionadajnikiem!");
-            controller.dialogNotConnect("Brak polaczenia", "Aplikacja nie moze sie polaczyc z radionadajnikiem!");
-            controller.getStage().close();
+            connectionStatus.setTextFill(Color.color(1, 0, 0));
+            connectionStatus.setText("Brak polaczenia z radionadajnikiem!");
+            dialogWarning("Brak polaczenia", "Aplikacja nie moze sie polaczyc z radionadajnikiem!");
+            stage.close();
         }
     }
 
@@ -100,5 +110,12 @@ public class Connection {
         } catch (SerialPortException e) {
             e.printStackTrace();
         }
+    }
+
+    private void dialogWarning(String title, String text) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(text);
+        alert.showAndWait();
     }
 }
