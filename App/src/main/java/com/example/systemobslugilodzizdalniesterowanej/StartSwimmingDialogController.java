@@ -52,8 +52,8 @@ public class StartSwimmingDialogController {
 //        blockActionsForAutonomicRunningBoatMode();
 //        boatModeController.setBoatMode(BoatMode.AUTONOMIC_RUNNING);
 //        connection.sendChangedBoatModeAndWaypoints();
-        Thread.sleep(3000);
-        progressDialogController.closeProgressDialogController();
+//        Thread.sleep(3000);
+//        progressDialogController.closeProgressDialogController();
     }
 
     @FXML
