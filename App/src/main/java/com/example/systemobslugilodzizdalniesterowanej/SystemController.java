@@ -34,20 +34,22 @@ public class SystemController implements Initializable {
 
     public SystemController(Stage stage, String chosenPort, String chosenSystem) {
         this.stage = stage;
-        this.boatModeController = BoatModeController.getInstance();
         this.chosenPort = chosenPort;
         this.chosenSystem = chosenSystem;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        this.boatModeController = BoatModeController.getInstance(leftFlap, lightDown, lightPower, lightUp, moveDown, moveLeft, moveRight,
+                moveUp, rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation);
         try {
             checkConnectionWithInternet();
             osmMap = new OSMMap(mapView, boatModeController);
         } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
-        this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage, boatModeController);
+        this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage,
+                boatModeController, runningBoatInformation);
         connection.connect(chosenPort, chosenSystem);
         networkStatus = false;
         lightPower.setText("0%");
@@ -63,6 +65,9 @@ public class SystemController implements Initializable {
 
     @FXML
     private Label connectionStatus;
+
+    @FXML
+    private Label runningBoatInformation;
 
     @FXML
     private Label networkConnection;
@@ -143,42 +148,37 @@ public class SystemController implements Initializable {
     @FXML
     void changeMode(ActionEvent event) {
         if (modeChooser.isSelected()) {
+            keyboardHandler.stopBoat();
             changeBoatMode(BoatMode.AUTONOMIC);
-            setViewForAutonomicBoatMode();
         } else {
             changeBoatMode(BoatMode.KEYBOARD_CONTROL);
-            setViewForKeyboardControlBoatMode();
         }
     }
 
     @FXML
     void startSwimming(ActionEvent event) throws IOException {
         if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints()) {
-//            if(true) {
+//        if (true) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("start-swimming-dialog.fxml"));
             Stage mainStage = new Stage();
-            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection,
-                    modeChooser, startSwimming, clearTrace, exit);
+            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection);
             fxmlLoader.setController(startSwimmingDialogController);
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
             mainStage.setScene(scene);
             mainStage.show();
         } else {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("information-dialog.fxml"));
-            Stage mainStage = new Stage();
-            DialogInformationController dialogInformationController = new DialogInformationController(mainStage);
-            fxmlLoader.setController(dialogInformationController);
-            Parent root = fxmlLoader.load();
-            Scene scene = new Scene(root);
-            mainStage.setScene(scene);
+            String text = "";
             if (!osmMap.designatedWaypoints() && !osmMap.getFoundBoatPosition())
-                dialogInformationController.setInformation("Nie wyznaczono pozycji docelowej łódki i jej aktualnego położenia.");
+                text = "Nie wyznaczono pozycji docelowej łódki i jej aktualnego położenia.";
             else if (!osmMap.designatedWaypoints())
-                dialogInformationController.setInformation("Nie wyznaczono pozycji docelowej łódki.");
+                text = "Nie wyznaczono pozycji docelowej łódki.";
             else if (!osmMap.getFoundBoatPosition())
-                dialogInformationController.setInformation("Nie wyznaczono aktualnego położenia łódki.");
-            mainStage.show();
+                text = "Nie wyznaczono aktualnego położenia łódki.";
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Brak danych");
+            alert.setHeaderText(text);
+            alert.showAndWait();
         }
     }
 
@@ -199,7 +199,9 @@ public class SystemController implements Initializable {
             networkConnection.setText("Polaczono z internetem!");
             networkStatus = true;
         } catch (Exception e) {
-            dialogNotConnect("Brak internetu", "Aplikacja nie moze polaczyc sie z internetem!");
+            modeChooser.setDisable(true);
+            mapOsmCheckBox.setDisable(true);
+            dialogNotConnect("Brak internetu", "Aplikacja nie może połączyć się z internetem! Brak możliwości przejścia w tryb autonomiczny.");
             getNetworkConnection().setTextFill(Color.color(1, 0, 0));
             getNetworkConnection().setText("Brak polaczenia z internetem! Brak lokalizacji!");
         }
@@ -212,40 +214,11 @@ public class SystemController implements Initializable {
         }
     }
 
-    private void setViewForAutonomicBoatMode() {
-        lightingText.setVisible(false);
-        lightDown.setVisible(false);
-        lightUp.setVisible(false);
-        flapsText.setVisible(false);
-        leftFlap.setVisible(false);
-        rightFlap.setVisible(false);
-        moveDown.setVisible(false);
-        moveLeft.setVisible(false);
-        moveRight.setVisible(false);
-        moveUp.setVisible(false);
-        startSwimming.setVisible(true);
-        clearTrace.setVisible(true);
-    }
-
-    private void setViewForKeyboardControlBoatMode() {
-        lightingText.setVisible(true);
-        lightDown.setVisible(true);
-        lightUp.setVisible(true);
-        flapsText.setVisible(true);
-        leftFlap.setVisible(true);
-        rightFlap.setVisible(true);
-        moveDown.setVisible(true);
-        moveLeft.setVisible(true);
-        moveRight.setVisible(true);
-        moveUp.setVisible(true);
-        startSwimming.setVisible(false);
-        clearTrace.setVisible(false);
-    }
-
     private void dialogNotConnect(String title, String text) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
         alert.setHeaderText(text);
+        alert.getDialogPane().setMaxWidth(500);
         alert.showAndWait();
     }
 }

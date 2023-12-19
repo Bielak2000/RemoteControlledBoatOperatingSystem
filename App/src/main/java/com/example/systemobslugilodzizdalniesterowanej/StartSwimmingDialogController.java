@@ -5,7 +5,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 
@@ -15,20 +14,11 @@ public class StartSwimmingDialogController {
     Stage stage;
     BoatModeController boatModeController;
     Connection connection;
-    ToggleButton modeChooser;
-    Button startSwimming;
-    Button clearTrace;
-    Button exit;
 
-    public StartSwimmingDialogController(Stage stage, BoatModeController boatModeController, Connection connection,
-                                         ToggleButton modeChooser, Button startSwimming, Button clearTrace, Button exit) {
+    public StartSwimmingDialogController(Stage stage, BoatModeController boatModeController, Connection connection) {
         this.stage = stage;
         this.boatModeController = boatModeController;
         this.connection = connection;
-        this.modeChooser = modeChooser;
-        this.startSwimming = startSwimming;
-        this.clearTrace = clearTrace;
-        this.exit = exit;
     }
 
     @FXML
@@ -39,6 +29,7 @@ public class StartSwimmingDialogController {
 
     @FXML
     void swimming(ActionEvent event) throws IOException, InterruptedException {
+        boatModeController.setBoatMode(BoatMode.AUTONOMIC_STARTING);
         Stage stage1 = new Stage();
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("progress-dialog.fxml"));
         ProgressDialogController progressDialogController = new ProgressDialogController(stage1);
@@ -49,22 +40,12 @@ public class StartSwimmingDialogController {
         stage1.show();
         root.requestFocus();
         this.stage.close();
-//        blockActionsForAutonomicRunningBoatMode();
-//        boatModeController.setBoatMode(BoatMode.AUTONOMIC_RUNNING);
-//        connection.sendChangedBoatModeAndWaypoints();
-//        Thread.sleep(3000);
-//        progressDialogController.closeProgressDialogController();
+        connection.setProgressDialogController(progressDialogController);
+        connection.asyncSendChangedBoatModeAndWaypoints();
     }
 
     @FXML
     void notSwimming(ActionEvent event) {
         this.stage.close();
-    }
-
-    private void blockActionsForAutonomicRunningBoatMode() {
-        modeChooser.setDisable(true);
-        startSwimming.setDisable(true);
-        clearTrace.setDisable(true);
-        exit.setDisable(true);
     }
 }

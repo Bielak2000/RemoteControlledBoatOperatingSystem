@@ -173,4 +173,26 @@ public class KeyboardHandler {
             }
         });
     }
+
+    public void stopBoat() {
+        moveLeft.disarm();
+        moveRight.disarm();
+        moveDown.disarm();
+        moveUp.disarm();
+        engines.turnOff();
+        engines.setTemp(false);
+
+        leftFlap.disarm();
+        rightFlap.disarm();
+        flaps.offLeftFlap();
+        flaps.offRightFlap();
+        flaps.setTemp(false);
+
+        lightUp.disarm();
+        lightDown.disarm();
+        lighting.setPower(-1);
+        lighting.setTemp(false);
+
+        connection.sendParameters();
+    }
 }

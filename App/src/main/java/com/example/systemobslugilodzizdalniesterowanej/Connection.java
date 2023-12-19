@@ -14,9 +14,20 @@ import static jssc.SerialPort.MASK_RXCHAR;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Connection {
+    private static String KEYBOARD_CONTROL_MODE_MARKING = "0";
+    private static String AUTONOMOUS_MODE_MARKING = "1";
+    private static int MILLISECONDS_TIME_BETWEEN_SEND_INFORMATION = 2000;
+    private static int BOAT_IS_SWIMMING_BY_WAYPOINTS = 0;
+    private static int BOAT_FINISHED_SWIMMING_BY_WAYPOINTS = 1;
+    private static String BOAT_RUNNING_SWIMMING_INFORMATION = "Łódka porszua się po wyznaczonych punktach. Nie wyłączaj aplikacji i nie wykonuj żadnych czynności, czekaj na informację z łodzi o uzyskaniu docelowej pozycji.";
+    private static String BOAT_FINISHED_SWIMMING_INFORMATION = "Łódka dopłyneła do ostaniego waypointa, zmieniono tryb sterowania na tryb manualny. Jeśli chcesz ponownie wyznaczyć trasę wykonaj odpowiednie czynności jak poprzednio.";
+    private ExecutorService executorService;
     private BoatModeController boatModeController;
+    private ProgressDialogController progressDialogController;
     private SerialPort serialPort;
     private Engines engines;
     private Lighting lighting;
@@ -27,8 +38,10 @@ public class Connection {
     private Boolean networkStatus;
     private OSMMap osmMap;
     private Stage stage;
+    private Label runningBoatInformation;
 
-    public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap, Stage stage, BoatModeController boatModeController) {
+    public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap,
+                      Stage stage, BoatModeController boatModeController, Label runningBoatInformation) {
         com.fazecast.jSerialComm.SerialPort[] ports = com.fazecast.jSerialComm.SerialPort.getCommPorts();
         for (com.fazecast.jSerialComm.SerialPort port : ports) {
             portNames.add(port.getSystemPortName());
@@ -42,6 +55,8 @@ public class Connection {
         this.osmMap = osmMap;
         this.stage = stage;
         this.boatModeController = boatModeController;
+        this.executorService = Executors.newFixedThreadPool(1);
+        this.runningBoatInformation = runningBoatInformation;
     }
 
     public void connect(String port, String system) {
@@ -67,10 +82,27 @@ public class Connection {
                             lighting.setPower(Integer.parseInt(array[0]));
                             System.out.println("Oswietlenie: " + array[0]);
                         }
+
                         String[] localization = {"", ""};
                         if (array.length > 1) {
                             localization = array[1].split(",");
                             System.out.println("Lokalizacja: " + array[1]);
+                        }
+
+                        if (array.length > 2) {
+                            if (Integer.parseInt(array[2]) == BOAT_IS_SWIMMING_BY_WAYPOINTS) {
+                                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+                                    boatModeController.setBoatMode(BoatMode.AUTONOMIC_RUNNING);
+                                    runningBoatInformation.setVisible(true);
+                                    Platform.runLater(() -> showInformationDialog("Łódka rozpoczeła pływanie", BOAT_RUNNING_SWIMMING_INFORMATION));
+                                }
+                            } else if (Integer.parseInt(array[2]) == BOAT_FINISHED_SWIMMING_BY_WAYPOINTS) {
+                                Platform.runLater(() -> {
+                                    boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
+                                    osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
+                                    showInformationDialog("Łódka osiągneła punkt docelowy", BOAT_FINISHED_SWIMMING_INFORMATION);
+                                });
+                            }
                         }
 
                         setLightPowerLabel();
@@ -82,8 +114,8 @@ public class Connection {
             });
         } catch (SerialPortException serialPortException) {
             connectionStatus.setTextFill(Color.color(1, 0, 0));
-            connectionStatus.setText("Brak polaczenia z radionadajnikiem!");
-            dialogWarning("Brak polaczenia", "Aplikacja nie moze sie polaczyc z radionadajnikiem!");
+            connectionStatus.setText("Brak połączenia z radionadajnikiem!");
+            dialogWarning("Brak połączenia", "Aplikacja nie może się połączyć z radionadajnikiem!");
             stage.close();
         }
     }
@@ -91,7 +123,8 @@ public class Connection {
     public void sendParameters() {
         try {
             if (boatModeController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
-                String sentInfo = ("0" + "_" + String.valueOf((int) engines.getMotorOne()) + "_" + String.valueOf((int) engines.getMotorTwo()) + "_"
+                String sentInfo = (KEYBOARD_CONTROL_MODE_MARKING + "_"
+                        + String.valueOf((int) engines.getMotorOne()) + "_" + String.valueOf((int) engines.getMotorTwo()) + "_"
                         + String.valueOf((int) lighting.getPower()) + "_"
                         + String.valueOf((int) flaps.getFirstFlap()) + "_" + flaps.getSecondFlap() + "_");
                 serialPort.writeString(sentInfo);
@@ -103,29 +136,46 @@ public class Connection {
         }
     }
 
-    public void sendChangedBoatModeAndWaypoints() {
-        try {
-            String sendInfo = "1";
-            serialPort.writeString(sendInfo);
-            Thread.sleep(1000);
-            List<Marker> markerList = osmMap.getDesignatedWaypoints();
-            String isLastMarker = "0";
-            for (int i = 0; i < markerList.size(); i++) {
-                if (i == markerList.size() - 1) {
-                    isLastMarker = "1";
-                }
-                sendInfo = "1" + "_" + markerList.get(i).getPosition().getLatitude().toString() + "_" + markerList.get(i).getPosition().getLongitude().toString() + isLastMarker;
-                serialPort.writeString(sendInfo);
-                System.out.println("Wyslano waypoint: lat - " + markerList.get(i).getPosition().getLatitude().toString() + ", long - " + markerList.get(i).getPosition().getLongitude().toString());
-                Thread.sleep(1000);
-            }
+    public void asyncSendChangedBoatModeAndWaypoints() {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String sendInfo;
+                    List<Marker> markerList = osmMap.getDesignatedWaypoints();
+                    String isLastMarker = "0";
+                    for (int i = 0; i < markerList.size(); i++) {
+                        if (i == markerList.size() - 1) {
+                            isLastMarker = "1";
+                        }
+                        sendInfo = AUTONOMOUS_MODE_MARKING + "_"
+                                + markerList.get(i).getPosition().getLatitude().toString() + "_"
+                                + markerList.get(i).getPosition().getLongitude().toString() + "_"
+                                + isLastMarker + "_";
+                        serialPort.writeString(sendInfo);
+                        System.out.println("Wyslano waypoint: lat - "
+                                + markerList.get(i).getPosition().getLatitude().toString()
+                                + ", long - " + markerList.get(i).getPosition().getLongitude().toString());
+                        Thread.sleep(MILLISECONDS_TIME_BETWEEN_SEND_INFORMATION);
+                    }
 
-            System.out.println("Wyslano waypointy");
-        } catch (SerialPortException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+                    System.out.println("Wyslano waypointy");
+                    Platform.runLater(() -> runningBoatInformation.setVisible(true));
+                } catch (SerialPortException e) {
+                    connectionStatus.setTextFill(Color.color(1, 0, 0));
+                    connectionStatus.setText("Brak polaczenia z radionadajnikiem!");
+                    dialogWarning("Brak polaczenia", "Aplikacja nie moze sie polaczyc z radionadajnikiem!");
+                    stage.close();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                Platform.runLater(() -> progressDialogController.closeProgressDialogController());
+            }
+        });
+    }
+
+    public void setProgressDialogController(ProgressDialogController progressDialogController) {
+        this.progressDialogController = progressDialogController;
     }
 
     private void setBoatPositionOnMap(String[] localization) {
@@ -136,13 +186,11 @@ public class Connection {
                     // TODO: dane lokalizacyjne przychodzace z lodzi, za pierwszym razem lub w trybie nie autonomicznym
                     // TODO: ma to byc dodane na pcozatek listy markerow i wygenerowac trase,
                     //  za kazdym kolejnym razem ma byc pole kotre bedzie to przedstawiac bez usuwania trasy i poczatkowej lokalizacji
-                    if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_RUNNING) {
+                    if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING) {
                         osmMap.generateTraceFromBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
                     } else {
                         osmMap.setCurrentBoatPositionWhileRunning(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
                     }
-//                                    controller.getMap().addNewMarker(new LatLong(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1])));
-//                                    controller.getMap().setPosition(new LatLong(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1])));
                 }
             });
         }
@@ -158,6 +206,14 @@ public class Connection {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle(title);
         alert.setHeaderText(text);
+        alert.showAndWait();
+    }
+
+    private void showInformationDialog(String title, String text) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(text);
+        alert.getDialogPane().setMaxWidth(700);
         alert.showAndWait();
     }
 }

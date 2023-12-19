@@ -72,7 +72,7 @@ public class OSMMap {
             markerList.remove(0);
             markerList.add(0, newMarker);
         } else {
-            markerList.add(newMarker);
+            markerList.add(0, newMarker);
         }
         mapView.addMarker(newMarker);
         generateTrace();
@@ -117,7 +117,7 @@ public class OSMMap {
     }
 
     public void setCurrentBoatPositionWhileRunning(double latitude, double longitude) {
-        if(currentBoatPositionWhileRunning != null) {
+        if (currentBoatPositionWhileRunning != null) {
             mapView.removeMarker(currentBoatPositionWhileRunning);
         }
         currentBoatPositionWhileRunning = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
@@ -125,8 +125,12 @@ public class OSMMap {
         mapView.setCenter(new Coordinate(latitude, longitude));
     }
 
-    public void clearCurrentBoatPositionWhileRunning() {
+    public void clearCurrentBoatPositionAfterFinishedLastWaypoint() {
         mapView.removeMarker(currentBoatPositionWhileRunning);
+        removeAllMarkersAndLinesWithoutBoatPosition();
+        if (currentBoatPositionWhileRunning != null) {
+            generateTraceFromBoatPosition(currentBoatPositionWhileRunning.getPosition().getLatitude(), currentBoatPositionWhileRunning.getPosition().getLongitude());
+        }
         currentBoatPositionWhileRunning = null;
     }
 }
