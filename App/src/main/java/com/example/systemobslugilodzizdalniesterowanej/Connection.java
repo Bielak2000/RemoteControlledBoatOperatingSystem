@@ -20,11 +20,14 @@ import java.util.concurrent.Executors;
 public class Connection {
     private static String KEYBOARD_CONTROL_MODE_MARKING = "0";
     private static String AUTONOMOUS_MODE_MARKING = "1";
+    private static String STOP_SWIMMING_MARKING = "2";
     private static int MILLISECONDS_TIME_BETWEEN_SEND_INFORMATION = 2000;
     private static int BOAT_IS_SWIMMING_BY_WAYPOINTS = 0;
     private static int BOAT_FINISHED_SWIMMING_BY_WAYPOINTS = 1;
+    private static int BOAT_MANUALLY_FINISHED_SWIMMING_BY_WAYPOINTS = 2;
     private static String BOAT_RUNNING_SWIMMING_INFORMATION = "Łódka porszua się po wyznaczonych punktach. Nie wyłączaj aplikacji i nie wykonuj żadnych czynności, czekaj na informację z łodzi o uzyskaniu docelowej pozycji.";
     private static String BOAT_FINISHED_SWIMMING_INFORMATION = "Łódka dopłyneła do ostaniego waypointa, zmieniono tryb sterowania na tryb manualny. Jeśli chcesz ponownie wyznaczyć trasę wykonaj odpowiednie czynności jak poprzednio.";
+    private static String BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION = "Ręcznie przerwano pływanie łodzi po waypointach, zmieniono tryb sterowania na tryb manualny.";
     private ExecutorService executorService;
     private BoatModeController boatModeController;
     private ProgressDialogController progressDialogController;
@@ -94,13 +97,21 @@ public class Connection {
                                 if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
                                     boatModeController.setBoatMode(BoatMode.AUTONOMIC_RUNNING);
                                     runningBoatInformation.setVisible(true);
-                                    Platform.runLater(() -> showInformationDialog("Łódka rozpoczeła pływanie", BOAT_RUNNING_SWIMMING_INFORMATION));
+                                    Platform.runLater(() -> showInformationDialog("Łódka rozpoczeła pływanie", BOAT_RUNNING_SWIMMING_INFORMATION, 700));
                                 }
                             } else if (Integer.parseInt(array[2]) == BOAT_FINISHED_SWIMMING_BY_WAYPOINTS) {
                                 Platform.runLater(() -> {
                                     boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
+                                    // TODO: przetestowac czy uda sie wyczyscic mape
                                     osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
-                                    showInformationDialog("Łódka osiągneła punkt docelowy", BOAT_FINISHED_SWIMMING_INFORMATION);
+                                    showInformationDialog("Łódka osiągneła punkt docelowy", BOAT_FINISHED_SWIMMING_INFORMATION, 700);
+                                });
+                            } else if (Integer.parseInt(array[2]) == BOAT_MANUALLY_FINISHED_SWIMMING_BY_WAYPOINTS) {
+                                Platform.runLater(() -> {
+                                    boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
+                                    // TODO: przetestowac czy uda sie wyczyscic mape
+                                    osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
+                                    showInformationDialog("Przerwano pływanie łodzi", BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION, 500);
                                 });
                             }
                         }
@@ -174,6 +185,19 @@ public class Connection {
         });
     }
 
+    public void sendStopSwimmingInfo() {
+        try {
+            if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+                String sentInfo = STOP_SWIMMING_MARKING;
+                serialPort.writeString(sentInfo);
+
+                System.out.println("Wyslano: " + sentInfo);
+            }
+        } catch (SerialPortException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void setProgressDialogController(ProgressDialogController progressDialogController) {
         this.progressDialogController = progressDialogController;
     }
@@ -209,11 +233,11 @@ public class Connection {
         alert.showAndWait();
     }
 
-    private void showInformationDialog(String title, String text) {
+    private void showInformationDialog(String title, String text, int width) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(text);
-        alert.getDialogPane().setMaxWidth(700);
+        alert.getDialogPane().setMaxWidth(width);
         alert.showAndWait();
     }
 }

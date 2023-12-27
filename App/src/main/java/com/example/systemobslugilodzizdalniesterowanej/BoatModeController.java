@@ -26,10 +26,11 @@ public class BoatModeController {
     private ToggleButton modeChooser;
     private Button exit;
     private Label runningBoatInformation;
+    private Button stopSwimmingButton;
 
     private BoatModeController(Button leftFlap, Button lightDown, Label lightPower, Button lightUp, Button moveDown, Button moveLeft, Button moveRight, Button moveUp,
                                Button rightFlap, Label lightingText, Label flapsText, Button startSwimming, Button clearTrace, ToggleButton modeChooser, Button exit,
-                               Label runningBoatInformation) {
+                               Label runningBoatInformation, Button stopSwimmingButton) {
         this.boatMode = BoatMode.KEYBOARD_CONTROL;
         this.leftFlap = leftFlap;
         this.lightDown = lightDown;
@@ -47,14 +48,15 @@ public class BoatModeController {
         this.modeChooser = modeChooser;
         this.exit = exit;
         this.runningBoatInformation = runningBoatInformation;
+        this.stopSwimmingButton = stopSwimmingButton;
     }
 
     public static BoatModeController getInstance(Button leftFlap, Button lightDown, Label lightPower, Button lightUp, Button moveDown, Button moveLeft, Button moveRight,
                                                  Button moveUp, Button rightFlap, Label lightingText, Label flapsText, Button startSwimming, Button clearTrace,
-                                                 ToggleButton modeChooser, Button exit, Label runningBoatInformation) {
+                                                 ToggleButton modeChooser, Button exit, Label runningBoatInformation, Button stopSwimmingButton) {
         if (boatModeController == null) {
             boatModeController = new BoatModeController(leftFlap, lightDown, lightPower, lightUp, moveDown, moveLeft, moveRight, moveUp,
-                    rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation);
+                    rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton);
         }
         return boatModeController;
     }
@@ -68,6 +70,7 @@ public class BoatModeController {
             setViewForAutonomicBoatMode();
         } else if (boatMode == BoatMode.KEYBOARD_CONTROL) {
             if (this.boatMode == BoatMode.AUTONOMIC_RUNNING) {
+                stopSwimmingButton.setVisible(false);
                 setRunningBoatInformation(STARTING_BOAT_INFORMATION, Color.color(230, 0, 0), false);
             }
             enableActionsForAutonomicRunningBoatMode();
@@ -76,6 +79,7 @@ public class BoatModeController {
             blockActionsForAutonomicRunningBoatMode();
         } else if (boatMode == BoatMode.AUTONOMIC_RUNNING) {
             setRunningBoatInformation(RUNNING_BOAT_INFORMATION, Color.color(81, 181, 61), true);
+            stopSwimmingButton.setVisible(true);
         }
         this.boatMode = boatMode;
     }

@@ -41,7 +41,7 @@ public class SystemController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.boatModeController = BoatModeController.getInstance(leftFlap, lightDown, lightPower, lightUp, moveDown, moveLeft, moveRight,
-                moveUp, rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation);
+                moveUp, rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton);
         try {
             checkConnectionWithInternet();
             osmMap = new OSMMap(mapView, boatModeController);
@@ -121,6 +121,9 @@ public class SystemController implements Initializable {
     private Button clearTrace;
 
     @FXML
+    private Button stopSwimmingButton;
+
+    @FXML
     private CheckBox mapOsmCheckBox;
 
     public Label getNetworkConnection() {
@@ -180,6 +183,11 @@ public class SystemController implements Initializable {
             alert.setHeaderText(text);
             alert.showAndWait();
         }
+    }
+
+    @FXML
+    void stopSwimming(ActionEvent event) {
+        connection.sendStopSwimmingInfo();
     }
 
     @FXML
