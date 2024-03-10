@@ -10,6 +10,9 @@ import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortException;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -116,6 +119,9 @@ public class Connection {
                                 System.out.println("Gps course: " + array[3]);
                             });
                         }
+                        List<String[]> courseData = new ArrayList<>();
+                        courseData.add(new String[] {sensorCourse.getText(), gpsCourse.getText(), expectedCourse.getText()});
+                        Utils.saveCourseToCsv(courseData);
 
 
 //                        if (array.length > 2) {
@@ -146,6 +152,8 @@ public class Connection {
                         setBoatPositionOnMap(localization);
                     } catch (SerialPortException ex) {
                         System.out.println("Problem z odbiorem danych: " + ex);
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             });
@@ -240,7 +248,9 @@ public class Connection {
                     // TODO: ma to byc dodane na pcozatek listy markerow i wygenerowac trase,
                     //  za kazdym kolejnym razem ma byc pole kotre bedzie to przedstawiac bez usuwania trasy i poczatkowej lokalizacji
 //                    if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING) {
+                    List<String[]> dataLines = new ArrayList<>();
                     if (!firstWaypoint) {
+                        dataLines.add(new String[] {finalLocalization[0], finalLocalization[1], "first localization"});
                         // TODO: nadpisuje pierwsza pozycje
                         expectedCourse.setText(
                                 osmMap.generateTraceFromBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]))
@@ -249,6 +259,12 @@ public class Connection {
                     } else {
                         // TODO: dodaje kolejne
                         osmMap.setCurrentBoatPositionWhileRunning(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
+                        dataLines.add(new String[] {finalLocalization[0], finalLocalization[1]});
+                    }
+                    try {
+                        Utils.saveGpsToCsv(dataLines);
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             });

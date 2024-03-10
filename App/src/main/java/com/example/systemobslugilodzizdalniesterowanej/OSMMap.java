@@ -4,6 +4,7 @@ import com.sothawo.mapjfx.*;
 import com.sothawo.mapjfx.event.MapViewEvent;
 import javafx.scene.paint.Color;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,6 +49,13 @@ public class OSMMap {
                 Marker newMarker = Marker.createProvided(Marker.Provided.GREEN).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true);
                 markerList.add(newMarker);
                 mapView.addMarker(newMarker);
+                List<String[]> markerData = new ArrayList<>();
+                markerData.add(new String[] {String.valueOf(newMarker.getPosition().getLatitude()), String.valueOf(newMarker.getPosition().getLongitude()), "marker"});
+                try {
+                    Utils.saveGpsToCsv(markerData);
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
                 generateTrace();
             }
         });
