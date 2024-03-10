@@ -1,14 +1,12 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 
 public class Utils {
 
-    public static void saveGpsToCsv(List<String[]> gpsData) throws FileNotFoundException {
-        File csvOutputFile = new File("/home/kacperbielak/Desktop/gps.csv");
+    public static void saveGpsToCsv(List<String[]> gpsData) throws IOException {
+        FileWriter csvOutputFile = new FileWriter("/home/kacperbielak/Desktop/gps.csv", true);
         try (PrintWriter pw = new PrintWriter(csvOutputFile)) {
             gpsData.stream()
                     .map(Utils::convertToCSV)
@@ -16,8 +14,8 @@ public class Utils {
         }
     }
 
-    public static void saveCourseToCsv(List<String[]> courseData) throws FileNotFoundException {
-        File csvOutputFile = new File("/home/kacperbielak/Desktop/course.csv");
+    public static void saveCourseToCsv(List<String[]> courseData) throws IOException {
+        FileWriter csvOutputFile = new FileWriter("/home/kacperbielak/Desktop/course.csv", true);
         try (PrintWriter pw = new PrintWriter(csvOutputFile)) {
             courseData.stream()
                     .map(Utils::convertToCSV)

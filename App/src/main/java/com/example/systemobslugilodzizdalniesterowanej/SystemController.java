@@ -45,7 +45,7 @@ public class SystemController implements Initializable {
                 gpsCourse, expectedCourse, sensorCourse, gpsCourseText, sensorCourseText, expectedCourseText);
         try {
             checkConnectionWithInternet();
-            osmMap = new OSMMap(mapView, boatModeController);
+            osmMap = new OSMMap(mapView, boatModeController, expectedCourse);
         } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }

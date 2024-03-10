@@ -2,9 +2,11 @@ package com.example.systemobslugilodzizdalniesterowanej;
 
 import com.sothawo.mapjfx.*;
 import com.sothawo.mapjfx.event.MapViewEvent;
+import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,16 +20,18 @@ public class OSMMap {
     private BoatModeController boatModeController;
     private Boolean foundBoatPosition;
     private Marker currentBoatPositionWhileRunning = null;
+    Label expectedCourse;
 
     /**
      * GREEN TAG - waypoint determined by user
      * RED TAG - waypoint determined by boat duringo autonomic swimming
      * BLUE TAG - first boat localization
      */
-    public OSMMap(MapView mapView, BoatModeController boatModeController) {
+    public OSMMap(MapView mapView, BoatModeController boatModeController, Label expectedCourse) {
         this.mapView = mapView;
         this.boatModeController = boatModeController;
         this.foundBoatPosition = false;
+        this.expectedCourse = expectedCourse;
         mapInitialize();
     }
 
@@ -50,13 +54,18 @@ public class OSMMap {
                 markerList.add(newMarker);
                 mapView.addMarker(newMarker);
                 List<String[]> markerData = new ArrayList<>();
-                markerData.add(new String[] {String.valueOf(newMarker.getPosition().getLatitude()), String.valueOf(newMarker.getPosition().getLongitude()), "marker"});
+                markerData.add(new String[]{String.valueOf(newMarker.getPosition().getLatitude()), String.valueOf(newMarker.getPosition().getLongitude()), "marker"});
                 try {
                     Utils.saveGpsToCsv(markerData);
                 } catch (FileNotFoundException e) {
                     throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
                 generateTrace();
+                if (markerList.size() > 1) {
+                    expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(markerList.get(0).getPosition(), newMarker.getPosition())));
+                }
             }
         });
     }
@@ -78,7 +87,7 @@ public class OSMMap {
         }
     }
 
-    public String generateTraceFromBoatPosition(double latitude, double longitude) {
+    public void generateTraceFromBoatPosition(double latitude, double longitude) {
         Marker newMarker = Marker.createProvided(Marker.Provided.BLUE).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
         if (foundBoatPosition) {
             mapView.removeMarker(markerList.get(0));
@@ -92,9 +101,9 @@ public class OSMMap {
         foundBoatPosition = true;
         mapView.setCenter(new Coordinate(latitude, longitude));
         if (markerList.size() > 1) {
-            return String.valueOf(determineCourseBetweenTwoWaypoints(newMarker.getPosition(), markerList.get(1).getPosition()));
+            this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(newMarker.getPosition(), markerList.get(1).getPosition())));
         } else {
-            return "-";
+            this.expectedCourse.setText("-");
         }
     }
 

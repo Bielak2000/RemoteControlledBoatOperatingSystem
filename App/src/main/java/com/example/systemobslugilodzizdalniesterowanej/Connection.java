@@ -10,9 +10,8 @@ import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortException;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -120,7 +119,7 @@ public class Connection {
                             });
                         }
                         List<String[]> courseData = new ArrayList<>();
-                        courseData.add(new String[] {sensorCourse.getText(), gpsCourse.getText(), expectedCourse.getText()});
+                        courseData.add(new String[]{sensorCourse.getText(), gpsCourse.getText(), expectedCourse.getText()});
                         Utils.saveCourseToCsv(courseData);
 
 
@@ -153,6 +152,8 @@ public class Connection {
                     } catch (SerialPortException ex) {
                         System.out.println("Problem z odbiorem danych: " + ex);
                     } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }
@@ -237,7 +238,7 @@ public class Connection {
     }
 
     // TODO: do testow
-    boolean firstWaypoint = false;
+    boolean firstWaypoint = true;
 
     private void setBoatPositionOnMap(String[] localization) {
         if (networkStatus) {
@@ -249,21 +250,21 @@ public class Connection {
                     //  za kazdym kolejnym razem ma byc pole kotre bedzie to przedstawiac bez usuwania trasy i poczatkowej lokalizacji
 //                    if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING) {
                     List<String[]> dataLines = new ArrayList<>();
-                    if (!firstWaypoint) {
-                        dataLines.add(new String[] {finalLocalization[0], finalLocalization[1], "first localization"});
+                    if (firstWaypoint) {
+                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], "first localization"});
                         // TODO: nadpisuje pierwsza pozycje
-                        expectedCourse.setText(
-                                osmMap.generateTraceFromBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]))
-                        );
-                        firstWaypoint = true;
+                        osmMap.generateTraceFromBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
+                        firstWaypoint = false;
                     } else {
                         // TODO: dodaje kolejne
                         osmMap.setCurrentBoatPositionWhileRunning(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
-                        dataLines.add(new String[] {finalLocalization[0], finalLocalization[1]});
+                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], "new localization"});
                     }
                     try {
                         Utils.saveGpsToCsv(dataLines);
                     } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }

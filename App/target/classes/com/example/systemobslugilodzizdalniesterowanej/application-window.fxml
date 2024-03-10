@@ -70,11 +70,11 @@
                            </font>
                         </Button>
                         <Label fx:id="sensorCourseText" layoutX="19.0" layoutY="78.0" text="Kurs z sensora:" visible="false" />
-                        <Label fx:id="sensorCourse" alignment="CENTER" layoutX="129.0" layoutY="70.0" prefHeight="31.0" prefWidth="40.0" text="-" textFill="#29acc6" visible="false" />
-                        <Label fx:id="gpsCourse" alignment="CENTER" layoutX="129.0" layoutY="95.0" prefHeight="31.0" prefWidth="40.0" text="-" textFill="#29acc6" visible="false" />
+                        <Label fx:id="sensorCourse" alignment="CENTER" layoutX="129.0" layoutY="70.0" prefHeight="31.0" prefWidth="129.0" text="-" textFill="#29acc6" visible="false" />
+                        <Label fx:id="gpsCourse" alignment="CENTER" layoutX="129.0" layoutY="95.0" prefHeight="31.0" prefWidth="129.0" text="-" textFill="#29acc6" visible="false" />
                         <Label fx:id="gpsCourseText" layoutX="20.0" layoutY="103.0" text="Kurs z GPS:" visible="false" />
                         <Label fx:id="expectedCourseText" layoutX="20.0" layoutY="50.0" text="Oczekiwany kurs:" visible="false" />
-                        <Label fx:id="expectedCourse" alignment="CENTER" layoutX="141.0" layoutY="42.0" prefHeight="31.0" prefWidth="40.0" text="-" textFill="#29acc6" visible="false" />
+                        <Label fx:id="expectedCourse" alignment="CENTER" layoutX="141.0" layoutY="42.0" prefHeight="31.0" prefWidth="115.0" text="-" textFill="#29acc6" visible="false" />
                             </children>
                         </AnchorPane>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="74.0" prefWidth="798.0">
