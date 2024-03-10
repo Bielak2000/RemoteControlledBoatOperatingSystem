@@ -18,6 +18,11 @@ public class OSMMap {
     private Boolean foundBoatPosition;
     private Marker currentBoatPositionWhileRunning = null;
 
+    /**
+     * GREEN TAG - waypoint determined by user
+     * RED TAG - waypoint determined by boat duringo autonomic swimming
+     * BLUE TAG - first boat localization
+     */
     public OSMMap(MapView mapView, BoatModeController boatModeController) {
         this.mapView = mapView;
         this.boatModeController = boatModeController;
@@ -65,7 +70,7 @@ public class OSMMap {
         }
     }
 
-    public void generateTraceFromBoatPosition(double latitude, double longitude) {
+    public String generateTraceFromBoatPosition(double latitude, double longitude) {
         Marker newMarker = Marker.createProvided(Marker.Provided.BLUE).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
         if (foundBoatPosition) {
             mapView.removeMarker(markerList.get(0));
@@ -78,6 +83,11 @@ public class OSMMap {
         generateTrace();
         foundBoatPosition = true;
         mapView.setCenter(new Coordinate(latitude, longitude));
+        if (markerList.size() > 1) {
+            return String.valueOf(determineCourseBetweenTwoWaypoints(newMarker.getPosition(), markerList.get(1).getPosition()));
+        } else {
+            return "-";
+        }
     }
 
     public void changeMapTypeToOSM() {
@@ -117,9 +127,10 @@ public class OSMMap {
     }
 
     public void setCurrentBoatPositionWhileRunning(double latitude, double longitude) {
-        if (currentBoatPositionWhileRunning != null) {
-            mapView.removeMarker(currentBoatPositionWhileRunning);
-        }
+        // TODO: zmiany na czas testowania: zamiast nadpisywania akutalnej juz lokalizacji lodzi to nakladanie na mape wszystkich
+//        if (currentBoatPositionWhileRunning != null) {
+//            mapView.removeMarker(currentBoatPositionWhileRunning);
+//        }
         currentBoatPositionWhileRunning = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
         mapView.addMarker(currentBoatPositionWhileRunning);
         mapView.setCenter(new Coordinate(latitude, longitude));
@@ -132,5 +143,14 @@ public class OSMMap {
             generateTraceFromBoatPosition(currentBoatPositionWhileRunning.getPosition().getLatitude(), currentBoatPositionWhileRunning.getPosition().getLongitude());
         }
         currentBoatPositionWhileRunning = null;
+    }
+
+    private double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {
+        double latitude1 = Math.toRadians(firstCoordinate.getLatitude());
+        double latitude2 = Math.toRadians(secondCoordinate.getLatitude());
+        double longDiff = Math.toRadians(secondCoordinate.getLongitude() - firstCoordinate.getLongitude());
+        double y = Math.sin(longDiff) * Math.cos(latitude2);
+        double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
+        return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
     }
 }

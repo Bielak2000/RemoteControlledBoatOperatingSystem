@@ -1,5 +1,6 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
+import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
@@ -28,9 +29,23 @@ public class BoatModeController {
     private Label runningBoatInformation;
     private Button stopSwimmingButton;
 
+    // TODO: do testu
+    private Label gpsCourse;
+    private Label expectedCourse;
+    private Label sensorCourse;
+    @FXML
+    private Label gpsCourseText;
+    @FXML
+    private Label expectedCourseText;
+    @FXML
+    private Label sensorCourseText;
+
+
+
     private BoatModeController(Button leftFlap, Button lightDown, Label lightPower, Button lightUp, Button moveDown, Button moveLeft, Button moveRight, Button moveUp,
                                Button rightFlap, Label lightingText, Label flapsText, Button startSwimming, Button clearTrace, ToggleButton modeChooser, Button exit,
-                               Label runningBoatInformation, Button stopSwimmingButton) {
+                               Label runningBoatInformation, Button stopSwimmingButton, Label gpsCourse, Label expectedCourse, Label sensorCourse, Label gpsCourseText,
+                               Label sensorCourseText, Label expectedCourseText) {
         this.boatMode = BoatMode.KEYBOARD_CONTROL;
         this.leftFlap = leftFlap;
         this.lightDown = lightDown;
@@ -49,14 +64,23 @@ public class BoatModeController {
         this.exit = exit;
         this.runningBoatInformation = runningBoatInformation;
         this.stopSwimmingButton = stopSwimmingButton;
+        this.gpsCourse = gpsCourse;
+        this.expectedCourse = expectedCourse;
+        this.sensorCourse = sensorCourse;
+        this.gpsCourseText = gpsCourseText;
+        this.expectedCourseText = expectedCourseText;
+        this.sensorCourseText = sensorCourseText;
     }
 
     public static BoatModeController getInstance(Button leftFlap, Button lightDown, Label lightPower, Button lightUp, Button moveDown, Button moveLeft, Button moveRight,
                                                  Button moveUp, Button rightFlap, Label lightingText, Label flapsText, Button startSwimming, Button clearTrace,
-                                                 ToggleButton modeChooser, Button exit, Label runningBoatInformation, Button stopSwimmingButton) {
+                                                 ToggleButton modeChooser, Button exit, Label runningBoatInformation, Button stopSwimmingButton,Label gpsCourse, Label expectedCourse, Label sensorCourse,
+                                                 Label gpsCourseText,
+                                                 Label sensorCourseText, Label expectedCourseText) {
         if (boatModeController == null) {
             boatModeController = new BoatModeController(leftFlap, lightDown, lightPower, lightUp, moveDown, moveLeft, moveRight, moveUp,
-                    rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton);
+                    rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton,
+                    gpsCourse, expectedCourse, sensorCourse, gpsCourseText, sensorCourseText, expectedCourseText);
         }
         return boatModeController;
     }
@@ -103,6 +127,12 @@ public class BoatModeController {
         moveUp.setVisible(false);
         startSwimming.setVisible(true);
         clearTrace.setVisible(true);
+        gpsCourse.setVisible(true);
+        sensorCourse.setVisible(true);
+        expectedCourse.setVisible(true);
+        gpsCourseText.setVisible(true);
+        sensorCourseText.setVisible(true);
+        expectedCourseText.setVisible(true);
     }
 
     private void setViewForKeyboardControlBoatMode() {
@@ -118,6 +148,12 @@ public class BoatModeController {
         moveUp.setVisible(true);
         startSwimming.setVisible(false);
         clearTrace.setVisible(false);
+        gpsCourse.setVisible(false);
+        sensorCourse.setVisible(false);
+        expectedCourse.setVisible(false);
+        gpsCourseText.setVisible(false);
+        sensorCourseText.setVisible(false);
+        expectedCourseText.setVisible(false);
     }
 
     private void blockActionsForAutonomicRunningBoatMode() {

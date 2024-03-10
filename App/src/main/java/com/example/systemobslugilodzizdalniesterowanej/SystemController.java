@@ -41,7 +41,8 @@ public class SystemController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.boatModeController = BoatModeController.getInstance(leftFlap, lightDown, lightPower, lightUp, moveDown, moveLeft, moveRight,
-                moveUp, rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton);
+                moveUp, rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton,
+                gpsCourse, expectedCourse, sensorCourse, gpsCourseText, sensorCourseText, expectedCourseText);
         try {
             checkConnectionWithInternet();
             osmMap = new OSMMap(mapView, boatModeController);
@@ -49,7 +50,7 @@ public class SystemController implements Initializable {
             throw new RuntimeException(e);
         }
         this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage,
-                boatModeController, runningBoatInformation);
+                boatModeController, runningBoatInformation, gpsCourse, sensorCourse, expectedCourse);
         connection.connect(chosenPort, chosenSystem);
         networkStatus = false;
         lightPower.setText("0%");
@@ -126,6 +127,25 @@ public class SystemController implements Initializable {
     @FXML
     private CheckBox mapOsmCheckBox;
 
+    // TODO: w celu testach
+    @FXML
+    private Label gpsCourse;
+
+    @FXML
+    private Label expectedCourse;
+
+    @FXML
+    private Label sensorCourse;
+
+    @FXML
+    private Label gpsCourseText;
+
+    @FXML
+    private Label expectedCourseText;
+
+    @FXML
+    private Label sensorCourseText;
+
     public Label getNetworkConnection() {
         return networkConnection;
     }
@@ -160,8 +180,8 @@ public class SystemController implements Initializable {
 
     @FXML
     void startSwimming(ActionEvent event) throws IOException {
-        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints()) {
-//        if (true) {
+//        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints()) {
+        if (true) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("start-swimming-dialog.fxml"));
             Stage mainStage = new Stage();
             StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection);

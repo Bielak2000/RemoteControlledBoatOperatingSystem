@@ -10,12 +10,12 @@ import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortException;
 
-import static jssc.SerialPort.MASK_RXCHAR;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static jssc.SerialPort.MASK_RXCHAR;
 
 public class Connection {
     private static String KEYBOARD_CONTROL_MODE_MARKING = "0";
@@ -38,13 +38,20 @@ public class Connection {
     private List<String> portNames = new ArrayList<>();
     private Label connectionStatus;
     private Label lightPower;
+
+    // TODO: do testow
+    private Label gpsCourse;
+    private Label sensorCourse;
+    private Label expectedCourse;
+
     private Boolean networkStatus;
     private OSMMap osmMap;
     private Stage stage;
     private Label runningBoatInformation;
 
     public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap,
-                      Stage stage, BoatModeController boatModeController, Label runningBoatInformation) {
+                      Stage stage, BoatModeController boatModeController, Label runningBoatInformation,
+                      Label gpsCourse, Label sensorCourse, Label expectedCourse) {
         com.fazecast.jSerialComm.SerialPort[] ports = com.fazecast.jSerialComm.SerialPort.getCommPorts();
         for (com.fazecast.jSerialComm.SerialPort port : ports) {
             portNames.add(port.getSystemPortName());
@@ -60,6 +67,10 @@ public class Connection {
         this.boatModeController = boatModeController;
         this.executorService = Executors.newFixedThreadPool(1);
         this.runningBoatInformation = runningBoatInformation;
+
+        this.gpsCourse = gpsCourse;
+        this.sensorCourse = sensorCourse;
+        this.expectedCourse = expectedCourse;
     }
 
     public void connect(String port, String system) {
@@ -92,29 +103,44 @@ public class Connection {
                             System.out.println("Lokalizacja: " + array[1]);
                         }
 
+                        // TODO: do testow
                         if (array.length > 2) {
-                            if (Integer.parseInt(array[2]) == BOAT_IS_SWIMMING_BY_WAYPOINTS) {
-                                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
-                                    boatModeController.setBoatMode(BoatMode.AUTONOMIC_RUNNING);
-                                    runningBoatInformation.setVisible(true);
-                                    Platform.runLater(() -> showInformationDialog("Łódka rozpoczeła pływanie", BOAT_RUNNING_SWIMMING_INFORMATION, 700));
-                                }
-                            } else if (Integer.parseInt(array[2]) == BOAT_FINISHED_SWIMMING_BY_WAYPOINTS) {
-                                Platform.runLater(() -> {
-                                    boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
-                                    // TODO: przetestowac czy uda sie wyczyscic mape
-                                    osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
-                                    showInformationDialog("Łódka osiągneła punkt docelowy", BOAT_FINISHED_SWIMMING_INFORMATION, 700);
-                                });
-                            } else if (Integer.parseInt(array[2]) == BOAT_MANUALLY_FINISHED_SWIMMING_BY_WAYPOINTS) {
-                                Platform.runLater(() -> {
-                                    boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
-                                    // TODO: przetestowac czy uda sie wyczyscic mape
-                                    osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
-                                    showInformationDialog("Przerwano pływanie łodzi", BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION, 500);
-                                });
-                            }
+                            Platform.runLater(() -> {
+                                sensorCourse.setText(array[2]);
+                                System.out.println("Sensor course: " + array[2]);
+                            });
                         }
+                        if (array.length > 3) {
+                            Platform.runLater(() -> {
+                                gpsCourse.setText(array[3]);
+                                System.out.println("Gps course: " + array[3]);
+                            });
+                        }
+
+
+//                        if (array.length > 2) {
+//                            if (Integer.parseInt(array[2]) == BOAT_IS_SWIMMING_BY_WAYPOINTS) {
+//                                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+//                                    boatModeController.setBoatMode(BoatMode.AUTONOMIC_RUNNING);
+//                                    runningBoatInformation.setVisible(true);
+//                                    Platform.runLater(() -> showInformationDialog("Łódka rozpoczeła pływanie", BOAT_RUNNING_SWIMMING_INFORMATION, 700));
+//                                }
+//                            } else if (Integer.parseInt(array[2]) == BOAT_FINISHED_SWIMMING_BY_WAYPOINTS) {
+//                                Platform.runLater(() -> {
+//                                    boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
+//                                    // TODO: przetestowac czy uda sie wyczyscic mape
+//                                    osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
+//                                    showInformationDialog("Łódka osiągneła punkt docelowy", BOAT_FINISHED_SWIMMING_INFORMATION, 700);
+//                                });
+//                            } else if (Integer.parseInt(array[2]) == BOAT_MANUALLY_FINISHED_SWIMMING_BY_WAYPOINTS) {
+//                                Platform.runLater(() -> {
+//                                    boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
+//                                    // TODO: przetestowac czy uda sie wyczyscic mape
+//                                    osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
+//                                    showInformationDialog("Przerwano pływanie łodzi", BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION, 500);
+//                                });
+//                            }
+//                        }
 
                         setLightPowerLabel();
                         setBoatPositionOnMap(localization);
@@ -202,6 +228,9 @@ public class Connection {
         this.progressDialogController = progressDialogController;
     }
 
+    // TODO: do testow
+    boolean firstWaypoint = false;
+
     private void setBoatPositionOnMap(String[] localization) {
         if (networkStatus) {
             String[] finalLocalization = localization;
@@ -210,9 +239,15 @@ public class Connection {
                     // TODO: dane lokalizacyjne przychodzace z lodzi, za pierwszym razem lub w trybie nie autonomicznym
                     // TODO: ma to byc dodane na pcozatek listy markerow i wygenerowac trase,
                     //  za kazdym kolejnym razem ma byc pole kotre bedzie to przedstawiac bez usuwania trasy i poczatkowej lokalizacji
-                    if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING) {
-                        osmMap.generateTraceFromBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
+//                    if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING) {
+                    if (!firstWaypoint) {
+                        // TODO: nadpisuje pierwsza pozycje
+                        expectedCourse.setText(
+                                osmMap.generateTraceFromBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]))
+                        );
+                        firstWaypoint = true;
                     } else {
+                        // TODO: dodaje kolejne
                         osmMap.setCurrentBoatPositionWhileRunning(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
                     }
                 }
