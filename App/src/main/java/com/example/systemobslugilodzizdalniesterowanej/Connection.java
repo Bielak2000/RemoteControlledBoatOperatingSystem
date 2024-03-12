@@ -94,28 +94,28 @@ public class Connection {
                         String readString = serialPort.readString();
                         String[] array = readString.split("_");
 
-                        if (array.length > 0) {
-                            lighting.setPower(Integer.parseInt(array[0]));
-                            System.out.println("Oswietlenie: " + array[0]);
-                        }
+//                        if (array.length > 0) {
+//                            lighting.setPower(Integer.parseInt(array[0]));
+//                            System.out.println("Oswietlenie: " + array[0]);
+//                        }
 
                         String[] localization = {"", ""};
-                        if (array.length > 1) {
-                            localization = array[1].split(",");
-                            System.out.println("Lokalizacja: " + array[1]);
+                        if (array.length > 0) {
+                            localization = array[0].split(",");
+                            System.out.println("Lokalizacja: " + localization[0] + ", " + localization[1]);
                         }
 
                         // TODO: do testow
-                        if (array.length > 2) {
+                        if (array.length > 1) {
                             Platform.runLater(() -> {
-                                sensorCourse.setText(array[2]);
-                                System.out.println("Sensor course: " + array[2]);
+                                sensorCourse.setText(array[1]);
+                                System.out.println("Sensor course: " + array[1]);
                             });
                         }
-                        if (array.length > 3) {
+                        if (array.length > 2) {
                             Platform.runLater(() -> {
-                                gpsCourse.setText(array[3]);
-                                System.out.println("Gps course: " + array[3]);
+                                gpsCourse.setText(array[2]);
+                                System.out.println("Gps course: " + array[2]);
                             });
                         }
                         List<String[]> courseData = new ArrayList<>();
