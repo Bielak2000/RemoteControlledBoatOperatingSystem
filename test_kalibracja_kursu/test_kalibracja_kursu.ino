@@ -2,6 +2,7 @@
 #include <LiquidCrystal.h>
 #include <TinyGPS++.h>
 #include <Adafruit_BNO08x.h>
+#include <math.h>
 
 //-------------wyswietlacz
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
@@ -34,12 +35,12 @@ void setup() {
 
 // dane do wyslania
 String sent="";
-String localization="";
-String previousLocalization="";
-String sensorCourse="";
-String previousCourse="";
-String gpsCourse="";
-String previousGpsCourse="";
+String localization="0";
+String previousLocalization="0";
+String sensorCourse="0";
+String previousCourse="0";
+String gpsCourse="0";
+String previousGpsCourse="0";
 
 long counter=0;//szybkosc wysylania danych
 int temp1=0;
@@ -65,7 +66,7 @@ void loop() {
      }
 
      sensorRead();             
-     if(strcmp(sensorCourse.c_str(), "")!=0 && strcmp(sensorCourse.c_str(), previousCourse.c_str())!=0) 
+     if(strcmp(sensorCourse.c_str(), "0")!=0 && strcmp(sensorCourse.c_str(), previousCourse.c_str())!=0) 
      {
          lcd.setCursor(0,1);
          lcd.print(sensorCourse);
@@ -139,8 +140,10 @@ void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t* ypr, boo
 
     if (degrees) {
       ypr->yaw *= RAD_TO_DEG;
-      ypr->pitch *= RAD_TO_DEG;
-      ypr->roll *= RAD_TO_DEG;
+      ypr->yaw = -ypr->yaw;
+      if(ypr->yaw<0) {
+        ypr->yaw = 360.0+ypr->yaw;
+      }
     }
 }
 

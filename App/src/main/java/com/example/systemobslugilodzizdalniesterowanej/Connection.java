@@ -101,21 +101,27 @@ public class Connection {
 
                         String[] localization = {"", ""};
                         if (array.length > 0) {
-                            localization = array[0].split(",");
-                            System.out.println("Lokalizacja: " + localization[0] + ", " + localization[1]);
+                            if (!array[0].equals("0")) {
+                                localization = array[0].split(",");
+                                System.out.println("Lokalizacja: " + localization[0] + ", " + localization[1]);
+                            }
                         }
 
                         // TODO: do testow
                         if (array.length > 1) {
                             Platform.runLater(() -> {
-                                sensorCourse.setText(array[1]);
-                                System.out.println("Sensor course: " + array[1]);
+                                if (!array[1].equals("0")) {
+                                    sensorCourse.setText(array[1]);
+                                    System.out.println("Sensor course: " + array[1]);
+                                }
                             });
                         }
                         if (array.length > 2) {
                             Platform.runLater(() -> {
-                                gpsCourse.setText(array[2]);
-                                System.out.println("Gps course: " + array[2]);
+                                if (!array[2].equals("0")) {
+                                    gpsCourse.setText(array[2]);
+                                    System.out.println("Gps course: " + array[2]);
+                                }
                             });
                         }
                         List<String[]> courseData = new ArrayList<>();
