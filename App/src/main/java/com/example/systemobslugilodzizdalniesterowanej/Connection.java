@@ -92,6 +92,7 @@ public class Connection {
                 if (serialPortEvent.isRXCHAR()) {
                     try {
                         String readString = serialPort.readString();
+                        System.out.println("Przyszło: " + readString);
                         String[] array = readString.split("_");
 
 //                        if (array.length > 0) {
@@ -99,35 +100,41 @@ public class Connection {
 //                            System.out.println("Oswietlenie: " + array[0]);
 //                        }
 
-                        String[] localization = {"", ""};
-                        if (array.length > 0) {
-                            if (!array[0].equals("0")) {
-                                localization = array[0].split(",");
-                                System.out.println("Lokalizacja: " + localization[0] + ", " + localization[1]);
+                        if (array.length == 3) {
+
+                            String[] localization = {"", ""};
+                            if (array.length > 0) {
+                                if (!array[0].equals("-1") && !array[0].equals("INVALID")) {
+                                    localization = array[0].split(",");
+                                    if(localization.length==2) {
+                                        System.out.println("Lokalizacja: " + localization[0] + ", " + localization[1]);
+                                        setBoatPositionOnMap(localization);
+                                    }
+                                }
                             }
-                        }
 
-                        // TODO: do testow
-                        if (array.length > 1) {
-                            Platform.runLater(() -> {
-                                if (!array[1].equals("0")) {
-                                    sensorCourse.setText(array[1]);
-                                    System.out.println("Sensor course: " + array[1]);
-                                }
-                            });
-                        }
-                        if (array.length > 2) {
-                            Platform.runLater(() -> {
-                                if (!array[2].equals("0")) {
-                                    gpsCourse.setText(array[2]);
-                                    System.out.println("Gps course: " + array[2]);
-                                }
-                            });
-                        }
-                        List<String[]> courseData = new ArrayList<>();
-                        courseData.add(new String[]{sensorCourse.getText(), gpsCourse.getText(), expectedCourse.getText()});
-                        Utils.saveCourseToCsv(courseData);
-
+                            // TODO: do testow
+                            if (array.length > 1) {
+                                Platform.runLater(() -> {
+                                    if (!array[1].equals("-1") && !array[1].equals("INVALID")) {
+                                        sensorCourse.setText(array[1]);
+                                        System.out.println("Sensor course: " + array[1]);
+                                    }
+                                });
+                            }
+                            if (array.length > 2) {
+                                Platform.runLater(() -> {
+                                    if (!array[2].equals("-1") && !array[2].equals("INVALID")) {
+                                        gpsCourse.setText(array[2]);
+                                        System.out.println("Gps course: " + array[2]);
+                                    }
+                                });
+                            }
+                            List<String[]> courseData = new ArrayList<>();
+                            courseData.add(new String[]{sensorCourse.getText(), gpsCourse.getText(), expectedCourse.getText()});
+                            Utils.saveCourseToCsv(courseData, "course-without-calibration.csv");
+//                        Utils.saveCourseToCsv(courseData, "course-without-xyz_calibration.csv");
+//                        Utils.saveCourseToCsv(courseData, "course-without-x_calibration.csv");
 
 //                        if (array.length > 2) {
 //                            if (Integer.parseInt(array[2]) == BOAT_IS_SWIMMING_BY_WAYPOINTS) {
@@ -153,8 +160,9 @@ public class Connection {
 //                            }
 //                        }
 
-                        setLightPowerLabel();
-                        setBoatPositionOnMap(localization);
+//                        setLightPowerLabel();
+//                        setBoatPositionOnMap(localization);
+                        }
                     } catch (SerialPortException ex) {
                         System.out.println("Problem z odbiorem danych: " + ex);
                     } catch (FileNotFoundException e) {
@@ -162,6 +170,7 @@ public class Connection {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
+
                 }
             });
         } catch (SerialPortException serialPortException) {

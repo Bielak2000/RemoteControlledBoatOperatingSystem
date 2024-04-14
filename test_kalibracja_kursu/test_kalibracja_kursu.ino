@@ -15,6 +15,8 @@ TinyGPSPlus gps;
 Adafruit_BNO08x bno08x(-1);
 sh2_SensorValue_t sensorValue;
 
+double SENSOR_COURSE_ACCURACY = 3;
+
 struct euler_t {
   float yaw;
   float pitch;
@@ -37,19 +39,26 @@ void setup() {
 String sent="";
 String localization="0";
 String previousLocalization="0";
-String sensorCourse="0";
-String previousCourse="0";
-String gpsCourse="0";
-String previousGpsCourse="0";
+double sensorCourse=-1;
+double previousCourse=-1;
+double gpsCourse=-1;
+double previousGpsCourse=-1;
 
-long counter=0;//szybkosc wysylania danych
+long counter=0;//szybkosc odczytu danych nawigacyjnych (GPS)
+long counter2=0;//szybkosc odczytu danych z czujnika do kursu
 int temp1=0;
 
 void loop() {
-  // odczyt danych i sprawdzenie czy cos sie zmienilo
-  if(counter>100000)
+//     readLocalization();
+//              lcd.setCursor(0,0);
+//         lcd.print(localization);
+  
+//  // odczyt danych i sprawdzenie czy cos sie zmienilo
+  if(counter>50000)
   {
+
      readLocalization();
+//         Serial.println(localization);
      if(strcmp(localization.c_str(), "INVALID")!=0 && strcmp(previousLocalization.c_str(), localization.c_str())!=0)
      {
          lcd.setCursor(0,0);
@@ -57,24 +66,27 @@ void loop() {
          temp1=1;
          previousLocalization=localization;
      }
-     if(strcmp(gpsCourse.c_str(), "INVALID")!=0 && strcmp(previousGpsCourse.c_str(), gpsCourse.c_str())!=0)
+     if(gpsCourse!=-1 && gpsCourse!=previousGpsCourse && abs(gpsCourse - previousGpsCourse)>SENSOR_COURSE_ACCURACY)
      {
          lcd.setCursor(8,1);
          lcd.print(gpsCourse);
          temp1=1;
          previousGpsCourse=gpsCourse;
      }
+          
+     counter=0;
+  }
 
+  if(counter2>200000) {
      sensorRead();             
-     if(strcmp(sensorCourse.c_str(), "0")!=0 && strcmp(sensorCourse.c_str(), previousCourse.c_str())!=0) 
+     if(sensorCourse!=-1 && sensorCourse!=previousCourse && abs(sensorCourse - previousCourse)>SENSOR_COURSE_ACCURACY) 
      {
          lcd.setCursor(0,1);
          lcd.print(sensorCourse);
          temp1=1;
          previousCourse=sensorCourse;
      }
-          
-     counter=0;
+     counter2=0;
   }
 
   // wyslanie danych
@@ -82,10 +94,14 @@ void loop() {
     sent = String(localization)+"_"+String(sensorCourse)+"_"+String(gpsCourse);
     Serial3.print(sent);
     temp1=0;
+
+    Serial.println("Wsylano: " + sent);
+    
     sent="";
   }
 
   counter++;
+  counter2++;
 }
 
 void readLocalization(){
@@ -94,19 +110,24 @@ void readLocalization(){
       {
         if (gps.location.isValid())
         {
-          localization=String(gps.location.lat(), 4)+","+String(gps.location.lng(), 4);
+//          Serial.println("location valid");
+          localization=String(gps.location.lat(), 5)+","+String(gps.location.lng(), 5);
+//                    lcd.setCursor(0,0);
+//                    lcd. clear();
+//          lcd.print(localization);
         }
         else
         {
+//          Serial.println("location invalid");
           localization="INVALID";
         }
         if(gps.course.isValid()) 
         {
-          gpsCourse=String(gps.course.deg(), 4);
+          gpsCourse=gps.course.deg();
         } 
         else 
         {
-          gpsCourse="INVALID";
+          gpsCourse=-1;
         }
       }
 }
@@ -152,21 +173,23 @@ void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, euler_t* y
 }
 
 void sensorRead() {
-  delay(100);
+//  delay(100);
 
   if (bno08x.wasReset()) {
     Serial.print("sensor was reset ");
     setReports();
   }
+//
+//  if (!bno08x.getSensorEvent(&sensorValue)) {
+//    return;
+//  }
 
-  if (!bno08x.getSensorEvent(&sensorValue)) {
-    return;
-  }
-
-  switch (sensorValue.sensorId) {
-    case SH2_ROTATION_VECTOR:
-      quaternionToEulerRV(&sensorValue.un.rotationVector, &ypr, true);
-      sensorCourse=String(ypr.yaw, 2);
-      break;
+  if (bno08x.getSensorEvent(&sensorValue)) {
+    switch (sensorValue.sensorId) {
+      case SH2_ROTATION_VECTOR:
+        quaternionToEulerRV(&sensorValue.un.rotationVector, &ypr, true);
+        sensorCourse=ypr.yaw;
+        break;
+    }
   }
 }

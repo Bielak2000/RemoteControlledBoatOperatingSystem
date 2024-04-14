@@ -7,11 +7,13 @@ import javafx.scene.paint.Color;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class OSMMap {
+    private static final DecimalFormat df = new DecimalFormat("0.00");
     private static String WMSUrl = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/HighResolution";
     private MapView mapView;
     private List<Marker> markerList = new ArrayList<>();
@@ -41,7 +43,7 @@ public class OSMMap {
         mapView.setWMSParam(wmsParam);
         mapView.initializedProperty().addListener((observable, oldValue, newValue) -> {
             mapView.setCenter(new Coordinate(50.0650887, 19.9245536));
-            mapView.setZoom(17);
+            mapView.setZoom(19);
         });
         setHandlersMap();
     }
@@ -64,7 +66,7 @@ public class OSMMap {
                 }
                 generateTrace();
                 if (markerList.size() > 1) {
-                    expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(markerList.get(0).getPosition(), newMarker.getPosition())));
+                    expectedCourse.setText(String.valueOf(df.format(determineCourseBetweenTwoWaypoints(markerList.get(0).getPosition(), newMarker.getPosition()))));
                 }
             }
         });

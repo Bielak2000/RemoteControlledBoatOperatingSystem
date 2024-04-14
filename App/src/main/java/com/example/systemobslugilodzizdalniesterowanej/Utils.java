@@ -14,8 +14,8 @@ public class Utils {
         }
     }
 
-    public static void saveCourseToCsv(List<String[]> courseData) throws IOException {
-        FileWriter csvOutputFile = new FileWriter("/home/kacperbielak/Desktop/course.csv", true);
+    public static void saveCourseToCsv(List<String[]> courseData, String fileName) throws IOException {
+        FileWriter csvOutputFile = new FileWriter("/home/kacperbielak/Desktop/" + fileName, true);
         try (PrintWriter pw = new PrintWriter(csvOutputFile)) {
             courseData.stream()
                     .map(Utils::convertToCSV)
