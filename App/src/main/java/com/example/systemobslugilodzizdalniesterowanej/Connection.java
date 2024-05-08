@@ -132,7 +132,7 @@ public class Connection {
                             }
                             List<String[]> courseData = new ArrayList<>();
                             courseData.add(new String[]{sensorCourse.getText(), gpsCourse.getText(), expectedCourse.getText()});
-                            Utils.saveCourseToCsv(courseData, "course-without-calibration.csv");
+                            Utils.saveCourseToCsv(courseData, "course-with-x-calibration-2.csv");
 //                        Utils.saveCourseToCsv(courseData, "course-without-xyz_calibration.csv");
 //                        Utils.saveCourseToCsv(courseData, "course-without-x_calibration.csv");
 

@@ -103,7 +103,7 @@ public class OSMMap {
         foundBoatPosition = true;
         mapView.setCenter(new Coordinate(latitude, longitude));
         if (markerList.size() > 1) {
-            this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(newMarker.getPosition(), markerList.get(1).getPosition())));
+            this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(markerList.get(1).getPosition(), newMarker.getPosition())));
         } else {
             this.expectedCourse.setText("-");
         }
