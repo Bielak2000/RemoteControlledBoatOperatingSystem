@@ -105,7 +105,7 @@ public class Connection {
 //                            localization = array[1].split(",");
 //                            System.out.println("Lokalizacja: " + array[1]);
 //                        }
-//                          if (array.length > 2) {
+//                        if (array.length > 2) {
 //                            if (Integer.parseInt(array[2]) == BOAT_IS_SWIMMING_BY_WAYPOINTS) {
 //                                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
 //                                    boatModeController.setBoatMode(BoatMode.AUTONOMIC_RUNNING);
@@ -135,7 +135,7 @@ public class Connection {
                             if (array.length > 0) {
                                 if (!array[0].equals("-1") && !array[0].equals("INVALID")) {
                                     localization = array[0].split(",");
-                                    if (localization.length == 2) {
+                                    if(localization.length==2) {
                                         System.out.println("Lokalizacja: " + localization[0] + ", " + localization[1]);
                                         setBoatPositionOnMap(localization);
                                     }
@@ -160,14 +160,13 @@ public class Connection {
                             List<String[]> courseData = new ArrayList<>();
                             courseData.add(new String[]{sensorCourse.getText(), gpsCourse.getText(), expectedCourse.getText()});
                             Utils.saveCourseToCsv(courseData, "course-with-x-calibration-two-waypoints-1.csv");
-
                         }
                         // TODO: koniec testow
 
-//                        setLightPowerLabel();
-//                        if (localization.length == 2) {
-//                             setBoatPositionOnMap(localization);
-//                        }
+//                          setLightPowerLabel();
+//                            if(localization.length==2) {
+//                              setBoatPositionOnMap(localization);
+//                            }
                     } catch (SerialPortException ex) {
                         System.out.println("Problem z odbiorem danych: " + ex);
                     } catch (FileNotFoundException e) {
@@ -258,11 +257,10 @@ public class Connection {
     }
 
     // TODO: do testow
-    boolean firstWaypoint = true;
-    boolean toSecondWaypoint = false;
-    boolean onTheRoadToSecondWaypoint = false;
-    String whichRoad = "on the road to first waypoint";
-
+//    boolean firstWaypoint = true;
+//    boolean toSecondWaypoint = false;
+//    boolean onTheRoadToSecondWaypoint = false;
+//    String whichRoad = "on the road to first waypoint";
 
     private void setBoatPositionOnMap(String[] localization) {
         if (networkStatus) {
@@ -272,46 +270,55 @@ public class Connection {
                     // TODO: dane lokalizacyjne przychodzace z lodzi, za pierwszym razem lub w trybie nie autonomicznym
                     // TODO: ma to byc dodane na pcozatek listy markerow i wygenerowac trase,
                     //  za kazdym kolejnym razem ma byc pole kotre bedzie to przedstawiac bez usuwania trasy i poczatkowej lokalizacji
-//                    if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING) {
-                    List<String[]> dataLines = new ArrayList<>();
-                    String desc = "first localization on the road to first waypoint";
-                    if (!toSecondWaypoint && osmMap.markerList.size() > 2) {
-                        double distance = Utils.calculateDistance(
-                                new Coordinate(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1])),
-                                osmMap.markerList.get(1).getPosition());
-                        System.out.println("DYSTANS: " + distance);
-                        if (distance <= 5) {
-                            toSecondWaypoint = true;
-                            desc = "first localization on the road to second waypoint";
-                            whichRoad = "on the road to second waypoint";
-                            System.out.println("ON THE ROAD TO THE SECOND WAYPOINT");
-                        }
-                    }
-
-                    if (firstWaypoint || (toSecondWaypoint && !onTheRoadToSecondWaypoint) || expectedCourse.getText().equals("-")) {
-                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], desc});
+                    if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING) {
+//                    List<String[]> dataLines = new ArrayList<>();
+//                    String desc = "first localization on the road to first waypoint";
+//                    if (!toSecondWaypoint && osmMap.markerList.size() > 2) {
+//                        double distance = Utils.calculateDistance(
+//                                new Coordinate(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1])),
+//                                osmMap.markerList.get(1).getPosition());
+//                        System.out.println("DYSTANS: " + distance);
+//                        if (distance <= 5) {
+//                            toSecondWaypoint = true;
+//                            desc = "first localization on the road to second waypoint";
+//                            whichRoad = "on the road to second waypoint";
+//                            System.out.println("ON THE ROAD TO THE SECOND WAYPOINT");
+//                        }
+//                    }
+//
+//                    if (firstWaypoint || (toSecondWaypoint && !onTheRoadToSecondWaypoint) || expectedCourse.getText().equals("-")) {
+//                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], desc});
                         // TODO: nadpisuje pierwsza pozycje
                         osmMap.generateTraceFromBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]), toSecondWaypoint);
-                        firstWaypoint = false;
-                        if (toSecondWaypoint) {
-                            onTheRoadToSecondWaypoint = true;
-                        }
+//                        firstWaypoint = false;
+//                        if (toSecondWaypoint) {
+//                            onTheRoadToSecondWaypoint = true;
+//                        }
                     } else {
                         // TODO: dodaje kolejne
+                        // TODO: to zostaje przed testami
                         osmMap.setCurrentBoatPositionWhileRunning(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
-                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], whichRoad});
+//                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], whichRoad});
+//                    }
+//                    try {
+//                        Utils.saveGpsToCsv(dataLines);
+//                    } catch (FileNotFoundException e) {
+//                        throw new RuntimeException(e);
+//                    } catch (IOException e) {
+//                        throw new RuntimeException(e);
                     }
-                    try {
-                        Utils.saveGpsToCsv(dataLines);
-                    } catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+//                    try {
+//                        Utils.saveGpsToCsv(dataLines);
+//                    } catch (FileNotFoundException e) {
+//                        throw new RuntimeException(e);
+//                    } catch (IOException e) {
+//                        throw new RuntimeException(e);
+//                    }
                 }
             });
         }
     }
+    // TODO: koniec testow
 
     private void setLightPowerLabel() {
         Platform.runLater(() -> {

@@ -58,23 +58,25 @@ public class OSMMap {
                 Marker newMarker = Marker.createProvided(Marker.Provided.GREEN).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true);
                 markerList.add(newMarker);
                 mapView.addMarker(newMarker);
-                List<String[]> markerData = new ArrayList<>();
-                String waypointNumber = "firstWaypoint";
-                if(!firstWaypoint) {
-                    waypointNumber = "secondWaypoint";
-                }
-                markerData.add(new String[]{String.valueOf(newMarker.getPosition().getLatitude()), String.valueOf(newMarker.getPosition().getLongitude()), "marker", waypointNumber});
-                try {
-                    Utils.saveGpsToCsv(markerData);
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                // TODO: do testow
+//                List<String[]> markerData = new ArrayList<>();
+//                String waypointNumber = "firstWaypoint";
+//                if(!firstWaypoint) {
+//                    waypointNumber = "secondWaypoint";
+//                }
+//                markerData.add(new String[]{String.valueOf(newMarker.getPosition().getLatitude()), String.valueOf(newMarker.getPosition().getLongitude()), "marker", waypointNumber});
+//                try {
+//                    Utils.saveGpsToCsv(markerData);
+//                } catch (FileNotFoundException e) {
+//                    throw new RuntimeException(e);
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
                 generateTrace();
 //                if (markerList.size() > 1) {
 //                    expectedCourse.setText(String.valueOf(df.format(determineCourseBetweenTwoWaypoints(markerList.get(0).getPosition(), newMarker.getPosition()))));
 //                }
+                // TODO: koniec testow
             }
         });
     }
@@ -114,16 +116,18 @@ public class OSMMap {
 
         foundBoatPosition = true;
         mapView.setCenter(new Coordinate(latitude, longitude));
-        if (markerList.size() > 1) {
-            if(secondWaypoint) {
-                System.out.println("DRUGI PUNKT");
-                this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(newMarker.getPosition(), markerList.get(2).getPosition())));
-            } else {
-                this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(newMarker.getPosition(), markerList.get(1).getPosition())));
-            }
-        } else {
-            this.expectedCourse.setText("-");
-        }
+        // TODO: do testow
+//        if (markerList.size() > 1) {
+//            if(secondWaypoint) {
+//                System.out.println("DRUGI PUNKT");
+//                this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(newMarker.getPosition(), markerList.get(2).getPosition())));
+//            } else {
+//                this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(newMarker.getPosition(), markerList.get(1).getPosition())));
+//            }
+//        } else {
+//            this.expectedCourse.setText("-");
+//        }
+        // TODO: koniec testow
     }
 
     public void changeMapTypeToOSM() {
@@ -167,6 +171,7 @@ public class OSMMap {
 //        if (currentBoatPositionWhileRunning != null) {
 //            mapView.removeMarker(currentBoatPositionWhileRunning);
 //        }
+        // TODO: koniec testow
         currentBoatPositionWhileRunning = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
         mapView.addMarker(currentBoatPositionWhileRunning);
         //mapView.setCenter(new Coordinate(latitude, longitude));
