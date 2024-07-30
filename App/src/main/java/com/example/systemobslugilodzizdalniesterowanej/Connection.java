@@ -1,5 +1,6 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
+import com.sothawo.mapjfx.Coordinate;
 import com.sothawo.mapjfx.Marker;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -132,7 +133,7 @@ public class Connection {
                             }
                             List<String[]> courseData = new ArrayList<>();
                             courseData.add(new String[]{sensorCourse.getText(), gpsCourse.getText(), expectedCourse.getText()});
-                            Utils.saveCourseToCsv(courseData, "course-with-x-calibration-2.csv");
+                            Utils.saveCourseToCsv(courseData, "course-with-x-calibration-two-waypoints-1.csv");
 //                        Utils.saveCourseToCsv(courseData, "course-without-xyz_calibration.csv");
 //                        Utils.saveCourseToCsv(courseData, "course-without-x_calibration.csv");
 
@@ -254,6 +255,10 @@ public class Connection {
 
     // TODO: do testow
     boolean firstWaypoint = true;
+    boolean toSecondWaypoint = false;
+    boolean onTheRoadToSecondWaypoint = false;
+    String whichRoad = "on the road to first waypoint";
+
 
     private void setBoatPositionOnMap(String[] localization) {
         if (networkStatus) {
@@ -265,15 +270,32 @@ public class Connection {
                     //  za kazdym kolejnym razem ma byc pole kotre bedzie to przedstawiac bez usuwania trasy i poczatkowej lokalizacji
 //                    if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING) {
                     List<String[]> dataLines = new ArrayList<>();
-                    if (firstWaypoint) {
-                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], "first localization"});
+                    String desc = "first localization on the road to first waypoint";
+                    if(!toSecondWaypoint && osmMap.markerList.size() > 2){
+                        double distance = Utils.calculateDistance(
+                                new Coordinate(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1])),
+                                osmMap.markerList.get(1).getPosition());
+                        System.out.println("DYSTANS: " + distance);
+                        if(distance <= 5) {
+                            toSecondWaypoint = true;
+                            desc = "first localization on the road to second waypoint";
+                            whichRoad = "on the road to second waypoint";
+                            System.out.println("ON THE ROAD TO THE SECOND WAYPOINT");
+                        }
+                    }
+
+                    if (firstWaypoint || (toSecondWaypoint && !onTheRoadToSecondWaypoint) || expectedCourse.getText().equals("-")) {
+                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], desc});
                         // TODO: nadpisuje pierwsza pozycje
-                        osmMap.generateTraceFromBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
+                        osmMap.generateTraceFromBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]), toSecondWaypoint);
                         firstWaypoint = false;
+                        if(toSecondWaypoint) {
+                            onTheRoadToSecondWaypoint = true;
+                        }
                     } else {
                         // TODO: dodaje kolejne
                         osmMap.setCurrentBoatPositionWhileRunning(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
-                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], "new localization"});
+                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], whichRoad});
                     }
                     try {
                         Utils.saveGpsToCsv(dataLines);
