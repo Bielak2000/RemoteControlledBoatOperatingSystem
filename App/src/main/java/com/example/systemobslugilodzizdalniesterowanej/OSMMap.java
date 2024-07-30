@@ -2,13 +2,18 @@ package com.example.systemobslugilodzizdalniesterowanej;
 
 import com.sothawo.mapjfx.*;
 import com.sothawo.mapjfx.event.MapViewEvent;
+import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class OSMMap {
+    private static final DecimalFormat df = new DecimalFormat("0.00");
     private static String WMSUrl = "https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/HighResolution";
     private MapView mapView;
     private List<Marker> markerList = new ArrayList<>();
@@ -17,11 +22,18 @@ public class OSMMap {
     private BoatModeController boatModeController;
     private Boolean foundBoatPosition;
     private Marker currentBoatPositionWhileRunning = null;
+    Label expectedCourse;
 
-    public OSMMap(MapView mapView, BoatModeController boatModeController) {
+    /**
+     * GREEN TAG - waypoint determined by user
+     * RED TAG - waypoint determined by boat duringo autonomic swimming
+     * BLUE TAG - first boat localization
+     */
+    public OSMMap(MapView mapView, BoatModeController boatModeController, Label expectedCourse) {
         this.mapView = mapView;
         this.boatModeController = boatModeController;
         this.foundBoatPosition = false;
+        this.expectedCourse = expectedCourse;
         mapInitialize();
     }
 
@@ -31,7 +43,7 @@ public class OSMMap {
         mapView.setWMSParam(wmsParam);
         mapView.initializedProperty().addListener((observable, oldValue, newValue) -> {
             mapView.setCenter(new Coordinate(50.0650887, 19.9245536));
-            mapView.setZoom(17);
+            mapView.setZoom(19);
         });
         setHandlersMap();
     }
@@ -43,7 +55,23 @@ public class OSMMap {
                 Marker newMarker = Marker.createProvided(Marker.Provided.GREEN).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true);
                 markerList.add(newMarker);
                 mapView.addMarker(newMarker);
+
+                // TODO: do testow
+//                List<String[]> markerData = new ArrayList<>();
+//                markerData.add(new String[]{String.valueOf(newMarker.getPosition().getLatitude()), String.valueOf(newMarker.getPosition().getLongitude()), "marker"});
+//                try {
+//                    Utils.saveGpsToCsv(markerData);
+//                } catch (FileNotFoundException e) {
+//                    throw new RuntimeException(e);
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+                //TODO: bez testow
                 generateTrace();
+//                if (markerList.size() > 1) {
+//                    expectedCourse.setText(String.valueOf(df.format(determineCourseBetweenTwoWaypoints(markerList.get(0).getPosition(), newMarker.getPosition()))));
+//                }
+                // TODO: koniec testow
             }
         });
     }
@@ -78,6 +106,14 @@ public class OSMMap {
         generateTrace();
         foundBoatPosition = true;
         mapView.setCenter(new Coordinate(latitude, longitude));
+
+        // TODO: do testow
+//        if (markerList.size() > 1) {
+//            this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(markerList.get(1).getPosition(), newMarker.getPosition())));
+//        } else {
+//            this.expectedCourse.setText("-");
+//        }
+        // TODO: koniec testow
     }
 
     public void changeMapTypeToOSM() {
@@ -117,9 +153,11 @@ public class OSMMap {
     }
 
     public void setCurrentBoatPositionWhileRunning(double latitude, double longitude) {
-        if (currentBoatPositionWhileRunning != null) {
-            mapView.removeMarker(currentBoatPositionWhileRunning);
-        }
+        // TODO: zmiany na czas testowania: zamiast nadpisywania akutalnej juz lokalizacji lodzi to nakladanie na mape wszystkich
+//        if (currentBoatPositionWhileRunning != null) {
+//            mapView.removeMarker(currentBoatPositionWhileRunning);
+//        }
+        // TODO: koniec testow
         currentBoatPositionWhileRunning = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
         mapView.addMarker(currentBoatPositionWhileRunning);
         mapView.setCenter(new Coordinate(latitude, longitude));
@@ -132,5 +170,14 @@ public class OSMMap {
             generateTraceFromBoatPosition(currentBoatPositionWhileRunning.getPosition().getLatitude(), currentBoatPositionWhileRunning.getPosition().getLongitude());
         }
         currentBoatPositionWhileRunning = null;
+    }
+
+    private double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {
+        double latitude1 = Math.toRadians(firstCoordinate.getLatitude());
+        double latitude2 = Math.toRadians(secondCoordinate.getLatitude());
+        double longDiff = Math.toRadians(secondCoordinate.getLongitude() - firstCoordinate.getLongitude());
+        double y = Math.sin(longDiff) * Math.cos(latitude2);
+        double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
+        return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
     }
 }

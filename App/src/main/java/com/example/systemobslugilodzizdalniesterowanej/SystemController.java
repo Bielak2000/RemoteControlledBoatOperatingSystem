@@ -41,15 +41,16 @@ public class SystemController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.boatModeController = BoatModeController.getInstance(leftFlap, lightDown, lightPower, lightUp, moveDown, moveLeft, moveRight,
-                moveUp, rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton);
+                moveUp, rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton,
+                gpsCourse, expectedCourse, sensorCourse, gpsCourseText, sensorCourseText, expectedCourseText);
         try {
             checkConnectionWithInternet();
-            osmMap = new OSMMap(mapView, boatModeController);
+            osmMap = new OSMMap(mapView, boatModeController, expectedCourse);
         } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
         this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage,
-                boatModeController, runningBoatInformation);
+                boatModeController, runningBoatInformation, gpsCourse, sensorCourse, expectedCourse);
         connection.connect(chosenPort, chosenSystem);
         networkStatus = false;
         lightPower.setText("0%");
@@ -125,6 +126,26 @@ public class SystemController implements Initializable {
 
     @FXML
     private CheckBox mapOsmCheckBox;
+
+    // TODO: w celu testach
+    @FXML
+    private Label gpsCourse;
+
+    @FXML
+    private Label expectedCourse;
+
+    @FXML
+    private Label sensorCourse;
+
+    @FXML
+    private Label gpsCourseText;
+
+    @FXML
+    private Label expectedCourseText;
+
+    @FXML
+    private Label sensorCourseText;
+    // TODO: koniec testow
 
     public Label getNetworkConnection() {
         return networkConnection;
