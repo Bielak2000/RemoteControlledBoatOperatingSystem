@@ -5,15 +5,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
-public class DialogController {
+public class ExitDialogController {
     Stage mainStage;
     Stage dialogStage = new Stage();
 
-    DialogController(Stage mainStage1, Stage dialogStage1) throws IOException {
-        this.mainStage=mainStage1;
-        this.dialogStage=dialogStage1;
+    ExitDialogController(Stage mainStage1, Stage dialogStage1) {
+        this.mainStage = mainStage1;
+        this.dialogStage = dialogStage1;
     }
 
     @FXML

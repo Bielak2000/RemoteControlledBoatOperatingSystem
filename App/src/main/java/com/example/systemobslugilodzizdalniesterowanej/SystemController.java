@@ -1,15 +1,13 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
+import com.sothawo.mapjfx.MapView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -17,42 +15,77 @@ import java.io.IOException;
 import java.net.*;
 import java.util.ResourceBundle;
 
-public class SystemController implements Initializable{
-
+public class SystemController implements Initializable {
     Stage stage;
     Boolean networkStatus;
-    Map map = new Map();
+    OSMMap osmMap;
+    BoatModeController boatModeController;
+    KeyboardHandler keyboardHandler;
+    Connection connection;
+    String chosenPort;
+    Lighting lighting = new Lighting();
+    Engines engines = new Engines();
+    Flaps flaps = new Flaps();
+    String chosenSystem;
+
     public Stage getStage() {
         return stage;
     }
-    public SystemController(Stage stage1){
-        this.stage=stage1;
+
+    public SystemController(Stage stage, String chosenPort, String chosenSystem) {
+        this.stage = stage;
+        this.chosenPort = chosenPort;
+        this.chosenSystem = chosenSystem;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        networkStatus=false;
+        this.boatModeController = BoatModeController.getInstance(leftFlap, lightDown, lightPower, lightUp, moveDown, moveLeft, moveRight,
+                moveUp, rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton);
+        try {
+            checkConnectionWithInternet();
+            osmMap = new OSMMap(mapView, boatModeController);
+        } catch (InterruptedException | IOException e) {
+            throw new RuntimeException(e);
+        }
+        this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage,
+                boatModeController, runningBoatInformation);
+        connection.connect(chosenPort, chosenSystem);
+        networkStatus = false;
         lightPower.setText("0%");
         exit.setCancelButton(true);
         exit.setFocusTraversable(false);
-        try {
-            checkConnectionWithInternet();
-            gps.getChildren().add(map.getMapView());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
     }
+
+    public void initializeKeyboardHandler() {
+        this.keyboardHandler = new KeyboardHandler(stage.getScene(), connection, boatModeController,
+                moveUp, moveDown, moveLeft, moveRight, leftFlap, rightFlap, lightDown, lightUp, engines, lighting, flaps);
+        keyboardHandler.keyboardHandler();
+    }
+
     @FXML
     private Label connectionStatus;
+
+    @FXML
+    private Label runningBoatInformation;
 
     @FXML
     private Label networkConnection;
 
     @FXML
-    private AnchorPane gps;
+    private Label lightingText;
+
+    @FXML
+    private Label flapsText;
+
+    @FXML
+    private ToggleButton modeChooser;
+
+    @FXML
+    private Button startSwimming;
+
+    @FXML
+    private MapView mapView;
 
     @FXML
     private Button leftFlap;
@@ -84,64 +117,25 @@ public class SystemController implements Initializable{
     @FXML
     private Button exit;
 
-    public Button getLeftFlap() {
-        return leftFlap;
-    }
+    @FXML
+    private Button clearTrace;
 
-    public Button getRightFlap() {
-        return rightFlap;
-    }
+    @FXML
+    private Button stopSwimmingButton;
 
-    public Button getLightDown() {
-        return lightDown;
-    }
-
-    public Button getLightUp() {
-        return lightUp;
-    }
-
-    public Button getMoveDown() {
-        return moveDown;
-    }
-
-    public Button getMoveLeft() {
-        return moveLeft;
-    }
-
-    public Button getMoveRight() {
-        return moveRight;
-    }
-
-    public Button getMoveUp() {
-        return moveUp;
-    }
-
-    public Label getConnectionStatus() {
-        return connectionStatus;
-    }
-
-    public Label getLightPower() {
-        return lightPower;
-    }
-
-    public Map getMap() {
-        return map;
-    }
+    @FXML
+    private CheckBox mapOsmCheckBox;
 
     public Label getNetworkConnection() {
         return networkConnection;
-    }
-
-    public Boolean getNetworkStatus() {
-        return networkStatus;
     }
 
     @FXML
     void closeApplication(ActionEvent event) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dialog-window.fxml"));
         Stage dialogStage = new Stage();
-        DialogController dialogController = new DialogController(stage, dialogStage);
-        fxmlLoader.setController(dialogController);
+        ExitDialogController exitDialogController = new ExitDialogController(stage, dialogStage);
+        fxmlLoader.setController(exitDialogController);
         Parent root = fxmlLoader.load();
         Scene scene = new Scene(root);
         dialogStage.setTitle("Zamknij aplikacje");
@@ -149,11 +143,60 @@ public class SystemController implements Initializable{
         dialogStage.show();
     }
 
-    public void dialogNotConnect(String title, String text){
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(title);
-        alert.setHeaderText(text);
-        alert.showAndWait();
+    @FXML
+    void clearTrace(ActionEvent event) {
+        osmMap.clearMap();
+    }
+
+    @FXML
+    void changeMode(ActionEvent event) {
+        if (modeChooser.isSelected()) {
+            keyboardHandler.stopBoat();
+            changeBoatMode(BoatMode.AUTONOMIC);
+        } else {
+            changeBoatMode(BoatMode.KEYBOARD_CONTROL);
+        }
+    }
+
+    @FXML
+    void startSwimming(ActionEvent event) throws IOException {
+        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints()) {
+//        if (true) {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("start-swimming-dialog.fxml"));
+            Stage mainStage = new Stage();
+            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection);
+            fxmlLoader.setController(startSwimmingDialogController);
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root);
+            mainStage.setScene(scene);
+            mainStage.show();
+        } else {
+            String text = "";
+            if (!osmMap.designatedWaypoints() && !osmMap.getFoundBoatPosition())
+                text = "Nie wyznaczono pozycji docelowej łódki i jej aktualnego położenia.";
+            else if (!osmMap.designatedWaypoints())
+                text = "Nie wyznaczono pozycji docelowej łódki.";
+            else if (!osmMap.getFoundBoatPosition())
+                text = "Nie wyznaczono aktualnego położenia łódki.";
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Brak danych");
+            alert.setHeaderText(text);
+            alert.showAndWait();
+        }
+    }
+
+    @FXML
+    void stopSwimming(ActionEvent event) {
+        connection.sendStopSwimmingInfo();
+    }
+
+    @FXML
+    void changeToOsmMap(ActionEvent event) {
+        if (mapOsmCheckBox.isSelected()) {
+            osmMap.changeMapTypeToOSM();
+        } else {
+            osmMap.changeMapTypeToWMSMap();
+        }
     }
 
     public void checkConnectionWithInternet() throws InterruptedException, IOException {
@@ -162,12 +205,28 @@ public class SystemController implements Initializable{
             URLConnection connection = url1.openConnection();
             connection.connect();
             networkConnection.setText("Polaczono z internetem!");
-            networkStatus=true;
-        }
-        catch (Exception e) {
-            dialogNotConnect("Brak internetu","Aplikacja nie moze polaczyc sie z internetem!");
+            networkStatus = true;
+        } catch (Exception e) {
+            modeChooser.setDisable(true);
+            mapOsmCheckBox.setDisable(true);
+            dialogNotConnect("Brak internetu", "Aplikacja nie może połączyć się z internetem! Brak możliwości przejścia w tryb autonomiczny.");
             getNetworkConnection().setTextFill(Color.color(1, 0, 0));
             getNetworkConnection().setText("Brak polaczenia z internetem! Brak lokalizacji!");
         }
+    }
+
+    private void changeBoatMode(BoatMode boatMode) {
+        this.boatModeController.setBoatMode(boatMode);
+        if (this.boatModeController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
+            osmMap.removeAllMarkersAndLinesWithoutBoatPosition();
+        }
+    }
+
+    private void dialogNotConnect(String title, String text) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(text);
+        alert.getDialogPane().setMaxWidth(500);
+        alert.showAndWait();
     }
 }
