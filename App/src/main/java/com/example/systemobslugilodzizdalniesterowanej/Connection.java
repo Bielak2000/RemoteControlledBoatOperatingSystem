@@ -256,7 +256,7 @@ public class Connection {
     }
 
     // TODO: do testow
-    boolean firstWaypoint = true;
+//    boolean firstWaypoint = true;
 
     private void setBoatPositionOnMap(String[] localization) {
         if (networkStatus) {
@@ -266,27 +266,27 @@ public class Connection {
                     // TODO: dane lokalizacyjne przychodzace z lodzi, za pierwszym razem lub w trybie nie autonomicznym
                     // TODO: ma to byc dodane na pcozatek listy markerow i wygenerowac trase,
                     //  za kazdym kolejnym razem ma byc pole kotre bedzie to przedstawiac bez usuwania trasy i poczatkowej lokalizacji
-//                    if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING) {
-                    List<String[]> dataLines = new ArrayList<>();
-                    if (firstWaypoint) {
-                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], "first localization"});
+                    if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING) {
+//                    List<String[]> dataLines = new ArrayList<>();
+//                    if (firstWaypoint) {
+//                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], "first localization"});
                         // TODO: nadpisuje pierwsza pozycje
                         // TODO: to zostaje przed testami
                         osmMap.generateTraceFromBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
-                        firstWaypoint = false;
+//                        firstWaypoint = false;
                     } else {
                         // TODO: dodaje kolejne
                         // TODO: to zostaje przed testami
                         osmMap.setCurrentBoatPositionWhileRunning(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
-                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], "new localization"});
+//                        dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], "new localization"});
                     }
-                    try {
-                        Utils.saveGpsToCsv(dataLines);
-                    } catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+//                    try {
+//                        Utils.saveGpsToCsv(dataLines);
+//                    } catch (FileNotFoundException e) {
+//                        throw new RuntimeException(e);
+//                    } catch (IOException e) {
+//                        throw new RuntimeException(e);
+//                    }
                 }
             });
         }

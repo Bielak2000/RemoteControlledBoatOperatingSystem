@@ -57,20 +57,20 @@ public class OSMMap {
                 mapView.addMarker(newMarker);
 
                 // TODO: do testow
-                List<String[]> markerData = new ArrayList<>();
-                markerData.add(new String[]{String.valueOf(newMarker.getPosition().getLatitude()), String.valueOf(newMarker.getPosition().getLongitude()), "marker"});
-                try {
-                    Utils.saveGpsToCsv(markerData);
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+//                List<String[]> markerData = new ArrayList<>();
+//                markerData.add(new String[]{String.valueOf(newMarker.getPosition().getLatitude()), String.valueOf(newMarker.getPosition().getLongitude()), "marker"});
+//                try {
+//                    Utils.saveGpsToCsv(markerData);
+//                } catch (FileNotFoundException e) {
+//                    throw new RuntimeException(e);
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
                 //TODO: bez testow
                 generateTrace();
-                if (markerList.size() > 1) {
-                    expectedCourse.setText(String.valueOf(df.format(determineCourseBetweenTwoWaypoints(markerList.get(0).getPosition(), newMarker.getPosition()))));
-                }
+//                if (markerList.size() > 1) {
+//                    expectedCourse.setText(String.valueOf(df.format(determineCourseBetweenTwoWaypoints(markerList.get(0).getPosition(), newMarker.getPosition()))));
+//                }
                 // TODO: koniec testow
             }
         });
@@ -108,11 +108,11 @@ public class OSMMap {
         mapView.setCenter(new Coordinate(latitude, longitude));
 
         // TODO: do testow
-        if (markerList.size() > 1) {
-            this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(markerList.get(1).getPosition(), newMarker.getPosition())));
-        } else {
-            this.expectedCourse.setText("-");
-        }
+//        if (markerList.size() > 1) {
+//            this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(markerList.get(1).getPosition(), newMarker.getPosition())));
+//        } else {
+//            this.expectedCourse.setText("-");
+//        }
         // TODO: koniec testow
     }
 
