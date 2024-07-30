@@ -99,43 +99,11 @@ public class Connection {
 //                            lighting.setPower(Integer.parseInt(array[0]));
 //                            System.out.println("Oswietlenie: " + array[0]);
 //                        }
-
-                        if (array.length == 3) {
-
-                            String[] localization = {"", ""};
-                            if (array.length > 0) {
-                                if (!array[0].equals("-1") && !array[0].equals("INVALID")) {
-                                    localization = array[0].split(",");
-                                    if(localization.length==2) {
-                                        System.out.println("Lokalizacja: " + localization[0] + ", " + localization[1]);
-                                        setBoatPositionOnMap(localization);
-                                    }
-                                }
-                            }
-
-                            // TODO: do testow
-                            if (array.length > 1) {
-                                Platform.runLater(() -> {
-                                    if (!array[1].equals("-1") && !array[1].equals("INVALID")) {
-                                        sensorCourse.setText(array[1]);
-                                        System.out.println("Sensor course: " + array[1]);
-                                    }
-                                });
-                            }
-                            if (array.length > 2) {
-                                Platform.runLater(() -> {
-                                    if (!array[2].equals("-1") && !array[2].equals("INVALID")) {
-                                        gpsCourse.setText(array[2]);
-                                        System.out.println("Gps course: " + array[2]);
-                                    }
-                                });
-                            }
-                            List<String[]> courseData = new ArrayList<>();
-                            courseData.add(new String[]{sensorCourse.getText(), gpsCourse.getText(), expectedCourse.getText()});
-                            Utils.saveCourseToCsv(courseData, "course-with-x-calibration-2.csv");
-//                        Utils.saveCourseToCsv(courseData, "course-without-xyz_calibration.csv");
-//                        Utils.saveCourseToCsv(courseData, "course-without-x_calibration.csv");
-
+//                        String[] localization = {"", ""};
+//                        if (array.length > 1) {
+//                            localization = array[1].split(",");
+//                            System.out.println("Lokalizacja: " + array[1]);
+//                        }
 //                        if (array.length > 2) {
 //                            if (Integer.parseInt(array[2]) == BOAT_IS_SWIMMING_BY_WAYPOINTS) {
 //                                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
@@ -160,9 +128,44 @@ public class Connection {
 //                            }
 //                        }
 
-//                        setLightPowerLabel();
-//                        setBoatPositionOnMap(localization);
+                        // TODO: do testow
+                        if (array.length == 3) {
+                            String[] localization = {"", ""};
+                            if (array.length > 0) {
+                                if (!array[0].equals("-1") && !array[0].equals("INVALID")) {
+                                    localization = array[0].split(",");
+                                    if(localization.length==2) {
+                                        System.out.println("Lokalizacja: " + localization[0] + ", " + localization[1]);
+                                        setBoatPositionOnMap(localization);
+                                    }
+                                }
+                            }
+                            if (array.length > 1) {
+                                Platform.runLater(() -> {
+                                    if (!array[1].equals("-1") && !array[1].equals("INVALID")) {
+                                        sensorCourse.setText(array[1]);
+                                        System.out.println("Sensor course: " + array[1]);
+                                    }
+                                });
+                            }
+                            if (array.length > 2) {
+                                Platform.runLater(() -> {
+                                    if (!array[2].equals("-1") && !array[2].equals("INVALID")) {
+                                        gpsCourse.setText(array[2]);
+                                        System.out.println("Gps course: " + array[2]);
+                                    }
+                                });
+                            }
+                            List<String[]> courseData = new ArrayList<>();
+                            courseData.add(new String[]{sensorCourse.getText(), gpsCourse.getText(), expectedCourse.getText()});
+                            Utils.saveCourseToCsv(courseData, "course-with-x-calibration-two-waypoints-1.csv");
                         }
+                        // TODO: koniec testow
+
+//                          setLightPowerLabel();
+//                            if(localization.length==2) {
+//                              setBoatPositionOnMap(localization);
+//                            }
                     } catch (SerialPortException ex) {
                         System.out.println("Problem z odbiorem danych: " + ex);
                     } catch (FileNotFoundException e) {
@@ -268,10 +271,12 @@ public class Connection {
                     if (firstWaypoint) {
                         dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], "first localization"});
                         // TODO: nadpisuje pierwsza pozycje
+                        // TODO: to zostaje przed testami
                         osmMap.generateTraceFromBoatPosition(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
                         firstWaypoint = false;
                     } else {
                         // TODO: dodaje kolejne
+                        // TODO: to zostaje przed testami
                         osmMap.setCurrentBoatPositionWhileRunning(Double.parseDouble(finalLocalization[0]), Double.parseDouble(finalLocalization[1]));
                         dataLines.add(new String[]{finalLocalization[0], finalLocalization[1], "new localization"});
                     }
@@ -286,6 +291,7 @@ public class Connection {
             });
         }
     }
+    // TODO: koniec testow
 
     private void setLightPowerLabel() {
         Platform.runLater(() -> {

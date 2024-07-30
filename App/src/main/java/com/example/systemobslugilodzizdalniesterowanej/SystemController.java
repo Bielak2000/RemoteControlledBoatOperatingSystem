@@ -145,6 +145,7 @@ public class SystemController implements Initializable {
 
     @FXML
     private Label sensorCourseText;
+    // TODO: koniec testow
 
     public Label getNetworkConnection() {
         return networkConnection;
@@ -180,8 +181,8 @@ public class SystemController implements Initializable {
 
     @FXML
     void startSwimming(ActionEvent event) throws IOException {
-//        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints()) {
-        if (true) {
+        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints()) {
+//        if (true) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("start-swimming-dialog.fxml"));
             Stage mainStage = new Stage();
             StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection);
