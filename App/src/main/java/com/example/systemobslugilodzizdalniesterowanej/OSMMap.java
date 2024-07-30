@@ -49,7 +49,7 @@ public class OSMMap {
     }
 
     // TODO: do testow
-    boolean firstWaypoint = true;
+//    boolean firstWaypoint = true;
 
     private void setHandlersMap() {
         mapView.addEventHandler(MapViewEvent.MAP_RIGHTCLICKED, event -> {
@@ -98,8 +98,10 @@ public class OSMMap {
         }
     }
 
-    public boolean compareWithFirstWaypoint = true;
+    // TODO: do testow
+//    public boolean compareWithFirstWaypoint = true;
 
+    // TODO: secondWaypoint do testow
     public void generateTraceFromBoatPosition(double latitude, double longitude, boolean secondWaypoint) {
         Marker newMarker = Marker.createProvided(Marker.Provided.BLUE).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
         if (foundBoatPosition) {
@@ -110,9 +112,11 @@ public class OSMMap {
             markerList.add(0, newMarker);
         }
         mapView.addMarker(newMarker);
-        if(secondWaypoint) {
-            generateTrace();
-        }
+        generateTrace();
+        // TODO: do testow
+//        if(secondWaypoint) {
+//            generateTrace();
+//        }
 
         foundBoatPosition = true;
         mapView.setCenter(new Coordinate(latitude, longitude));
@@ -174,15 +178,15 @@ public class OSMMap {
         // TODO: koniec testow
         currentBoatPositionWhileRunning = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
         mapView.addMarker(currentBoatPositionWhileRunning);
-        //mapView.setCenter(new Coordinate(latitude, longitude));
+        mapView.setCenter(new Coordinate(latitude, longitude));
     }
 
     public void clearCurrentBoatPositionAfterFinishedLastWaypoint() {
         mapView.removeMarker(currentBoatPositionWhileRunning);
         removeAllMarkersAndLinesWithoutBoatPosition();
         if (currentBoatPositionWhileRunning != null) {
-            // na testy zakomentowane
-//            generateTraceFromBoatPosition(currentBoatPositionWhileRunning.getPosition().getLatitude(), currentBoatPositionWhileRunning.getPosition().getLongitude());
+            // TODO: do testow trzeba zakomentowac
+            generateTraceFromBoatPosition(currentBoatPositionWhileRunning.getPosition().getLatitude(), currentBoatPositionWhileRunning.getPosition().getLongitude());
         }
         currentBoatPositionWhileRunning = null;
     }

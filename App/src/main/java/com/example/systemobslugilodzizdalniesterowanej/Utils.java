@@ -34,11 +34,9 @@ public class Utils {
 
     /**
      * Metoda do obliczania odległości między dwoma współrzędnymi geograficznymi w metrach
-     * @param lat1 Szerokość geograficzna pierwszego punktu w stopniach
-     * @param lon1 Długość geograficzna pierwszego punktu w stopniach
-     * @param lat2 Szerokość geograficzna drugiego punktu w stopniach
-     * @param lon2 Długość geograficzna drugiego punktu w stopniach
-     * @return Odległość w kilometrach
+     * @param c1 wspolrzedne pierwsze punktu
+     * @param c1 wspolrzedne drugiego punktu
+     * @return Odległość w metrach
      */
     public static double calculateDistance(Coordinate c1, Coordinate c2) {
         // Konwersja stopni na radiany
