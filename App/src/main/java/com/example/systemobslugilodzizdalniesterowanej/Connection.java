@@ -19,8 +19,10 @@ import static jssc.SerialPort.MASK_RXCHAR;
 
 public class Connection {
     private static String KEYBOARD_CONTROL_MODE_MARKING = "0";
-    private static String AUTONOMOUS_MODE_MARKING = "1";
-    private static String STOP_SWIMMING_MARKING = "2";
+    private static String MOVE_TO_AUTONOMIC_MODE = "1";
+    private static String AUTONOMOUS_MODE_MARKING = "2";
+    private static String AUTONOMOUS_MODE_STOP_SENDING_WAYPOINT = "3";
+    private static String STOP_SWIMMING_MARKING = "4";
     private static int MILLISECONDS_TIME_BETWEEN_SEND_INFORMATION = 2000;
     private static int BOAT_IS_SWIMMING_BY_WAYPOINTS = 0;
     private static int BOAT_FINISHED_SWIMMING_BY_WAYPOINTS = 1;
@@ -169,20 +171,18 @@ public class Connection {
                     String sendInfo;
                     List<Marker> markerList = osmMap.getDesignatedWaypoints();
                     String isLastMarker = "0";
-                    for (int i = 0; i < markerList.size(); i++) {
-                        if (i == markerList.size() - 1) {
-                            isLastMarker = "1";
-                        }
+                    for (Marker marker : markerList) {
                         sendInfo = AUTONOMOUS_MODE_MARKING + "_"
-                                + markerList.get(i).getPosition().getLatitude().toString() + "_"
-                                + markerList.get(i).getPosition().getLongitude().toString() + "_"
-                                + isLastMarker + "_";
+                                + marker.getPosition().getLatitude().toString() + "_"
+                                + marker.getPosition().getLongitude().toString() + "_";
                         serialPort.writeString(sendInfo);
                         System.out.println("Wyslano waypoint: lat - "
-                                + markerList.get(i).getPosition().getLatitude().toString()
-                                + ", long - " + markerList.get(i).getPosition().getLongitude().toString());
+                                + marker.getPosition().getLatitude().toString()
+                                + ", long - " + marker.getPosition().getLongitude().toString());
                         Thread.sleep(MILLISECONDS_TIME_BETWEEN_SEND_INFORMATION);
                     }
+                    sendInfo = AUTONOMOUS_MODE_STOP_SENDING_WAYPOINT;
+                    serialPort.writeString(sendInfo);
 
                     System.out.println("Wyslano waypointy");
                     Platform.runLater(() -> runningBoatInformation.setVisible(true));
@@ -210,10 +210,19 @@ public class Connection {
 
     public void sendStopSwimmingInfo() {
         try {
-            if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
-                String sentInfo = STOP_SWIMMING_MARKING;
-                serialPort.writeString(sentInfo);
+            String sentInfo = STOP_SWIMMING_MARKING;
+            serialPort.writeString(sentInfo);
+            System.out.println("Wyslano: " + sentInfo);
+        } catch (SerialPortException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public void sendMoveToAutonomicInfo() {
+        try {
+            if (boatModeController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
+                String sentInfo = MOVE_TO_AUTONOMIC_MODE;
+                serialPort.writeString(sentInfo);
                 System.out.println("Wyslano: " + sentInfo);
             }
         } catch (SerialPortException e) {
