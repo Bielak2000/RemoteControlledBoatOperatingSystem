@@ -1,5 +1,13 @@
-package com.example.systemobslugilodzizdalniesterowanej;
+package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
+import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Engines;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Flaps;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.keyboardcontrol.KeyboardHandler;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Lighting;
+import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
 import com.sothawo.mapjfx.MapView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,6 +27,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ResourceBundle;
+
+import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_RESOURCES_PATH;
 
 public class SystemController implements Initializable {
     Stage stage;
@@ -158,7 +168,7 @@ public class SystemController implements Initializable {
 
     @FXML
     void closeApplication(ActionEvent event) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dialog-window.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "dialog-window.fxml"));
         Stage dialogStage = new Stage();
         ExitDialogController exitDialogController = new ExitDialogController(stage, dialogStage);
         fxmlLoader.setController(exitDialogController);
@@ -190,7 +200,7 @@ public class SystemController implements Initializable {
     void startSwimming(ActionEvent event) throws IOException {
 //        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints()) {
         if (true) {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("start-swimming-dialog.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "start-swimming-dialog.fxml"));
             Stage mainStage = new Stage();
             StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection);
             fxmlLoader.setController(startSwimmingDialogController);
@@ -264,7 +274,7 @@ public class SystemController implements Initializable {
 
     private ProgressDialogController manuallyStopSwimmingProgressDialog() throws IOException {
         Stage stage1 = new Stage();
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("progress-dialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "progress-dialog.fxml"));
         ProgressDialogController progressDialogController = new ProgressDialogController(stage1);
         fxmlLoader.setController(progressDialogController);
         Parent root = fxmlLoader.load();

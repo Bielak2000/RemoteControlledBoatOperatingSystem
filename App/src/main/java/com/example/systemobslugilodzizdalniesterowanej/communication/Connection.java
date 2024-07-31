@@ -1,5 +1,12 @@
-package com.example.systemobslugilodzizdalniesterowanej;
+package com.example.systemobslugilodzizdalniesterowanej.communication;
 
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Engines;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Flaps;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Lighting;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
+import com.example.systemobslugilodzizdalniesterowanej.controllers.ProgressDialogController;
+import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
 import com.sothawo.mapjfx.Marker;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;

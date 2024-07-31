@@ -1,4 +1,4 @@
-package com.example.systemobslugilodzizdalniesterowanej;
+package com.example.systemobslugilodzizdalniesterowanej.boatmodel;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;

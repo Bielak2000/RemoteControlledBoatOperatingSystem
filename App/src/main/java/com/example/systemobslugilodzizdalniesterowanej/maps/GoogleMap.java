@@ -1,4 +1,4 @@
-package com.example.systemobslugilodzizdalniesterowanej;
+package com.example.systemobslugilodzizdalniesterowanej.maps;
 
 import com.dlsc.gmapsfx.GoogleMapView;
 import com.dlsc.gmapsfx.MapComponentInitializedListener;

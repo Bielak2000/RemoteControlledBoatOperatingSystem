@@ -1,4 +1,4 @@
-package com.example.systemobslugilodzizdalniesterowanej;
+package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -20,6 +20,8 @@ import jssc.SerialPortException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_RESOURCES_PATH;
 
 public class ChoosePortController implements Initializable {
     Stage stage;
@@ -92,7 +94,7 @@ public class ChoosePortController implements Initializable {
             alert.setHeaderText("Port lub system nie zostal wybrany! Wybierz port oraz system.");
             alert.showAndWait();
         } else {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("application-window.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "application-window.fxml"));
             Stage mainStage = new Stage();
             SystemController systemController = new SystemController(mainStage, chosenPort, chosenSystem);
             fxmlLoader.setController(systemController);
@@ -109,7 +111,7 @@ public class ChoosePortController implements Initializable {
 
     @FXML
     void exit(ActionEvent event) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dialog-window.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "dialog-window.fxml"));
         Stage dialogStage = new Stage();
         ExitDialogController exitDialogController = new ExitDialogController(stage, dialogStage);
         fxmlLoader.setController(exitDialogController);

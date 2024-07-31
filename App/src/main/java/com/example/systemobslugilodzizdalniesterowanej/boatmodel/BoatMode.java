@@ -1,4 +1,4 @@
-package com.example.systemobslugilodzizdalniesterowanej;
+package com.example.systemobslugilodzizdalniesterowanej.boatmodel;
 
 /**
  * KEYBOARD_CONTROL - control boat by keyboard

@@ -1,5 +1,7 @@
-package com.example.systemobslugilodzizdalniesterowanej;
+package com.example.systemobslugilodzizdalniesterowanej.maps;
 
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
 import com.sothawo.mapjfx.Coordinate;
 import com.sothawo.mapjfx.CoordinateLine;
 import com.sothawo.mapjfx.MapType;

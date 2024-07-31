@@ -1,4 +1,4 @@
-package com.example.systemobslugilodzizdalniesterowanej;
+package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

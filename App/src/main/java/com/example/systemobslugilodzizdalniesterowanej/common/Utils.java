@@ -1,4 +1,4 @@
-package com.example.systemobslugilodzizdalniesterowanej;
+package com.example.systemobslugilodzizdalniesterowanej.common;
 
 import com.sothawo.mapjfx.Coordinate;
 
@@ -8,6 +8,8 @@ import java.io.PrintWriter;
 import java.util.List;
 
 public class Utils {
+
+    public static String FXML_RESOURCES_PATH = "/com/example/systemobslugilodzizdalniesterowanej/";
 
     public static void saveGpsToCsv(List<String[]> gpsData) throws IOException {
         FileWriter csvOutputFile = new FileWriter("/home/kacperbielak/Desktop/testy2/gps.csv", true);

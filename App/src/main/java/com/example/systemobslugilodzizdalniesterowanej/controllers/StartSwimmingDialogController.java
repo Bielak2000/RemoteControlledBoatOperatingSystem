@@ -1,5 +1,8 @@
-package com.example.systemobslugilodzizdalniesterowanej;
+package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
+import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -9,6 +12,8 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+
+import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_RESOURCES_PATH;
 
 public class StartSwimmingDialogController {
     Stage stage;
@@ -31,7 +36,7 @@ public class StartSwimmingDialogController {
     void swimming(ActionEvent event) throws IOException, InterruptedException {
         boatModeController.setBoatMode(BoatMode.AUTONOMIC_STARTING);
         Stage stage1 = new Stage();
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("progress-dialog.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "progress-dialog.fxml"));
         ProgressDialogController progressDialogController = new ProgressDialogController(stage1);
         fxmlLoader.setController(progressDialogController);
         Parent root = fxmlLoader.load();

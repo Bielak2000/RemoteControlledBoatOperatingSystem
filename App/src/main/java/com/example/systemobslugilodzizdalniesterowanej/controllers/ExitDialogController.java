@@ -1,4 +1,4 @@
-package com.example.systemobslugilodzizdalniesterowanej;
+package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
