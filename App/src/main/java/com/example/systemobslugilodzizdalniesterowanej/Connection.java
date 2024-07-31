@@ -181,10 +181,11 @@ public class Connection {
                                 + ", long - " + marker.getPosition().getLongitude().toString());
                         Thread.sleep(MILLISECONDS_TIME_BETWEEN_SEND_INFORMATION);
                     }
+                    System.out.println("Wyslano waypointy");
                     sendInfo = AUTONOMOUS_MODE_STOP_SENDING_WAYPOINT;
                     serialPort.writeString(sendInfo);
+                    System.out.println("Wyslano zakonczenie wysylania waypointow");
 
-                    System.out.println("Wyslano waypointy");
                     Platform.runLater(() -> runningBoatInformation.setVisible(true));
 
                     // Symulacja rozpoczecia plywania lodki
