@@ -1,5 +1,6 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -8,12 +9,11 @@ import javafx.scene.paint.Color;
 
 public class BoatModeController {
     private static BoatModeController boatModeController;
-    private static String RUNNING_BOAT_INFORMATION = "Łódka rozpoczeła pływanie po waypointach.";
+    private static String RUNNING_BOAT_INFORMATION = "\t\t  Łódka płynie do docelowego miejsca ...";
     private static String STARTING_BOAT_INFORMATION = "Łódka rozpoczyna pływanie po waypointach, proszę czekać ...";
     private BoatMode boatMode;
     private Button leftFlap;
     private Button lightDown;
-    private Label lightPower;
     private Button lightUp;
     private Button moveDown;
     private Button moveLeft;
@@ -41,15 +41,13 @@ public class BoatModeController {
     private Label sensorCourseText;
 
 
-
-    private BoatModeController(Button leftFlap, Button lightDown, Label lightPower, Button lightUp, Button moveDown, Button moveLeft, Button moveRight, Button moveUp,
+    private BoatModeController(Button leftFlap, Button lightDown, Button lightUp, Button moveDown, Button moveLeft, Button moveRight, Button moveUp,
                                Button rightFlap, Label lightingText, Label flapsText, Button startSwimming, Button clearTrace, ToggleButton modeChooser, Button exit,
                                Label runningBoatInformation, Button stopSwimmingButton, Label gpsCourse, Label expectedCourse, Label sensorCourse, Label gpsCourseText,
                                Label sensorCourseText, Label expectedCourseText) {
         this.boatMode = BoatMode.KEYBOARD_CONTROL;
         this.leftFlap = leftFlap;
         this.lightDown = lightDown;
-        this.lightPower = lightPower;
         this.lightUp = lightUp;
         this.moveDown = moveDown;
         this.moveLeft = moveLeft;
@@ -72,13 +70,13 @@ public class BoatModeController {
         this.sensorCourseText = sensorCourseText;
     }
 
-    public static BoatModeController getInstance(Button leftFlap, Button lightDown, Label lightPower, Button lightUp, Button moveDown, Button moveLeft, Button moveRight,
+    public static BoatModeController getInstance(Button leftFlap, Button lightDown, Button lightUp, Button moveDown, Button moveLeft, Button moveRight,
                                                  Button moveUp, Button rightFlap, Label lightingText, Label flapsText, Button startSwimming, Button clearTrace,
-                                                 ToggleButton modeChooser, Button exit, Label runningBoatInformation, Button stopSwimmingButton,Label gpsCourse, Label expectedCourse, Label sensorCourse,
+                                                 ToggleButton modeChooser, Button exit, Label runningBoatInformation, Button stopSwimmingButton, Label gpsCourse, Label expectedCourse, Label sensorCourse,
                                                  Label gpsCourseText,
                                                  Label sensorCourseText, Label expectedCourseText) {
         if (boatModeController == null) {
-            boatModeController = new BoatModeController(leftFlap, lightDown, lightPower, lightUp, moveDown, moveLeft, moveRight, moveUp,
+            boatModeController = new BoatModeController(leftFlap, lightDown, lightUp, moveDown, moveLeft, moveRight, moveUp,
                     rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton,
                     gpsCourse, expectedCourse, sensorCourse, gpsCourseText, sensorCourseText, expectedCourseText);
         }
@@ -95,23 +93,25 @@ public class BoatModeController {
         } else if (boatMode == BoatMode.KEYBOARD_CONTROL) {
             if (this.boatMode == BoatMode.AUTONOMIC_RUNNING) {
                 stopSwimmingButton.setVisible(false);
-                setRunningBoatInformation(STARTING_BOAT_INFORMATION, Color.color(230, 0, 0), false);
+                setRunningBoatInformation(STARTING_BOAT_INFORMATION, Color.color(230.0 / 255.0, 0, 0), false);
             }
             enableActionsForAutonomicRunningBoatMode();
             setViewForKeyboardControlBoatMode();
         } else if (boatMode == BoatMode.AUTONOMIC_STARTING) {
             blockActionsForAutonomicRunningBoatMode();
         } else if (boatMode == BoatMode.AUTONOMIC_RUNNING) {
-            setRunningBoatInformation(RUNNING_BOAT_INFORMATION, Color.color(81, 181, 61), true);
+            setRunningBoatInformation(RUNNING_BOAT_INFORMATION, Color.color(81.0 / 255.0, 181.0 / 255.0, 61.0 / 255.0), true);
             stopSwimmingButton.setVisible(true);
         }
         this.boatMode = boatMode;
     }
 
     private void setRunningBoatInformation(String text, Color color, boolean visible) {
-        this.runningBoatInformation.setVisible(visible);
-        this.runningBoatInformation.setText(text);
-        this.runningBoatInformation.setTextFill(color);
+        Platform.runLater(() -> {
+            this.runningBoatInformation.setVisible(visible);
+            this.runningBoatInformation.setText(text);
+            this.runningBoatInformation.setTextFill(color);
+        });
     }
 
     private void setViewForAutonomicBoatMode() {

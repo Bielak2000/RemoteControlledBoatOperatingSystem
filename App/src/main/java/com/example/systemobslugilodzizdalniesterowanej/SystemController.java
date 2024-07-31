@@ -7,12 +7,17 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ResourceBundle;
 
 public class SystemController implements Initializable {
@@ -40,7 +45,7 @@ public class SystemController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        this.boatModeController = BoatModeController.getInstance(leftFlap, lightDown, lightPower, lightUp, moveDown, moveLeft, moveRight,
+        this.boatModeController = BoatModeController.getInstance(leftFlap, lightDown, lightUp, moveDown, moveLeft, moveRight,
                 moveUp, rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton,
                 gpsCourse, expectedCourse, sensorCourse, gpsCourseText, sensorCourseText, expectedCourseText);
         try {
@@ -207,8 +212,12 @@ public class SystemController implements Initializable {
     }
 
     @FXML
-    void stopSwimming(ActionEvent event) {
+    void stopSwimming(ActionEvent event) throws IOException {
+        ProgressDialogController progressDialogController = manuallyStopSwimmingProgressDialog();
+        connection.setProgressDialogController(progressDialogController);
         connection.sendStopSwimmingInfo();
+        changeBoatMode(BoatMode.KEYBOARD_CONTROL);
+        modeChooser.setSelected(false);
     }
 
     @FXML
@@ -249,5 +258,19 @@ public class SystemController implements Initializable {
         alert.setHeaderText(text);
         alert.getDialogPane().setMaxWidth(500);
         alert.showAndWait();
+    }
+
+    private ProgressDialogController manuallyStopSwimmingProgressDialog() throws IOException {
+        Stage stage1 = new Stage();
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("progress-dialog.fxml"));
+        ProgressDialogController progressDialogController = new ProgressDialogController(stage1);
+        fxmlLoader.setController(progressDialogController);
+        Parent root = fxmlLoader.load();
+        Scene scene = new Scene(root);
+        stage1.setScene(scene);
+        progressDialogController.setDescriptions("Zatrzymywanie łodzi", "Trwa zatrzymywanie łodzi, proszę o cierpliowść ...");
+        stage1.show();
+        root.requestFocus();
+        return progressDialogController;
     }
 }

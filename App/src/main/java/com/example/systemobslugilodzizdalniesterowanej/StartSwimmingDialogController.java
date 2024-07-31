@@ -1,12 +1,12 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
-import javafx.event.ActionEvent;
 
 import java.io.IOException;
 
@@ -37,6 +37,7 @@ public class StartSwimmingDialogController {
         Parent root = fxmlLoader.load();
         Scene scene = new Scene(root);
         stage1.setScene(scene);
+        progressDialogController.setDescriptions("Wysyłanie danych", "Trwa wysyłanie danych do łodzi, proszę o cierpliwość.");
         stage1.show();
         root.requestFocus();
         this.stage.close();

@@ -1,12 +1,15 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
-import com.sothawo.mapjfx.*;
+import com.sothawo.mapjfx.Coordinate;
+import com.sothawo.mapjfx.CoordinateLine;
+import com.sothawo.mapjfx.MapType;
+import com.sothawo.mapjfx.MapView;
+import com.sothawo.mapjfx.Marker;
+import com.sothawo.mapjfx.WMSParam;
 import com.sothawo.mapjfx.event.MapViewEvent;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +51,6 @@ public class OSMMap {
         setHandlersMap();
     }
 
-    // TODO: do testow
-//    boolean firstWaypoint = true;
-
     private void setHandlersMap() {
         mapView.addEventHandler(MapViewEvent.MAP_RIGHTCLICKED, event -> {
             if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC) {
@@ -58,25 +58,7 @@ public class OSMMap {
                 Marker newMarker = Marker.createProvided(Marker.Provided.GREEN).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true);
                 markerList.add(newMarker);
                 mapView.addMarker(newMarker);
-                // TODO: do testow
-//                List<String[]> markerData = new ArrayList<>();
-//                String waypointNumber = "firstWaypoint";
-//                if(!firstWaypoint) {
-//                    waypointNumber = "secondWaypoint";
-//                }
-//                markerData.add(new String[]{String.valueOf(newMarker.getPosition().getLatitude()), String.valueOf(newMarker.getPosition().getLongitude()), "marker", waypointNumber});
-//                try {
-//                    Utils.saveGpsToCsv(markerData);
-//                } catch (FileNotFoundException e) {
-//                    throw new RuntimeException(e);
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
                 generateTrace();
-//                if (markerList.size() > 1) {
-//                    expectedCourse.setText(String.valueOf(df.format(determineCourseBetweenTwoWaypoints(markerList.get(0).getPosition(), newMarker.getPosition()))));
-//                }
-                // TODO: koniec testow
             }
         });
     }
@@ -98,11 +80,7 @@ public class OSMMap {
         }
     }
 
-    // TODO: do testow
-//    public boolean compareWithFirstWaypoint = true;
-
-    // TODO: secondWaypoint do testow
-    public void generateTraceFromBoatPosition(double latitude, double longitude, boolean secondWaypoint) {
+    public void generateTraceFromBoatPosition(double latitude, double longitude) {
         Marker newMarker = Marker.createProvided(Marker.Provided.BLUE).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
         if (foundBoatPosition) {
             mapView.removeMarker(markerList.get(0));
@@ -113,25 +91,8 @@ public class OSMMap {
         }
         mapView.addMarker(newMarker);
         generateTrace();
-        // TODO: do testow
-//        if(secondWaypoint) {
-//            generateTrace();
-//        }
-
         foundBoatPosition = true;
         mapView.setCenter(new Coordinate(latitude, longitude));
-        // TODO: do testow
-//        if (markerList.size() > 1) {
-//            if(secondWaypoint) {
-//                System.out.println("DRUGI PUNKT");
-//                this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(newMarker.getPosition(), markerList.get(2).getPosition())));
-//            } else {
-//                this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(newMarker.getPosition(), markerList.get(1).getPosition())));
-//            }
-//        } else {
-//            this.expectedCourse.setText("-");
-//        }
-        // TODO: koniec testow
     }
 
     public void changeMapTypeToOSM() {
@@ -171,11 +132,9 @@ public class OSMMap {
     }
 
     public void setCurrentBoatPositionWhileRunning(double latitude, double longitude) {
-        // TODO: zmiany na czas testowania: zamiast nadpisywania akutalnej juz lokalizacji lodzi to nakladanie na mape wszystkich
-//        if (currentBoatPositionWhileRunning != null) {
-//            mapView.removeMarker(currentBoatPositionWhileRunning);
-//        }
-        // TODO: koniec testow
+        if (currentBoatPositionWhileRunning != null) {
+            mapView.removeMarker(currentBoatPositionWhileRunning);
+        }
         currentBoatPositionWhileRunning = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
         mapView.addMarker(currentBoatPositionWhileRunning);
         mapView.setCenter(new Coordinate(latitude, longitude));
@@ -185,7 +144,6 @@ public class OSMMap {
         mapView.removeMarker(currentBoatPositionWhileRunning);
         removeAllMarkersAndLinesWithoutBoatPosition();
         if (currentBoatPositionWhileRunning != null) {
-            // TODO: do testow trzeba zakomentowac
             generateTraceFromBoatPosition(currentBoatPositionWhileRunning.getPosition().getLatitude(), currentBoatPositionWhileRunning.getPosition().getLongitude());
         }
         currentBoatPositionWhileRunning = null;

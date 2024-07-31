@@ -9,12 +9,12 @@
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="129.0" prefWidth="438.0">
          <children>
-            <Text layoutX="10.0" layoutY="57.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Trwa wysyłanie danych do łodzi, proszę o cierpliwość." textAlignment="CENTER" wrappingWidth="421.0">
+            <Text fx:id="progressDialogContent" layoutX="10.0" layoutY="57.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="421.0">
                <font>
                   <Font size="15.0" />
                </font>
             </Text>
-            <Label layoutX="121.0" layoutY="8.0" prefHeight="24.0" prefWidth="198.0" text="Wysyłanie danych">
+            <Label fx:id="progressDialogHeader" layoutX="121.0" layoutY="8.0" prefHeight="24.0" prefWidth="198.0">
                <font>
                   <Font name="System Bold" size="19.0" />
                </font>

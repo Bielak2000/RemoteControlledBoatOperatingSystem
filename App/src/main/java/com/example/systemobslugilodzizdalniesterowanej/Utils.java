@@ -2,7 +2,9 @@ package com.example.systemobslugilodzizdalniesterowanej;
 
 import com.sothawo.mapjfx.Coordinate;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 public class Utils {
@@ -34,6 +36,7 @@ public class Utils {
 
     /**
      * Metoda do obliczania odległości między dwoma współrzędnymi geograficznymi w metrach
+     *
      * @param c1 wspolrzedne pierwsze punktu
      * @param c1 wspolrzedne drugiego punktu
      * @return Odległość w metrach

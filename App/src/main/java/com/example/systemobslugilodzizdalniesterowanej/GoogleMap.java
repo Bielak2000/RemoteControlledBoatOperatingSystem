@@ -1,9 +1,18 @@
 package com.example.systemobslugilodzizdalniesterowanej;
 
-import com.dlsc.gmapsfx.MapComponentInitializedListener;
-import com.dlsc.gmapsfx.javascript.object.*;
 import com.dlsc.gmapsfx.GoogleMapView;
-import com.dlsc.gmapsfx.service.directions.*;
+import com.dlsc.gmapsfx.MapComponentInitializedListener;
+import com.dlsc.gmapsfx.javascript.object.DirectionsPane;
+import com.dlsc.gmapsfx.javascript.object.LatLong;
+import com.dlsc.gmapsfx.javascript.object.MapOptions;
+import com.dlsc.gmapsfx.javascript.object.MapTypeIdEnum;
+import com.dlsc.gmapsfx.javascript.object.Marker;
+import com.dlsc.gmapsfx.javascript.object.MarkerOptions;
+import com.dlsc.gmapsfx.service.directions.DirectionStatus;
+import com.dlsc.gmapsfx.service.directions.DirectionsRenderer;
+import com.dlsc.gmapsfx.service.directions.DirectionsResult;
+import com.dlsc.gmapsfx.service.directions.DirectionsService;
+import com.dlsc.gmapsfx.service.directions.DirectionsServiceCallback;
 
 import java.util.ArrayList;
 import java.util.List;
