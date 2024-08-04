@@ -5,6 +5,7 @@ import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Engi
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Flaps;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Lighting;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
+import com.example.systemobslugilodzizdalniesterowanej.communication.exception.WrongMessageException;
 import com.example.systemobslugilodzizdalniesterowanej.controllers.ProgressDialogController;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
 import com.sothawo.mapjfx.Marker;
@@ -16,6 +17,7 @@ import javafx.stage.Stage;
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.concurrent.Executors;
 
 import static jssc.SerialPort.MASK_RXCHAR;
 
+@Slf4j
 public class Connection {
     private static String KEYBOARD_CONTROL_MODE_MARKING = "0";
     private static String MOVE_TO_AUTONOMIC_MODE = "1";
@@ -99,8 +102,14 @@ public class Connection {
                 if (serialPortEvent.isRXCHAR()) {
                     try {
                         String readString = serialPort.readString();
-                        System.out.println("Przyszło: " + readString);
+                        log.info("Received: {}", readString);
                         String[] array = readString.split("_");
+
+                        if(array.length != 2) {
+                            throw new WrongMessageException(readString);
+                        }
+
+
 
                         if (array.length > 0) {
                             lighting.setPower(Integer.parseInt(array[0]));
@@ -142,7 +151,7 @@ public class Connection {
                             setBoatPositionOnMap(localization);
                         }
                     } catch (SerialPortException ex) {
-                        System.out.println("Problem z odbiorem danych: " + ex);
+                        log.error("Error while receiving data: {}", ex.getMessage());
                     }
                 }
             });
@@ -162,11 +171,10 @@ public class Connection {
                         + String.valueOf((int) lighting.getPower()) + "_"
                         + String.valueOf((int) flaps.getFirstFlap()) + "_" + flaps.getSecondFlap() + "_");
                 serialPort.writeString(sentInfo);
-
-                System.out.println("Wyslano: " + sentInfo);
+                log.info("Sent: {}", sentInfo);
             }
         } catch (SerialPortException e) {
-            e.printStackTrace();
+            log.error("Error while sending message: {}", e.getMessage());
         }
     }
 
@@ -183,15 +191,13 @@ public class Connection {
                                 + marker.getPosition().getLatitude().toString() + "_"
                                 + marker.getPosition().getLongitude().toString() + "_";
                         serialPort.writeString(sendInfo);
-                        System.out.println("Wyslano waypoint: lat - "
-                                + marker.getPosition().getLatitude().toString()
-                                + ", long - " + marker.getPosition().getLongitude().toString());
+                        log.info("Sent waypoint: lat - {}, long - {}", marker.getPosition().getLatitude().toString(), marker.getPosition().getLongitude().toString());
                         Thread.sleep(MILLISECONDS_TIME_BETWEEN_SEND_INFORMATION);
                     }
-                    System.out.println("Wyslano waypointy");
+                    log.info("Sent all waypoints");
                     sendInfo = AUTONOMOUS_MODE_STOP_SENDING_WAYPOINT;
                     serialPort.writeString(sendInfo);
-                    System.out.println("Wyslano zakonczenie wysylania waypointow");
+                    log.info("Sent confirmation of sent waypoints");
 
                     Platform.runLater(() -> runningBoatInformation.setVisible(true));
 
@@ -209,7 +215,7 @@ public class Connection {
                     dialogWarning("Brak polaczenia", "Aplikacja nie moze sie polaczyc z radionadajnikiem!");
                     stage.close();
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    log.error("Error while async sending changed boat mode and waypoints: {}", e.getMessage());
                 }
                 Platform.runLater(() -> progressDialogController.closeProgressDialogController());
             }
@@ -220,9 +226,9 @@ public class Connection {
         try {
             String sentInfo = STOP_SWIMMING_MARKING;
             serialPort.writeString(sentInfo);
-            System.out.println("Wyslano: " + sentInfo);
+            log.info("Sent message: {}", sentInfo);
         } catch (SerialPortException e) {
-            e.printStackTrace();
+            log.error("Error while sending stop swimming info: {}", e.getMessage());
         }
     }
 
@@ -231,10 +237,10 @@ public class Connection {
             if (boatModeController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
                 String sentInfo = MOVE_TO_AUTONOMIC_MODE;
                 serialPort.writeString(sentInfo);
-                System.out.println("Wyslano: " + sentInfo);
+                log.info("Sent: {}", sentInfo);
             }
         } catch (SerialPortException e) {
-            e.printStackTrace();
+            log.error("Error while sending move to autonomic info: {}", e.getMessage());
         }
     }
 
