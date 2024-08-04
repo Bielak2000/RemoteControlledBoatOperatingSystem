@@ -11,6 +11,8 @@ import com.sothawo.mapjfx.WMSParam;
 import com.sothawo.mapjfx.event.MapViewEvent;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -27,6 +29,12 @@ public class OSMMap {
     private BoatModeController boatModeController;
     private Boolean foundBoatPosition;
     private Marker currentBoatPositionWhileRunning = null;
+    @Getter
+    @Setter
+    private int waypointIndex = 0;
+    @Setter
+    @Getter
+    private Coordinate nextWaypointOnTheRoad = null;
     Label expectedCourse;
 
     /**
@@ -149,6 +157,14 @@ public class OSMMap {
             generateTraceFromBoatPosition(currentBoatPositionWhileRunning.getPosition().getLatitude(), currentBoatPositionWhileRunning.getPosition().getLongitude());
         }
         currentBoatPositionWhileRunning = null;
+    }
+
+    public void setExpectedCourse(Coordinate firstCoordinate, Coordinate secondCoordinate) {
+        this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(firstCoordinate, secondCoordinate)));
+    }
+
+    public void incrementWaypointIndex() {
+            this.waypointIndex++;
     }
 
     private double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {

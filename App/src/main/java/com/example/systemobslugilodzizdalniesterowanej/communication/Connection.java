@@ -8,6 +8,7 @@ import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Ligh
 import com.example.systemobslugilodzizdalniesterowanej.communication.exception.WrongMessageException;
 import com.example.systemobslugilodzizdalniesterowanej.controllers.ProgressDialogController;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
+import com.sothawo.mapjfx.Coordinate;
 import com.sothawo.mapjfx.Marker;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.calculateDistance;
 import static jssc.SerialPort.MASK_RXCHAR;
 
 @Slf4j
@@ -168,6 +170,7 @@ public class Connection {
                         log.info("Sent waypoint: lat - {}, long - {}", marker.getPosition().getLatitude().toString(), marker.getPosition().getLongitude().toString());
                         Thread.sleep(MILLISECONDS_TIME_BETWEEN_SEND_INFORMATION);
                     }
+                    osmMap.setNextWaypointOnTheRoad(markerList.get(0).getPosition());
                     log.info("Sent all waypoints");
                     sendInfo = FROM_APP_AUTONOMOUS_MODE_STOP_SENDING_WAYPOINT;
                     serialPort.writeString(sendInfo);
@@ -234,6 +237,19 @@ public class Connection {
                 if (localization.length == 2) {
                     setBoatPositionOnMap(localization);
                 }
+                if(boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+                    Coordinate newPosition = new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1]));
+                    if(calculateDistance(newPosition, osmMap.getNextWaypointOnTheRoad()) < 3) {
+                        osmMap.incrementWaypointIndex();
+                        List<Marker> markerList = osmMap.getDesignatedWaypoints();
+                        if(osmMap.getWaypointIndex() < markerList.size()) {
+                            osmMap.setNextWaypointOnTheRoad(markerList.get(osmMap.getWaypointIndex()).getPosition());
+                            osmMap.setExpectedCourse(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), osmMap.getNextWaypointOnTheRoad());
+                        }
+                    } else {
+                        osmMap.setExpectedCourse(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), osmMap.getNextWaypointOnTheRoad());
+                    }
+                }
                 break;
             case FROM_BOAT_BOAT_IS_SWIMMING_BY_WAYPOINTS:
                 if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_STARTING) {
@@ -251,6 +267,8 @@ public class Connection {
                     osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
                     showInformationDialog("Łódka osiągneła punkt docelowy", BOAT_FINISHED_SWIMMING_INFORMATION, 700);
                 });
+                osmMap.setNextWaypointOnTheRoad(null);
+                osmMap.setWaypointIndex(0);
                 break;
             case FROM_BOAT_BOAT_MANUALLY_FINISHED_SWIMMING_BY_WAYPOINTS:
                 Platform.runLater(() -> {
@@ -260,6 +278,8 @@ public class Connection {
                     Platform.runLater(() -> progressDialogController.closeProgressDialogController());
                     showInformationDialog("Przerwano pływanie łodzi", BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION, 500);
                 });
+                osmMap.setNextWaypointOnTheRoad(null);
+                osmMap.setWaypointIndex(0);
                 break;
             case FROM_BOAT_GPS_COURSE_MESSAGE:
                 Platform.runLater(()->{
