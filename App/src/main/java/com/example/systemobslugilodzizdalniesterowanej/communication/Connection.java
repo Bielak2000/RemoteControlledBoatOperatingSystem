@@ -123,8 +123,8 @@ public class Connection {
                         if (array.length != 2) {
                             log.error(String.format("The wrong received message from boat: %s", readString));
                         } else {
-//                            int messageSign = Integer.parseInt(array[0]);
-//                        receivedMessageHandler(messageSign, array);
+                            int messageSign = Integer.parseInt(array[0]);
+                            receivedMessageHandler(messageSign, array);
                         }
                     } catch (SerialPortException ex) {
                         log.error("Error while receiving data: {}", ex.getMessage());
