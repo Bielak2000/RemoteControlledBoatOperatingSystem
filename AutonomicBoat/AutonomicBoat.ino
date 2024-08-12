@@ -1,5 +1,6 @@
 #include <SoftwareSerial.h>
 #include <TinyGPS++.h>
+#include <Adafruit_BNO08x.h>
 #include <math.h>
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
@@ -14,6 +15,7 @@
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
 
 #define GPS_COURSE_ACCURACY 3
+#define COMPASS_COURSE_ACCURACY 3
 
 // ********************************************************************************
 
@@ -28,26 +30,48 @@ bool newLocalization = false;
 // ZMIENNE DO OBSLUG GPS - kurs
 double gpsCourse = 400;
 
+// ZMIENNE DO OBSLUGI BNO08X - kompas
+uint32_t COMPASS_REPORT_INTERVAL = 1000000;  // 100000 µs = 100 ms = 10 Hz
+Adafruit_BNO08x bno08x(-1);
+sh2_SensorValue_t compassValue;
+double previousCompassCourse = 400;
+double compassCourse = 400;
+bool newCompassCourse = false;
+struct euler_t {
+  float yaw;
+  float pitch;
+  float roll;
+} compassData;
+
 // ZMIENNE DO WYSYŁANIA DANYCH
 String dataBuffer = "";
 unsigned long currentMillis;
 unsigned long previousMillis = 0;
 // OZNACZENIA
 const String LOCALIZATION_ASSIGN = "1";
-const String GPS_COURSE_ASSIGN = "6";
+const String GPS_COURSE_ASSIGN = "5";
+const String COMPASS_COURSE_ASSIGN = "6";
 
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
 
 double previousGpsCourse = 400;
 bool newGpsCourse = false;
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+LiquidCrystal lcd(12, 11, 5, 4, 3, 6);
 
 // ********************************************************************************
+
+void compassInterrupt() {
+  newCompassCourse = true;
+}
 
 void setup() {
     Serial2.begin(9600); // gps
     Serial3.begin(57600); // radionadanjnik
+    setCompassSensor();
+    setCompassReports();
+    attachInterrupt(digitalPinToInterrupt(2), compassInterrupt, FALLING);
+    delay(500);
 
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
@@ -99,6 +123,14 @@ void loop() {
     }
   }
 
+  // OBSLUGA DANYCH KURSU Z KOMPASU JESLI SIE POJAWILY
+  if (newCompassCourse) {
+    compassRead();
+    if(newCompassCourseHandler()) {
+      appendData(COMPASS_COURSE_ASSIGN + "_" + String(compassCourse) + "_");
+    }
+  }
+
   // WYSYLANIE DANYCH
   if(dataBuffer.length() > 0) {
     sendDataIfNecessary();
@@ -132,7 +164,6 @@ void appendData(String data) {
 bool newLocalizationHandler() {
   double dis = calculateCmDistance();
   if(dis > MINIMAL_DIFFERENCE_LOCALIZATION || oldLat == 0) {
-      Serial.write("send\n");
       oldLat = newLat;
       oldLng = newLng;
       lcd.setCursor(0,1);
@@ -155,6 +186,73 @@ double calculateCmDistance() {
     //            sin(dLon / 2) * sin(dLon / 2);
     // double c = 2 * atan2(sqrt(a), sqrt(1 - a));
     // return EARTH_RADIUS * c * 100000.0;
+}
+
+// DODAĆ ODPOWIEDNIA OBSLUGE BLEDOW
+void setCompassSensor() {
+  if (!bno08x.begin_I2C()) {
+    Serial.write("Failed to find BNO08x chip\n");
+    while (1) {
+      delay(10);
+    }
+    bno08x.hardwareReset();
+  }
+}
+
+void setCompassReports() {
+  if (!bno08x.enableReport(SH2_ROTATION_VECTOR, COMPASS_REPORT_INTERVAL)) {
+    Serial.write("Could not enable rotation vector\n");
+  }
+}
+
+void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t* ypr, bool degrees) {
+    float sqr = sq(qr);
+    float sqi = sq(qi);
+    float sqj = sq(qj);
+    float sqk = sq(qk);
+
+    ypr->yaw = atan2(2.0 * (qi * qj + qk * qr), (sqi - sqj - sqk + sqr));
+    ypr->pitch = asin(-2.0 * (qi * qk - qj * qr) / (sqi + sqj + sqk + sqr));
+    ypr->roll = atan2(2.0 * (qj * qk + qi * qr), (-sqi - sqj + sqk + sqr));
+
+    if (degrees) {
+      ypr->yaw *= RAD_TO_DEG;
+      ypr->yaw = -ypr->yaw;
+      if(ypr->yaw<0) {
+        ypr->yaw = 360.0+ypr->yaw;
+      }
+    }
+}
+
+void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, euler_t* ypr, bool degrees) {
+    quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
+}
+
+void compassRead() {
+  newCompassCourse = false;
+  if (bno08x.wasReset()) {
+    Serial.write("sensor was reset\n");
+    setCompassReports();
+  }    
+  if (bno08x.getSensorEvent(&compassValue)) {
+    switch (compassValue.sensorId) {
+      case SH2_ROTATION_VECTOR:
+        quaternionToEulerRV(&compassValue.un.rotationVector, &compassData, true);
+        compassCourse = compassData.yaw;
+        lcd.clear();
+        lcd.setCursor(0,0);
+        lcd.print(compassCourse);
+        break;
+    }
+  }
+}
+
+bool newCompassCourseHandler() {
+  if(abs(compassCourse - previousCompassCourse) > COMPASS_COURSE_ACCURACY) {
+      previousCompassCourse = compassCourse;
+      return true;
+  }
+  return false;
 }
 
 // ********************************************************************************
