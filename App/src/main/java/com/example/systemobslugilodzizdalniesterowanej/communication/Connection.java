@@ -52,8 +52,8 @@ public class Connection {
     private final static String BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION = "Ręcznie przerwano pływanie łodzi po waypointach, zmieniono tryb sterowania na tryb manualny.";
 
     // TODO: do testow
-    private final static int FROM_BOAT_SENSOR_COURSE_MESSAGE = 5;
-    private final static int FROM_BOAT_GPS_COURSE_MESSAGE = 6;
+    private final static int FROM_BOAT_GPS_COURSE_MESSAGE = 5;
+    private final static int FROM_BOAT_SENSOR_COURSE_MESSAGE = 6;
 
     private ExecutorService executorService;
     private BoatModeController boatModeController;
