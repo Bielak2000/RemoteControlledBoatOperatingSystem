@@ -14,6 +14,7 @@
 #define INTERVAL_ENGINE_POWER 50
 #define INTERVAL_LIGHTING_POWER 500
 #define BOAT_MODE_KEYBOARD 0
+#define BOAT_MODE_TO_AUTONOMIC 1
 
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
@@ -85,6 +86,7 @@ char buff[buffLength];
 uint8_t buffIndex = 0;
 uint8_t arrayIndex = 0;
 int newDataForKeyboardHandler[5] = {0,0,0,0,0};
+bool receivedFirstData = true;
 
 // OZNACZENIA
 const String LIGTHING_ASSIGN = "0";
@@ -165,11 +167,35 @@ void serialEvent2() {
 // RADIONADAJNIK
 void serialEvent3() {
   while (Serial3.available()) {
-    if(boatMode == BOAT_MODE_KEYBOARD) {
-       char newChar = Serial3.read();
-       if (buffIndex < buffLength-1) { 
-         readDataFromAppForKeyboardMode(newChar);
+    bool newMode = false;
+    char newChar = Serial3.read();
+            lcd.setCursor(8, 1);
+        lcd.print(newChar);
+    if(receivedFirstData) {
+      int boatModeTemp = atoi(newChar);
+      if(boatMode != boatModeTemp) {
+        boatMode = boatModeTemp;
+        newMode = true;
+        lcd.setCursor(10, 1);
+        lcd.print(boatMode);
       }
+    }
+    receivedFirstData = false;
+
+    if(boatMode == BOAT_MODE_KEYBOARD) {
+       if (buffIndex < buffLength-1) { 
+         if(newMode) {
+          // TODO: czyszczenie
+         }
+         readDataFromAppForKeyboardMode(newChar);
+       }
+    } else if(boatMode == BOAT_MODE_TO_AUTONOMIC) {
+       if (buffIndex < buffLength-1) { 
+        if(newMode) {
+         // TODO: obsluga nowego trybu, czyszcenie wszystkiego z k
+        }
+        // TODO: rozpoczecie autonomicznosci
+       }
     }
   }
 }
@@ -214,11 +240,9 @@ void loop() {
     }
   }
 
-  if(boatMode == BOAT_MODE_KEYBOARD) {
-    if (sentLigthingValue && newDataForKeyboardHandler[2] != 1) {
-      appendData(LIGTHING_ASSIGN + "_" + String(currentLight) + "_");
-      sentLigthingValue = false;
-   }
+  if (sentLigthingValue && newDataForKeyboardHandler[2] != 1) {
+    appendData(LIGTHING_ASSIGN + "_" + String(currentLight) + "_");
+    sentLigthingValue = false;
   }
 
   // WYSYLANIE DANYCH
@@ -388,6 +412,7 @@ void readDataFromAppForKeyboardMode(char newChar) {
            newDataForKeyboardHandler[4]=1;
         }
         arrayIndex = 0;
+        receivedFirstData = true;
       }
    }
    else if (newChar == '-' || ('0' <= newChar && newChar <= '9'))

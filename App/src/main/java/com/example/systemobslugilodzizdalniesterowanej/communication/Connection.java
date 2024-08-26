@@ -199,7 +199,7 @@ public class Connection {
 
     public void sendStopSwimmingInfo() {
         try {
-            String sentInfo = FROM_APP_STOP_SWIMMING_MARKING;
+            String sentInfo = FROM_APP_KEYBOARD_CONTROL_MODE_MARKING;
             serialPort.writeString(sentInfo);
             log.info("Sent message: {}", sentInfo);
         } catch (SerialPortException e) {

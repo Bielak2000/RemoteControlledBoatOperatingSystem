@@ -189,8 +189,8 @@ public class SystemController implements Initializable {
     @FXML
     void changeMode(ActionEvent event) {
         if (modeChooser.isSelected()) {
-            connection.sendMoveToAutonomicInfo();
             keyboardHandler.stopBoat();
+            connection.sendMoveToAutonomicInfo();
             changeBoatMode(BoatMode.AUTONOMIC);
         } else {
             connection.sendStopSwimmingInfo();
