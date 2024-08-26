@@ -2,6 +2,7 @@
 #include <TinyGPS++.h>
 #include <Adafruit_BNO08x.h>
 #include <math.h>
+#include <Servo.h>
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
 #include <LiquidCrystal.h>
@@ -10,6 +11,9 @@
 #define EARTH_RADIUS 6371.0
 #define MINIMAL_DIFFERENCE_LOCALIZATION 100
 #define INTERVAL_SEND_DATA 300
+#define INTERVAL_ENGINE_POWER 50
+#define INTERVAL_LIGHTING_POWER 500
+#define BOAT_MODE_KEYBOARD 0
 
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
@@ -18,6 +22,33 @@
 #define COMPASS_COURSE_ACCURACY 3
 
 // ********************************************************************************
+
+// MODEL STEROWANIA ŁODZIĄ
+int boatMode = BOAT_MODE_KEYBOARD;
+
+// SILNIKI
+Servo leftEngine;
+Servo rightEngine;
+int enginesSpeed = 1500;
+unsigned long setServoPowerCurrentMillis;
+unsigned long setEnginePowerPreviousMillis = 0;
+int newEnginesSpeed[2] = {0,0};
+int currentEngineSpeeds[2] = {0,0};
+
+// ZAPADKI
+Servo leftFlap;
+Servo rightFlap;
+int leftFlapState = 0;
+int rightFlapState = 0;
+int leftFlapPower = 1400;
+int rightFlapPower = 1700;
+
+// SWIATLO
+Servo lighting;
+int newLight = 0;
+int currentLight = 0;
+bool sentLigthingValue = false;
+unsigned long setLightingPowerPreviousMillis = 0;
 
 // ZMIENNE DO OBSLUGI GPS - lokalizacja
 TinyGPSPlus gps;
@@ -47,7 +78,16 @@ struct euler_t {
 String dataBuffer = "";
 unsigned long currentMillis;
 unsigned long previousMillis = 0;
+
+// ZMIENNE DO ODBIORU DANYCH - keyboard handler
+const uint8_t buffLength = 7;
+char buff[buffLength];
+uint8_t buffIndex = 0;
+uint8_t arrayIndex = 0;
+int newDataForKeyboardHandler[5] = {0,0,0,0,0};
+
 // OZNACZENIA
+const String LIGTHING_ASSIGN = "0";
 const String LOCALIZATION_ASSIGN = "1";
 const String GPS_COURSE_ASSIGN = "5";
 const String COMPASS_COURSE_ASSIGN = "6";
@@ -65,21 +105,47 @@ void compassInterrupt() {
   newCompassCourse = true;
 }
 
+void enginesInit() {
+  leftEngine.attach(8);
+  leftEngine.writeMicroseconds(enginesSpeed);
+  rightEngine.attach(9);
+  rightEngine.writeMicroseconds(enginesSpeed);
+}
+
+void flapsInit() {
+  leftFlap.attach(9);
+  leftFlap.writeMicroseconds(leftFlapPower);
+  rightFlap.attach(8);
+  rightFlap.writeMicroseconds(rightFlapPower);
+}
+
+void lightingInit() {
+  lighting.attach(8);
+  lighting.writeMicroseconds(1200);
+}
+
 void setup() {
-    Serial2.begin(9600); // gps
-    Serial3.begin(57600); // radionadanjnik
-    setCompassSensor();
-    setCompassReports();
-    attachInterrupt(digitalPinToInterrupt(2), compassInterrupt, FALLING);
-    delay(500);
+  Serial2.begin(9600); // gps
+  Serial3.begin(57600); // radionadanjnik
+
+  setCompassSensor();
+  setCompassReports();
+  attachInterrupt(digitalPinToInterrupt(2), compassInterrupt, FALLING);
+
+  // enginesInit();
+  // flapsInit();
+  lightingInit();
+
+  delay(500);
 
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
-    Serial.begin(4800);
-    lcd.begin(16,2);
+  Serial.begin(4800);
+  lcd.begin(16,2);
 // ********************************************************************************    
 }
 
+// GPS
 void serialEvent2() {
   while (Serial2.available()) {
     if (gps.encode(Serial2.read())) {
@@ -96,7 +162,24 @@ void serialEvent2() {
   }
 }
 
+// RADIONADAJNIK
+void serialEvent3() {
+  while (Serial3.available()) {
+    if(boatMode == BOAT_MODE_KEYBOARD) {
+       char newChar = Serial3.read();
+       if (buffIndex < buffLength-1) { 
+         readDataFromAppForKeyboardMode(newChar);
+      }
+    }
+  }
+}
+
 void loop() {
+  // OBGLUGA DANYCH Z APLIKACJI - RECZNE STEROWANIE
+  if(boatMode == BOAT_MODE_KEYBOARD && checkNewDataFromAppInKeyboardMode()) {
+    keyboardHandler();
+  }
+
   // OBSLUGA DANYCH LOKALIZACYJNYCH JESLI SIE POJAWILY
   if(newLocalization) {
     newLocalization = false;
@@ -131,10 +214,21 @@ void loop() {
     }
   }
 
+  if(boatMode == BOAT_MODE_KEYBOARD) {
+    if (sentLigthingValue && newDataForKeyboardHandler[2] != 1) {
+      appendData(LIGTHING_ASSIGN + "_" + String(currentLight) + "_");
+      sentLigthingValue = false;
+   }
+  }
+
   // WYSYLANIE DANYCH
   if(dataBuffer.length() > 0) {
     sendDataIfNecessary();
   }
+}
+
+void changeBoatMode(int boatMode) {
+  // TODO: zmiana trybu
 }
 
 void sendDataIfNecessary() {
@@ -166,8 +260,8 @@ bool newLocalizationHandler() {
   if(dis > MINIMAL_DIFFERENCE_LOCALIZATION || oldLat == 0) {
       oldLat = newLat;
       oldLng = newLng;
-      lcd.setCursor(0,1);
-      lcd.print(dis);
+      // lcd.setCursor(0,1);
+      // lcd.print(dis);
       return true;
   }
   return false;
@@ -239,9 +333,9 @@ void compassRead() {
       case SH2_ROTATION_VECTOR:
         quaternionToEulerRV(&compassValue.un.rotationVector, &compassData, true);
         compassCourse = compassData.yaw;
-        lcd.clear();
-        lcd.setCursor(0,0);
-        lcd.print(compassCourse);
+        // lcd.clear();
+        // lcd.setCursor(0,0);
+        // lcd.print(compassCourse);
         break;
     }
   }
@@ -253,6 +347,154 @@ bool newCompassCourseHandler() {
       return true;
   }
   return false;
+}
+
+void readDataFromAppForKeyboardMode(char newChar) {
+   if (newChar == '_') { 
+      buff[buffIndex++] = 0;
+      buffIndex = 0;
+      if(arrayIndex==5){
+        rightFlapState = atoi(buff);
+      }
+      else if(arrayIndex==4){
+        leftFlapState = atoi(buff);
+      }
+      else if(arrayIndex==3){
+        newLight = atoi(buff);
+      }
+      else if(arrayIndex==2){
+        newEnginesSpeed[1] = atoi(buff);
+      }
+      else if(arrayIndex==1) {
+        newEnginesSpeed[0] = atoi(buff);
+      } else {
+        int newBoatMode = atoi(buff);
+        if(newBoatMode!='0') {
+          changeBoatMode(newBoatMode);
+        }
+      }
+      arrayIndex++;
+      if (arrayIndex == 6) 
+      { 
+        newDataForKeyboardHandler[0]=1;
+        newDataForKeyboardHandler[1]=1;
+        if(newLight != currentLight){
+          newDataForKeyboardHandler[2]=1;
+        }
+        if(rightFlapState != 0){
+           newDataForKeyboardHandler[3]=1;
+        }
+        if(leftFlapState != 0){
+           newDataForKeyboardHandler[4]=1;
+        }
+        arrayIndex = 0;
+      }
+   }
+   else if (newChar == '-' || ('0' <= newChar && newChar <= '9'))
+   {
+       buff[buffIndex++] = newChar;
+   }
+}
+
+void keyboardHandler() {
+  // szybczkosc zwiekszania mocy na silniki / oswietlenie / zapadki
+  setServoPowerCurrentMillis = millis();
+  if (setServoPowerCurrentMillis - setEnginePowerPreviousMillis >= INTERVAL_ENGINE_POWER || setEnginePowerPreviousMillis == 0) {
+    //jesli dostano dane i jeszcze nie zostaly ustawione na maksa to wykonaj
+    if((newDataForKeyboardHandler[0]==1 || newDataForKeyboardHandler[1]==1)){
+      setEnginePowerForKeyboardMode();
+      setEnginePowerPreviousMillis = millis();
+    }
+  }
+  
+  if (setServoPowerCurrentMillis - setLightingPowerPreviousMillis >= INTERVAL_LIGHTING_POWER || setLightingPowerPreviousMillis == 0) {
+    if(newDataForKeyboardHandler[2]==1){
+      setLight();
+      sentLigthingValue = true;
+      setLightingPowerPreviousMillis = millis();
+    }
+  }
+
+  // jesli sa informacje to wlacz zapadke (jesli przeslano 1)
+  if(newDataForKeyboardHandler[3]==1 || newDataForKeyboardHandler[4]==1){
+    openOrCloseFlaps();
+    rightFlapState = 0;
+    leftFlapState = 0;
+  }
+}
+
+bool checkNewDataFromAppInKeyboardMode() {
+  return newDataForKeyboardHandler[0]==1 || newDataForKeyboardHandler[1]==1 || newDataForKeyboardHandler[2]==1 || newDataForKeyboardHandler[3]==1 || newDataForKeyboardHandler[4]==1;
+}
+
+void setEnginePowerForKeyboardMode(){
+    for(int i=0; i<2; i++)
+    {
+      if(newEnginesSpeed[i]<0 && currentEngineSpeeds[i]>newEnginesSpeed[i])
+      {
+        currentEngineSpeeds[i]=currentEngineSpeeds[i]-1;
+      }
+      else if(newEnginesSpeed[i]>0 && currentEngineSpeeds[i]<newEnginesSpeed[i])
+      {
+        currentEngineSpeeds[i]=currentEngineSpeeds[i]+1;
+      }
+      else if(newEnginesSpeed[i]==0)
+      {
+        currentEngineSpeeds[i]=0;
+        newDataForKeyboardHandler[i]=0;
+      }
+      else
+      {
+        newDataForKeyboardHandler[i]=0;
+      }
+    }
+
+    enginesSpeed = map(currentEngineSpeeds[0], -100, 100, 1000, 2000);
+    leftEngine.writeMicroseconds(enginesSpeed); 
+    lcd.setCursor(0, 0);         
+    lcd.print(enginesSpeed);
+
+    enginesSpeed = map(currentEngineSpeeds[1], -100, 100, 1000, 2000);
+    rightEngine.writeMicroseconds(enginesSpeed);
+    lcd.setCursor(8, 0);         
+    lcd.print(enginesSpeed);
+}
+
+void openOrCloseFlaps() {
+  if(rightFlapState == 1) {
+    if(rightFlapPower == 1700) {
+      rightFlapPower = 1250;
+    } else {
+      rightFlapPower = 1700;
+    }
+    rightFlap.writeMicroseconds(rightFlapPower);
+    newDataForKeyboardHandler[3] = 0;
+  }
+  if(leftFlapState == 1) {
+    if(leftFlapPower == 1400) {
+      leftFlapPower = 1850;
+    } else {
+      leftFlapPower=1400;
+    }
+    leftFlap.writeMicroseconds(leftFlapPower);
+    newDataForKeyboardHandler[4] = 0;
+  }
+}
+
+void setLight() {
+  if(newLight == -1) {
+    newDataForKeyboardHandler[2]=0;
+  } else if(currentLight < newLight) {
+    currentLight = currentLight + 5;
+  }
+  else if(currentLight > newLight) {
+    currentLight = currentLight - 5;
+  } else {
+    newDataForKeyboardHandler[2] = 0;
+  }
+  lcd.setCursor(0, 1);
+  lcd.print(currentLight);
+  lighting.writeMicroseconds(map(currentLight, 0, 100, 1210, 2000));
 }
 
 // ********************************************************************************

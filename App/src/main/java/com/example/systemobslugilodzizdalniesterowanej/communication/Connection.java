@@ -52,8 +52,8 @@ public class Connection {
     private final static String BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION = "Ręcznie przerwano pływanie łodzi po waypointach, zmieniono tryb sterowania na tryb manualny.";
 
     // TODO: do testow
-    private final static int FROM_BOAT_SENSOR_COURSE_MESSAGE = 5;
-    private final static int FROM_BOAT_GPS_COURSE_MESSAGE = 6;
+    private final static int FROM_BOAT_GPS_COURSE_MESSAGE = 5;
+    private final static int FROM_BOAT_SENSOR_COURSE_MESSAGE = 6;
 
     private ExecutorService executorService;
     private BoatModeController boatModeController;
@@ -70,7 +70,6 @@ public class Connection {
     // TODO: do testow
     private Label gpsCourse;
     private Label sensorCourse;
-    private Label expectedCourse;
 
     private Boolean networkStatus;
     private OSMMap osmMap;
@@ -79,7 +78,7 @@ public class Connection {
 
     public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap,
                       Stage stage, BoatModeController boatModeController, Label runningBoatInformation,
-                      Label gpsCourse, Label sensorCourse, Label expectedCourse) {
+                      Label gpsCourse, Label sensorCourse) {
         com.fazecast.jSerialComm.SerialPort[] ports = com.fazecast.jSerialComm.SerialPort.getCommPorts();
         for (com.fazecast.jSerialComm.SerialPort port : ports) {
             portNames.add(port.getSystemPortName());
@@ -98,7 +97,6 @@ public class Connection {
 
         this.gpsCourse = gpsCourse;
         this.sensorCourse = sensorCourse;
-        this.expectedCourse = expectedCourse;
     }
 
     public void connect(String port, String system) {
@@ -120,11 +118,11 @@ public class Connection {
                         log.info("Received: {}", readString);
                         String[] array = readString.split("_");
 
-                        if (array.length != 2) {
-                            log.error(String.format("The wrong received message from boat: %s", readString));
-                        } else {
+                        if (checkCorrectlyReceivedData(array)) {
                             int messageSign = Integer.parseInt(array[0]);
                             receivedMessageHandler(messageSign, array);
+                        } else {
+                            log.error(String.format("The wrong received message from boat: %s", readString));
                         }
                     } catch (SerialPortException ex) {
                         log.error("Error while receiving data: {}", ex.getMessage());
@@ -237,12 +235,12 @@ public class Connection {
                 if (localization.length == 2) {
                     setBoatPositionOnMap(localization);
                 }
-                if(boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
                     Coordinate newPosition = new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1]));
-                    if(calculateDistance(newPosition, osmMap.getNextWaypointOnTheRoad()) < 3) {
+                    if (calculateDistance(newPosition, osmMap.getNextWaypointOnTheRoad()) < 3) {
                         osmMap.incrementWaypointIndex();
                         List<Marker> markerList = osmMap.getDesignatedWaypoints();
-                        if(osmMap.getWaypointIndex() < markerList.size()) {
+                        if (osmMap.getWaypointIndex() < markerList.size()) {
                             osmMap.setNextWaypointOnTheRoad(markerList.get(osmMap.getWaypointIndex()).getPosition());
                             osmMap.setExpectedCourse(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), osmMap.getNextWaypointOnTheRoad());
                         }
@@ -282,12 +280,12 @@ public class Connection {
                 osmMap.setWaypointIndex(0);
                 break;
             case FROM_BOAT_GPS_COURSE_MESSAGE:
-                Platform.runLater(()->{
+                Platform.runLater(() -> {
                     this.gpsCourse.setText(array[1]);
                 });
                 break;
             case FROM_BOAT_SENSOR_COURSE_MESSAGE:
-                Platform.runLater(()->{
+                Platform.runLater(() -> {
                     this.sensorCourse.setText(array[1]);
                 });
                 break;
@@ -335,5 +333,15 @@ public class Connection {
         alert.setHeaderText(text);
         alert.getDialogPane().setMaxWidth(width);
         alert.showAndWait();
+    }
+
+    private boolean checkCorrectlyReceivedData(String[] receivedData) {
+        return receivedData.length == 2 && (Integer.parseInt(receivedData[0]) == FROM_BOAT_LIGHTING_MESSAGE ||
+                Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_MESSAGE ||
+                Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_IS_SWIMMING_BY_WAYPOINTS ||
+                Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS ||
+                Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_MANUALLY_FINISHED_SWIMMING_BY_WAYPOINTS ||
+                Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_COURSE_MESSAGE ||
+                Integer.parseInt(receivedData[0]) == FROM_BOAT_SENSOR_COURSE_MESSAGE);
     }
 }

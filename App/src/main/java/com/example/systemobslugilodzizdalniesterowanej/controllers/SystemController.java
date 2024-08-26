@@ -22,6 +22,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URL;
@@ -30,6 +31,7 @@ import java.util.ResourceBundle;
 
 import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_RESOURCES_PATH;
 
+@Slf4j
 public class SystemController implements Initializable {
     Stage stage;
     Boolean networkStatus;
@@ -65,7 +67,7 @@ public class SystemController implements Initializable {
             throw new RuntimeException(e);
         }
         this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage,
-                boatModeController, runningBoatInformation, gpsCourse, sensorCourse, expectedCourse);
+                boatModeController, runningBoatInformation, gpsCourse, sensorCourse);
         connection.connect(chosenPort, chosenSystem);
         networkStatus = false;
         lightPower.setText("0%");
@@ -194,6 +196,7 @@ public class SystemController implements Initializable {
             connection.sendStopSwimmingInfo();
             changeBoatMode(BoatMode.KEYBOARD_CONTROL);
         }
+       modeChooser.getScene().getRoot().requestFocus();
     }
 
     @FXML
@@ -262,6 +265,7 @@ public class SystemController implements Initializable {
         if (this.boatModeController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
             osmMap.removeAllMarkersAndLinesWithoutBoatPosition();
         }
+        log.info("Change to {} boat mode.", boatMode.name());
     }
 
     private void dialogNotConnect(String title, String text) {
