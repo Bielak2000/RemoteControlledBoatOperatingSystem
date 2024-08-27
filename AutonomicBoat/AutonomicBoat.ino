@@ -228,7 +228,6 @@ void loop() {
     keyboardHandler();
   }
 
-  // TODO: i jesli plywa
   if(boatMode == BOAT_MODE_KEYBOARD) {
     // OBSLUGA DANYCH LOKALIZACYJNYCH JESLI SIE POJAWILY
     if(newLocalization) {
@@ -274,10 +273,6 @@ void loop() {
   if(dataBuffer.length() > 0) {
     sendDataIfNecessary();
   }
-}
-
-void changeBoatMode(int boatMode) {
-  // TODO: zmiana trybu
 }
 
 void sendDataIfNecessary() {
