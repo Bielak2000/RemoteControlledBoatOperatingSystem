@@ -1,12 +1,12 @@
 package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
-import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Engines;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Flaps;
-import com.example.systemobslugilodzizdalniesterowanej.boatmodel.keyboardcontrol.KeyboardHandler;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Lighting;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.keyboardcontrol.KeyboardHandler;
+import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
 import com.sothawo.mapjfx.MapView;
 import javafx.event.ActionEvent;
@@ -28,11 +28,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_RESOURCES_PATH;
 
 @Slf4j
 public class SystemController implements Initializable {
+    ExecutorService executorService;
     Stage stage;
     Boolean networkStatus;
     OSMMap osmMap;
@@ -53,6 +56,7 @@ public class SystemController implements Initializable {
         this.stage = stage;
         this.chosenPort = chosenPort;
         this.chosenSystem = chosenSystem;
+        this.executorService = Executors.newFixedThreadPool(1);
     }
 
     @Override
@@ -190,22 +194,32 @@ public class SystemController implements Initializable {
     void changeMode(ActionEvent event) {
         if (modeChooser.isSelected()) {
             keyboardHandler.stopBoat();
-            connection.sendMoveToAutonomicInfo();
-            changeBoatMode(BoatMode.AUTONOMIC);
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(200);
+                        connection.sendMoveToAutonomicInfo();
+                        changeBoatMode(BoatMode.AUTONOMIC);
+                    } catch (InterruptedException e) {
+                        log.error("Error while async sending changed boat mode and waypoints: {}", e.getMessage());
+                    }
+                }
+            });
         } else {
             connection.sendStopSwimmingInfo();
             changeBoatMode(BoatMode.KEYBOARD_CONTROL);
         }
-       modeChooser.getScene().getRoot().requestFocus();
+        modeChooser.getScene().getRoot().requestFocus();
     }
 
     @FXML
     void startSwimming(ActionEvent event) throws IOException {
-        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints()) {
-//        if (true) {
+//        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints()) {
+        if (true) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "start-swimming-dialog.fxml"));
             Stage mainStage = new Stage();
-            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection);
+            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection, osmMap);
             fxmlLoader.setController(startSwimmingDialogController);
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
