@@ -37,7 +37,6 @@ public class Connection {
     private final static String FROM_APP_MOVE_TO_AUTONOMIC_MODE = "1";
     private final static String FROM_APP_AUTONOMOUS_MODE_MARKING = "2";
     private final static String FROM_APP_AUTONOMOUS_MODE_STOP_SENDING_WAYPOINT = "3";
-    private final static String FROM_APP_STOP_SWIMMING_MARKING = "4";
 
     // MESSAGE FROM BOAT
     private final static int FROM_BOAT_LIGHTING_MESSAGE = 0;
@@ -159,7 +158,6 @@ public class Connection {
                 try {
                     String sendInfo;
                     List<Marker> markerList = osmMap.getDesignatedWaypoints();
-                    String isLastMarker = "0";
                     for (Marker marker : markerList) {
                         sendInfo = FROM_APP_AUTONOMOUS_MODE_MARKING + "_"
                                 + marker.getPosition().getLatitude().toString() + "_"
@@ -173,7 +171,6 @@ public class Connection {
                     sendInfo = FROM_APP_AUTONOMOUS_MODE_STOP_SENDING_WAYPOINT;
                     serialPort.writeString(sendInfo);
                     log.info("Sent confirmation of sent waypoints");
-
                     Platform.runLater(() -> runningBoatInformation.setVisible(true));
 
                     // Symulacja rozpoczecia plywania lodki

@@ -15,6 +15,8 @@
 #define INTERVAL_LIGHTING_POWER 500
 #define BOAT_MODE_KEYBOARD 0
 #define BOAT_MODE_TO_AUTONOMIC 1
+#define BOAT_MODE_RECEIVIING_WAYPOINTS 2
+#define BOAT_MODE_STOP_RECEIVING_WAYPOINTS 3
 
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
@@ -81,12 +83,26 @@ unsigned long currentMillis;
 unsigned long previousMillis = 0;
 
 // ZMIENNE DO ODBIORU DANYCH - keyboard handler
-const uint8_t buffLength = 7;
+const uint8_t buffLength = 9;
 char buff[buffLength];
 uint8_t buffIndex = 0;
 uint8_t arrayIndex = 0;
 int newDataForKeyboardHandler[5] = {0,0,0,0,0};
 bool receivedFirstData = true;
+
+// AUTONOMICZNOSC
+struct Waypoint {
+  double lat;
+  double lon;
+};
+int currentWaypointsIndex = 0;
+struct Waypoint waypoints[5] = {
+  {0.0, 0.0},
+  {0.0, 0.0},
+  {0.0, 0.0},
+  {0.0, 0.0},
+  {0.0, 0.0}
+};
 
 // OZNACZENIA
 const String LIGTHING_ASSIGN = "0";
@@ -169,33 +185,39 @@ void serialEvent3() {
   while (Serial3.available()) {
     bool newMode = false;
     char newChar = Serial3.read();
-            lcd.setCursor(8, 1);
-        lcd.print(newChar);
     if(receivedFirstData) {
-      int boatModeTemp = atoi(newChar);
+      int boatModeTemp = newChar - '0';
       if(boatMode != boatModeTemp) {
         boatMode = boatModeTemp;
         newMode = true;
-        lcd.setCursor(10, 1);
-        lcd.print(boatMode);
       }
     }
     receivedFirstData = false;
 
+    lcd.setCursor(1, 10);
+    lcd.print(boatMode);
     if(boatMode == BOAT_MODE_KEYBOARD) {
-       if (buffIndex < buffLength-1) { 
-         if(newMode) {
-          // TODO: czyszczenie
-         }
-         readDataFromAppForKeyboardMode(newChar);
-       }
-    } else if(boatMode == BOAT_MODE_TO_AUTONOMIC) {
-       if (buffIndex < buffLength-1) { 
+      if (buffIndex < buffLength-1) { 
         if(newMode) {
-         // TODO: obsluga nowego trybu, czyszcenie wszystkiego z k
+         // TODO: czyszczenie po zakonczeniu autonomicznosci
+         clearWaypointsData();
         }
-        // TODO: rozpoczecie autonomicznosci
-       }
+        readDataFromAppForKeyboardMode(newChar);
+      }
+    } else if(boatMode == BOAT_MODE_TO_AUTONOMIC) {
+      receivedFirstData = true;
+    } else if(boatMode == BOAT_MODE_RECEIVIING_WAYPOINTS) {
+      readWaypointsFromApp(newChar);
+    } else if(boatMode == BOAT_MODE_STOP_RECEIVING_WAYPOINTS) {
+      // TODO: odpowiednia konwersja na double
+      // lcd.setCursor(12, 1);
+      // lcd.print("9");
+      // TODO: obsluga odebranych danych
+            // lcd.setCursor(0, 0);
+      // lcd.print(String(waypoints[0].lat));
+                  // lcd.setCursor(0,1);
+      // lcd.print(String(waypoints[0].lon));
+
     }
   }
 }
@@ -206,43 +228,46 @@ void loop() {
     keyboardHandler();
   }
 
-  // OBSLUGA DANYCH LOKALIZACYJNYCH JESLI SIE POJAWILY
-  if(newLocalization) {
-    newLocalization = false;
-    if(newLocalizationHandler()) {
-      appendData(LOCALIZATION_ASSIGN + "_" + String(gps.location.lat(), 5) + "," + String(gps.location.lng(), 5) + "_");
-      // ********************************************************************************
-      // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
-      // lcd.setCursor(0,0);
-      // lcd.print(LOCALIZATION_ASSIGN + "_" + String(gps.location.lat(), 5) + "," + String(gps.location.lng(), 5) + "_");
-      // ********************************************************************************   
+  // TODO: i jesli plywa
+  if(boatMode == BOAT_MODE_KEYBOARD) {
+    // OBSLUGA DANYCH LOKALIZACYJNYCH JESLI SIE POJAWILY
+    if(newLocalization) {
+      newLocalization = false;
+      if(newLocalizationHandler()) {
+        appendData(LOCALIZATION_ASSIGN + "_" + String(gps.location.lat(), 5) + "," + String(gps.location.lng(), 5) + "_");
+        // ********************************************************************************
+        // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
+        // lcd.setCursor(0,0);
+        // lcd.print(LOCALIZATION_ASSIGN + "_" + String(gps.location.lat(), 5) + "," + String(gps.location.lng(), 5) + "_");
+        // ********************************************************************************   
+      } 
     }
-  }
 
-  // OBSLUGA DANYCH KURSU Z GPS JESLI SIE POJAWILY
-  if(newGpsCourse) {
-    newGpsCourse = false;
-    if(newGpsCourseHandler()) {
-      appendData(GPS_COURSE_ASSIGN + "_" + String(gpsCourse) + "_");
-      // ********************************************************************************
-      // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
-      // lcd.setCursor(0,1);
-      // lcd.print(GPS_COURSE_ASSIGN + "_" + String(gpsCourse) + "_");
-      // ********************************************************************************   
+    // OBSLUGA DANYCH KURSU Z GPS JESLI SIE POJAWILY
+    if(newGpsCourse) {
+      newGpsCourse = false;
+      if(newGpsCourseHandler()) {
+        appendData(GPS_COURSE_ASSIGN + "_" + String(gpsCourse) + "_");
+        // ********************************************************************************
+        // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
+        // lcd.setCursor(0,1);
+        // lcd.print(GPS_COURSE_ASSIGN + "_" + String(gpsCourse) + "_");
+        // ********************************************************************************   
+      }
     }
-  }
 
-  // OBSLUGA DANYCH KURSU Z KOMPASU JESLI SIE POJAWILY
-  if (newCompassCourse) {
-    compassRead();
-    if(newCompassCourseHandler()) {
-      appendData(COMPASS_COURSE_ASSIGN + "_" + String(compassCourse) + "_");
+    // OBSLUGA DANYCH KURSU Z KOMPASU JESLI SIE POJAWILY
+    if (newCompassCourse) {
+      compassRead();
+      if(newCompassCourseHandler()) {
+        appendData(COMPASS_COURSE_ASSIGN + "_" + String(compassCourse) + "_");
+      }
     }
-  }
 
-  if (sentLigthingValue && newDataForKeyboardHandler[2] != 1) {
-    appendData(LIGTHING_ASSIGN + "_" + String(currentLight) + "_");
-    sentLigthingValue = false;
+    if (sentLigthingValue && newDataForKeyboardHandler[2] != 1) {
+      appendData(LIGTHING_ASSIGN + "_" + String(currentLight) + "_");
+      sentLigthingValue = false;
+    }
   }
 
   // WYSYLANIE DANYCH
@@ -391,11 +416,6 @@ void readDataFromAppForKeyboardMode(char newChar) {
       }
       else if(arrayIndex==1) {
         newEnginesSpeed[0] = atoi(buff);
-      } else {
-        int newBoatMode = atoi(buff);
-        if(newBoatMode!='0') {
-          changeBoatMode(newBoatMode);
-        }
       }
       arrayIndex++;
       if (arrayIndex == 6) 
@@ -520,6 +540,43 @@ void setLight() {
   lcd.setCursor(0, 1);
   lcd.print(currentLight);
   lighting.writeMicroseconds(map(currentLight, 0, 100, 1210, 2000));
+}
+
+void readWaypointsFromApp(char newChar) {
+   if (newChar == '_') { 
+      buff[buffIndex++] = 0;
+      buffIndex = 0;
+            // TODO: odpowiednia konwersja na double
+      if(arrayIndex==2){
+        lcd.setCursor(0,1);
+        lcd.print(buff);
+        waypoints[currentWaypointsIndex].lon = strtod(buff, NULL);
+      } else if(arrayIndex==1){
+                lcd.setCursor(0,0);
+        lcd.print(buff);
+        waypoints[currentWaypointsIndex].lat = strtod(buff, NULL);
+      }
+      arrayIndex++;
+      if (arrayIndex == 3) 
+      { 
+        currentWaypointsIndex++;
+        arrayIndex = 0;
+        receivedFirstData = true;
+      }
+   }
+   else if (newChar == '.' || ('0' <= newChar && newChar <= '9'))
+   {
+       buff[buffIndex++] = newChar;
+   }
+}
+
+void clearWaypointsData() {
+  currentWaypointsIndex = 0;
+  waypoints[0] = {0,0};
+  waypoints[1] = {0,0};
+  waypoints[2] = {0,0};
+  waypoints[3] = {0,0};
+  waypoints[4] = {0,0};
 }
 
 // ********************************************************************************
