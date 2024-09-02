@@ -206,7 +206,7 @@ void serialEvent3() {
     } else if(boatMode == BOAT_MODE_AUTONOMIC_CONTROL) {
       // TODO: nadanie mocy na silniki --> odpowiedni odbior
     } else if (boatMode == FINISH_AUTONOMIC_CONTROL) {
-      // TODO: czyszczenie po zakonczeniu autonomicznosci
+      // TODO: czyszczenie po zakonczeniu autonomicznosci i wyslanie zakonczenia po
       boatMode = BOAT_MODE_KEYBOARD;
     }
   }
