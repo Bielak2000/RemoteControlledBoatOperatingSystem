@@ -5,21 +5,21 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<SplitPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="129.0" prefWidth="440.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<SplitPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="129.0" prefWidth="461.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
   <items>
-    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="129.0" prefWidth="438.0">
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="127.0" prefWidth="447.0">
          <children>
-            <Text fx:id="progressDialogContent" layoutX="10.0" layoutY="57.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="421.0">
+            <Text fx:id="progressDialogContent" layoutX="31.0" layoutY="59.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="421.0">
                <font>
                   <Font size="15.0" />
                </font>
             </Text>
-            <Label fx:id="progressDialogHeader" layoutX="121.0" layoutY="8.0" prefHeight="24.0" prefWidth="198.0">
+            <Label fx:id="progressDialogHeader" layoutX="95.0" layoutY="14.0" prefHeight="24.0" prefWidth="269.0">
                <font>
                   <Font name="System Bold" size="19.0" />
                </font>
             </Label>
-            <ProgressBar fx:id="progressDialog" layoutX="86.0" layoutY="79.0" prefHeight="20.0" prefWidth="269.0" />
+            <ProgressBar fx:id="progressDialog" layoutX="95.0" layoutY="78.0" prefHeight="20.0" prefWidth="269.0" />
          </children></AnchorPane>
   </items>
 </SplitPane>

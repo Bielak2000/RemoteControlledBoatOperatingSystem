@@ -64,4 +64,13 @@ public class Utils {
         return EARTH_RADIUS * c * 1000;
     }
 
+    public static double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {
+        double latitude1 = Math.toRadians(firstCoordinate.getLatitude());
+        double latitude2 = Math.toRadians(secondCoordinate.getLatitude());
+        double longDiff = Math.toRadians(secondCoordinate.getLongitude() - firstCoordinate.getLongitude());
+        double y = Math.sin(longDiff) * Math.cos(latitude2);
+        double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
+        return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
+    }
+
 }

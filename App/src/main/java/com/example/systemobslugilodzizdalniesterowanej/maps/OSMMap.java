@@ -2,6 +2,7 @@ package com.example.systemobslugilodzizdalniesterowanej.maps;
 
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
+import com.example.systemobslugilodzizdalniesterowanej.common.Utils;
 import com.sothawo.mapjfx.Coordinate;
 import com.sothawo.mapjfx.CoordinateLine;
 import com.sothawo.mapjfx.MapType;
@@ -36,6 +37,9 @@ public class OSMMap {
     @Getter
     private Coordinate nextWaypointOnTheRoad = null;
     Label expectedCourse;
+    @Getter
+    @Setter
+    private Double currentCourse = null;
 
     /**
      * GREEN TAG - waypoint determined by user
@@ -160,19 +164,18 @@ public class OSMMap {
     }
 
     public void setExpectedCourse(Coordinate firstCoordinate, Coordinate secondCoordinate) {
-        this.expectedCourse.setText(String.valueOf(determineCourseBetweenTwoWaypoints(firstCoordinate, secondCoordinate)));
+        this.expectedCourse.setText(String.valueOf(Utils.determineCourseBetweenTwoWaypoints(firstCoordinate, secondCoordinate)));
+    }
+
+    public void setExpectedCourse(String expectedCourse) {
+        this.expectedCourse.setText(expectedCourse);
     }
 
     public void incrementWaypointIndex() {
             this.waypointIndex++;
     }
 
-    private double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {
-        double latitude1 = Math.toRadians(firstCoordinate.getLatitude());
-        double latitude2 = Math.toRadians(secondCoordinate.getLatitude());
-        double longDiff = Math.toRadians(secondCoordinate.getLongitude() - firstCoordinate.getLongitude());
-        double y = Math.sin(longDiff) * Math.cos(latitude2);
-        double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
-        return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
+    public Coordinate getCurrentBoatPosition() {
+        return markerList.get(0).getPosition();
     }
 }

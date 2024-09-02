@@ -5,25 +5,30 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<SplitPane dividerPositions="0.6835443037974683" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="160.0" prefWidth="440.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<SplitPane dividerPositions="0.6835443037974683" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="195.0" prefWidth="507.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
   <items>
-    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="104.0" prefWidth="488.0">
          <children>
-            <Text layoutX="30.0" layoutY="53.0" strokeType="OUTSIDE" strokeWidth="0.0" text="W przypadku kontynuacji proszę o nie wyłączanie systemu. Łódź rozpocznie pływanie po wyznaczonych w aplikacji punktach." textAlignment="CENTER" wrappingWidth="380.0">
+            <Text layoutX="3.0" layoutY="51.0" strokeType="OUTSIDE" strokeWidth="0.0" text="W przypadku kontynuacji proszę o nie wyłączanie systemu. Łódź rozpocznie pływanie po wyznaczonych w aplikacji punktach. Łódź powinna mieć wystarczająco miejsca wkoło siebie." textAlignment="CENTER" wrappingWidth="499.0">
                <font>
                   <Font size="15.0" />
                </font>
             </Text>
-            <Label layoutX="24.0" layoutY="10.0" prefHeight="24.0" prefWidth="391.0" text="Czy na pewno chcesz kontynuować?">
+            <Label layoutX="57.0" layoutY="2.0" prefHeight="24.0" prefWidth="391.0" text="Czy na pewno chcesz kontynuować?">
                <font>
                   <Font name="System Bold" size="19.0" />
                </font>
             </Label>
+            <Text fill="#e10c0c" layoutY="116.0" strokeType="OUTSIDE" strokeWidth="0.0" text="WAŻNE ! Aby zatrzymać łódź kliknij awaryjny, czerwony przycisk." textAlignment="CENTER" wrappingWidth="505.0">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </Text>
          </children></AnchorPane>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="78.0" prefWidth="368.0">
          <children>
-            <Button fx:id="confirmSwimming" layoutX="128.0" layoutY="11.0" mnemonicParsing="false" onAction="#swimming" prefHeight="25.0" prefWidth="75.0" text="TAK" textFill="#41a425" />
-            <Button fx:id="noConfirmSwimming" layoutX="236.0" layoutY="11.0" mnemonicParsing="false" onAction="#notSwimming" prefHeight="25.0" prefWidth="75.0" text="NIE" textFill="#dd4040" />
+            <Button fx:id="confirmSwimming" layoutX="161.0" layoutY="16.0" mnemonicParsing="false" onAction="#swimming" prefHeight="25.0" prefWidth="75.0" text="TAK" textFill="#41a425" />
+            <Button fx:id="noConfirmSwimming" layoutX="270.0" layoutY="16.0" mnemonicParsing="false" onAction="#notSwimming" prefHeight="25.0" prefWidth="75.0" text="NIE" textFill="#dd4040" />
          </children></AnchorPane>
   </items>
 </SplitPane>

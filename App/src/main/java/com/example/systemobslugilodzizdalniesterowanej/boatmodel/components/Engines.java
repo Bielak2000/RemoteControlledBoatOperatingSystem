@@ -1,5 +1,7 @@
 package com.example.systemobslugilodzizdalniesterowanej.boatmodel.components;
 
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.LinearAndAngularSpeed;
+
 public class Engines {
     private int motorOne;
     private int motorTwo;
@@ -9,6 +11,12 @@ public class Engines {
         motorOne = 0;
         motorTwo = 0;
         temp = false;
+    }
+
+    public Engines(int motorOne, int motorTwo) {
+        this.motorOne = motorOne;
+        this.motorTwo = motorTwo;
+        this.temp = true;
     }
 
     public void movingForward() {
@@ -50,5 +58,12 @@ public class Engines {
 
     public boolean getTemp() {
         return temp;
+    }
+
+    // TODO: mapowanie liniowej i katowej na moc silnikow
+    public void setEnginesPowerByAngularAndLinearSpeed(LinearAndAngularSpeed linearAndAngularSpeed) {
+        this.motorOne = 50;
+        this.motorTwo = 50;
+        this.temp = true;
     }
 }

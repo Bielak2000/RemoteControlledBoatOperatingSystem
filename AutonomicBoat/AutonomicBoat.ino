@@ -15,8 +15,8 @@
 #define INTERVAL_LIGHTING_POWER 500
 #define BOAT_MODE_KEYBOARD 0
 #define BOAT_MODE_TO_AUTONOMIC 1
-#define BOAT_MODE_RECEIVIING_WAYPOINTS 2
-#define BOAT_MODE_STOP_RECEIVING_WAYPOINTS 3
+#define BOAT_MODE_AUTONOMIC_CONTROL 2
+#define FINISH_AUTONOMIC_CONTROL 3
 
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
@@ -90,23 +90,24 @@ uint8_t arrayIndex = 0;
 int newDataForKeyboardHandler[5] = {0,0,0,0,0};
 bool receivedFirstData = true;
 
-// AUTONOMICZNOSC
-struct Waypoint {
-  double lat;
-  double lon;
-};
-int currentWaypointsIndex = 0;
-struct Waypoint waypoints[5] = {
-  {0.0, 0.0},
-  {0.0, 0.0},
-  {0.0, 0.0},
-  {0.0, 0.0},
-  {0.0, 0.0}
-};
+// AUTONOMICZNOSC - waypointy
+// struct Waypoint {
+//   double lat;
+//   double lon;
+// };
+// int currentWaypointsIndex = 0;
+// struct Waypoint waypoints[5] = {
+//   {0.0, 0.0},
+//   {0.0, 0.0},
+//   {0.0, 0.0},
+//   {0.0, 0.0},
+//   {0.0, 0.0}
+// };
 
 // OZNACZENIA
 const String LIGTHING_ASSIGN = "0";
 const String LOCALIZATION_ASSIGN = "1";
+const String FINISH_SWIMMING_BY_WAYPOINTS = "2";
 const String GPS_COURSE_ASSIGN = "5";
 const String COMPASS_COURSE_ASSIGN = "6";
 
@@ -198,26 +199,15 @@ void serialEvent3() {
     lcd.print(boatMode);
     if(boatMode == BOAT_MODE_KEYBOARD) {
       if (buffIndex < buffLength-1) { 
-        if(newMode) {
-         // TODO: czyszczenie po zakonczeniu autonomicznosci
-         clearWaypointsData();
-        }
-        readDataFromAppForKeyboardMode(newChar);
+        readDataFromAppForKeyboardMode(newChar);      
       }
     } else if(boatMode == BOAT_MODE_TO_AUTONOMIC) {
       receivedFirstData = true;
-    } else if(boatMode == BOAT_MODE_RECEIVIING_WAYPOINTS) {
-      readWaypointsFromApp(newChar);
-    } else if(boatMode == BOAT_MODE_STOP_RECEIVING_WAYPOINTS) {
-      // TODO: odpowiednia konwersja na double
-      // lcd.setCursor(12, 1);
-      // lcd.print("9");
-      // TODO: obsluga odebranych danych
-            // lcd.setCursor(0, 0);
-      // lcd.print(String(waypoints[0].lat));
-                  // lcd.setCursor(0,1);
-      // lcd.print(String(waypoints[0].lon));
-
+    } else if(boatMode == BOAT_MODE_AUTONOMIC_CONTROL) {
+      // TODO: nadanie mocy na silniki --> odpowiedni odbior
+    } else if (boatMode == FINISH_AUTONOMIC_CONTROL) {
+      // TODO: czyszczenie po zakonczeniu autonomicznosci
+      boatMode = BOAT_MODE_KEYBOARD;
     }
   }
 }
@@ -537,42 +527,42 @@ void setLight() {
   lighting.writeMicroseconds(map(currentLight, 0, 100, 1210, 2000));
 }
 
-void readWaypointsFromApp(char newChar) {
-   if (newChar == '_') { 
-      buff[buffIndex++] = 0;
-      buffIndex = 0;
-            // TODO: odpowiednia konwersja na double
-      if(arrayIndex==2){
-        lcd.setCursor(0,1);
-        lcd.print(buff);
-        waypoints[currentWaypointsIndex].lon = strtod(buff, NULL);
-      } else if(arrayIndex==1){
-                lcd.setCursor(0,0);
-        lcd.print(buff);
-        waypoints[currentWaypointsIndex].lat = strtod(buff, NULL);
-      }
-      arrayIndex++;
-      if (arrayIndex == 3) 
-      { 
-        currentWaypointsIndex++;
-        arrayIndex = 0;
-        receivedFirstData = true;
-      }
-   }
-   else if (newChar == '.' || ('0' <= newChar && newChar <= '9'))
-   {
-       buff[buffIndex++] = newChar;
-   }
-}
+// void readWaypointsFromApp(char newChar) {
+//    if (newChar == '_') { 
+//       buff[buffIndex++] = 0;
+//       buffIndex = 0;
+//             // TODO: odpowiednia konwersja na double
+//       if(arrayIndex==2){
+//         lcd.setCursor(0,1);
+//         lcd.print(buff);
+//         waypoints[currentWaypointsIndex].lon = strtod(buff, NULL);
+//       } else if(arrayIndex==1){
+//                 lcd.setCursor(0,0);
+//         lcd.print(buff);
+//         waypoints[currentWaypointsIndex].lat = strtod(buff, NULL);
+//       }
+//       arrayIndex++;
+//       if (arrayIndex == 3) 
+//       { 
+//         currentWaypointsIndex++;
+//         arrayIndex = 0;
+//         receivedFirstData = true;
+//       }
+//    }
+//    else if (newChar == '.' || ('0' <= newChar && newChar <= '9'))
+//    {
+//        buff[buffIndex++] = newChar;
+//    }
+// }
 
-void clearWaypointsData() {
-  currentWaypointsIndex = 0;
-  waypoints[0] = {0,0};
-  waypoints[1] = {0,0};
-  waypoints[2] = {0,0};
-  waypoints[3] = {0,0};
-  waypoints[4] = {0,0};
-}
+// void clearWaypointsData() {
+//   currentWaypointsIndex = 0;
+//   waypoints[0] = {0,0};
+//   waypoints[1] = {0,0};
+//   waypoints[2] = {0,0};
+//   waypoints[3] = {0,0};
+//   waypoints[4] = {0,0};
+// }
 
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************

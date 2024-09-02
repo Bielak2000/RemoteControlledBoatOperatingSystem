@@ -2,17 +2,20 @@ package com.example.systemobslugilodzizdalniesterowanej.communication;
 
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.LinearAndAngularSpeed;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Engines;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Flaps;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Lighting;
-import com.example.systemobslugilodzizdalniesterowanej.communication.exception.WrongMessageException;
 import com.example.systemobslugilodzizdalniesterowanej.controllers.ProgressDialogController;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
-import com.sothawo.mapjfx.Coordinate;
-import com.sothawo.mapjfx.Marker;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import jssc.SerialPort;
@@ -21,12 +24,11 @@ import jssc.SerialPortException;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.calculateDistance;
+import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_RESOURCES_PATH;
 import static jssc.SerialPort.MASK_RXCHAR;
 
 @Slf4j
@@ -35,18 +37,14 @@ public class Connection {
     // MESSAGE TO BOAT
     private final static String FROM_APP_KEYBOARD_CONTROL_MODE_MARKING = "0";
     private final static String FROM_APP_MOVE_TO_AUTONOMIC_MODE = "1";
-    private final static String FROM_APP_AUTONOMOUS_MODE_MARKING = "2";
-    private final static String FROM_APP_AUTONOMOUS_MODE_STOP_SENDING_WAYPOINT = "3";
+    private final static String FROM_APP_AUTONOMOUS_MODE_CONTROL = "2";
+    private final static String FINISH_SWIMMING_BY_WAYPOINTS = "3";
 
     // MESSAGE FROM BOAT
     private final static int FROM_BOAT_LIGHTING_MESSAGE = 0;
     private final static int FROM_BOAT_GPS_MESSAGE = 1;
-    private final static int FROM_BOAT_BOAT_IS_SWIMMING_BY_WAYPOINTS = 2;
-    private final static int FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS = 3;
-    private final static int FROM_BOAT_BOAT_MANUALLY_FINISHED_SWIMMING_BY_WAYPOINTS = 4;
+    private final static int FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS = 2;
 
-    private final static int MILLISECONDS_TIME_BETWEEN_SEND_INFORMATION = 2000;
-    private final static String BOAT_RUNNING_SWIMMING_INFORMATION = "Łódka porszua się po wyznaczonych punktach. Nie wyłączaj aplikacji i nie wykonuj żadnych czynności, czekaj na informację z łodzi o uzyskaniu docelowej pozycji. Możesz zastopować łódź przyciskiem STOP.";
     private final static String BOAT_FINISHED_SWIMMING_INFORMATION = "Łódka dopłyneła do ostaniego waypointa, zmieniono tryb sterowania na tryb manualny. Jeśli chcesz ponownie wyznaczyć trasę wykonaj odpowiednie czynności jak poprzednio.";
     private final static String BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION = "Ręcznie przerwano pływanie łodzi po waypointach, zmieniono tryb sterowania na tryb manualny.";
 
@@ -54,7 +52,7 @@ public class Connection {
     private final static int FROM_BOAT_GPS_COURSE_MESSAGE = 5;
     private final static int FROM_BOAT_SENSOR_COURSE_MESSAGE = 6;
 
-    private ExecutorService executorService;
+    private AutonomicController autonomicController;
     private BoatModeController boatModeController;
     @Setter
     private ProgressDialogController progressDialogController;
@@ -74,10 +72,11 @@ public class Connection {
     private OSMMap osmMap;
     private Stage stage;
     private Label runningBoatInformation;
+    private ToggleButton modeChooser;
 
     public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap,
-                      Stage stage, BoatModeController boatModeController, Label runningBoatInformation,
-                      Label gpsCourse, Label sensorCourse) {
+                      Stage stage, BoatModeController boatModeController, Label runningBoatInformation, AutonomicController autonomicController,
+                      Label gpsCourse, Label sensorCourse, ToggleButton modeChooser) {
         com.fazecast.jSerialComm.SerialPort[] ports = com.fazecast.jSerialComm.SerialPort.getCommPorts();
         for (com.fazecast.jSerialComm.SerialPort port : ports) {
             portNames.add(port.getSystemPortName());
@@ -91,11 +90,11 @@ public class Connection {
         this.osmMap = osmMap;
         this.stage = stage;
         this.boatModeController = boatModeController;
-        this.executorService = Executors.newFixedThreadPool(1);
         this.runningBoatInformation = runningBoatInformation;
-
+        this.autonomicController = autonomicController;
         this.gpsCourse = gpsCourse;
         this.sensorCourse = sensorCourse;
+        this.modeChooser = modeChooser;
     }
 
     public void connect(String port, String system) {
@@ -123,7 +122,7 @@ public class Connection {
                         } else {
                             log.error(String.format("The wrong received message from boat: %s", readString));
                         }
-                    } catch (SerialPortException ex) {
+                    } catch (SerialPortException | IOException ex) {
                         log.error("Error while receiving data: {}", ex.getMessage());
                     }
                 }
@@ -151,52 +150,25 @@ public class Connection {
         }
     }
 
-    public void asyncSendChangedBoatModeAndWaypoints() {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String sendInfo;
-                    List<Marker> markerList = osmMap.getDesignatedWaypoints();
-                    for (Marker marker : markerList) {
-                        sendInfo = FROM_APP_AUTONOMOUS_MODE_MARKING + "_"
-                                + marker.getPosition().getLatitude().toString() + "_"
-                                + marker.getPosition().getLongitude().toString() + "_";
-                        serialPort.writeString(sendInfo);
-                        log.info("Sent waypoint: lat - {}, long - {}", marker.getPosition().getLatitude().toString(), marker.getPosition().getLongitude().toString());
-                        Thread.sleep(MILLISECONDS_TIME_BETWEEN_SEND_INFORMATION);
-                    }
-                    osmMap.setNextWaypointOnTheRoad(markerList.get(0).getPosition());
-                    log.info("Sent all waypoints");
-                    sendInfo = FROM_APP_AUTONOMOUS_MODE_STOP_SENDING_WAYPOINT;
-                    serialPort.writeString(sendInfo);
-                    log.info("Sent confirmation of sent waypoints");
-                    Platform.runLater(() -> runningBoatInformation.setVisible(true));
-
-                    // Symulacja rozpoczecia plywania lodki
-//                    Thread.sleep(3000);
-//                    if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_STARTING) {
-//                        boatModeController.setBoatMode(BoatMode.AUTONOMIC_RUNNING);
-//                        runningBoatInformation.setVisible(true);
-//                        Platform.runLater(() -> showInformationDialog("Łódka rozpoczeła pływanie", BOAT_RUNNING_SWIMMING_INFORMATION, 700));
-//                    }
-
-                } catch (SerialPortException e) {
-                    connectionStatus.setTextFill(Color.color(1, 0, 0));
-                    connectionStatus.setText("Brak polaczenia z radionadajnikiem!");
-                    dialogWarning("Brak polaczenia", "Aplikacja nie moze sie polaczyc z radionadajnikiem!");
-                    stage.close();
-                } catch (InterruptedException e) {
-                    log.error("Error while async sending changed boat mode and waypoints: {}", e.getMessage());
+    public void sendEnginesPowerInAutonomicMode(LinearAndAngularSpeed linearAndAngularSpeed) {
+        if (linearAndAngularSpeed != null) {
+            engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
+            try {
+                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+                    String sentInfo = (FROM_APP_AUTONOMOUS_MODE_CONTROL + "_"
+                            + String.valueOf((int) engines.getMotorOne()) + "_" + String.valueOf((int) engines.getMotorTwo()) + "_");
+                    serialPort.writeString(sentInfo);
+                    log.info("Sent: {}", sentInfo);
                 }
-                Platform.runLater(() -> progressDialogController.closeProgressDialogController());
+            } catch (SerialPortException e) {
+                log.error("Error while sending message: {}", e.getMessage());
             }
-        });
+        }
     }
 
     public void sendStopSwimmingInfo() {
         try {
-            String sentInfo = FROM_APP_KEYBOARD_CONTROL_MODE_MARKING;
+            String sentInfo = FINISH_SWIMMING_BY_WAYPOINTS;
             serialPort.writeString(sentInfo);
             log.info("Sent message: {}", sentInfo);
         } catch (SerialPortException e) {
@@ -216,7 +188,7 @@ public class Connection {
         }
     }
 
-    private void receivedMessageHandler(int messageSign, String[] array) {
+    private void receivedMessageHandler(int messageSign, String[] array) throws IOException {
         switch (messageSign) {
             case FROM_BOAT_LIGHTING_MESSAGE:
                 lighting.setPower(Integer.parseInt(array[1]));
@@ -233,58 +205,56 @@ public class Connection {
                     setBoatPositionOnMap(localization);
                 }
                 if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
-                    Coordinate newPosition = new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1]));
-                    if (calculateDistance(newPosition, osmMap.getNextWaypointOnTheRoad()) < 3) {
-                        osmMap.incrementWaypointIndex();
-                        List<Marker> markerList = osmMap.getDesignatedWaypoints();
-                        if (osmMap.getWaypointIndex() < markerList.size()) {
-                            osmMap.setNextWaypointOnTheRoad(markerList.get(osmMap.getWaypointIndex()).getPosition());
-                            osmMap.setExpectedCourse(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), osmMap.getNextWaypointOnTheRoad());
-                        }
+                    LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
+                    if (linearAndAngularSpeed != null) {
+                        sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
                     } else {
-                        osmMap.setExpectedCourse(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), osmMap.getNextWaypointOnTheRoad());
+                        privateSetProgressDialogController("Koniec trasy", "Łódź osiągneła cel, zatrzymywanie łodzi ...");
+                        autonomicController.setManuallyFinishSwimming(true);
+                        sendStopSwimmingInfo();
                     }
-                }
-                break;
-            case FROM_BOAT_BOAT_IS_SWIMMING_BY_WAYPOINTS:
-                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_STARTING) {
-                    boatModeController.setBoatMode(BoatMode.AUTONOMIC_RUNNING);
-                    runningBoatInformation.setVisible(true);
-                    Platform.runLater(() -> showInformationDialog("Łódka rozpoczeła pływanie", BOAT_RUNNING_SWIMMING_INFORMATION, 700));
-                } else {
-                    throw new WrongMessageException("Received that boat is swimming by waypoints but current boat mode isn't AUTONOMIC_STARTING");
                 }
                 break;
             case FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS:
                 Platform.runLater(() -> {
+                    progressDialogController.closeProgressDialogController();
+                    this.progressDialogController = null;
+                    autonomicController.setManuallyFinishSwimming(false);
                     boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
                     // TODO: przetestowac czy uda sie wyczyscic mape
                     osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
-                    showInformationDialog("Łódka osiągneła punkt docelowy", BOAT_FINISHED_SWIMMING_INFORMATION, 700);
+                    if (autonomicController.isManuallyFinishSwimming()) {
+                        showInformationDialog("Przerwano pływanie łodzi", BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION, 500);
+                    } else {
+                        showInformationDialog("Łódka osiągneła punkt docelowy", BOAT_FINISHED_SWIMMING_INFORMATION, 700);
+                    }
                 });
                 osmMap.setNextWaypointOnTheRoad(null);
                 osmMap.setWaypointIndex(0);
-                break;
-            case FROM_BOAT_BOAT_MANUALLY_FINISHED_SWIMMING_BY_WAYPOINTS:
-                Platform.runLater(() -> {
-                    boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
-                    // TODO: przetestowac czy uda sie wyczyscic mape
-                    osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
-                    Platform.runLater(() -> progressDialogController.closeProgressDialogController());
-                    showInformationDialog("Przerwano pływanie łodzi", BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION, 500);
-                });
-                osmMap.setNextWaypointOnTheRoad(null);
-                osmMap.setWaypointIndex(0);
+                boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
+                modeChooser.setSelected(false);
                 break;
             case FROM_BOAT_GPS_COURSE_MESSAGE:
+                // TODO: aktualziacja kursu w osmmap, chociaz chyba lepiej odrazu wysylac jedne
                 Platform.runLater(() -> {
                     this.gpsCourse.setText(array[1]);
                 });
+                osmMap.setCurrentCourse(Double.parseDouble(array[1]));
+                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+                    LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
+                    sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
+                }
                 break;
             case FROM_BOAT_SENSOR_COURSE_MESSAGE:
+                // TODO: aktualziacja kursu w osmmap
                 Platform.runLater(() -> {
                     this.sensorCourse.setText(array[1]);
                 });
+                osmMap.setCurrentCourse(Double.parseDouble(array[1]));
+                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+                    LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
+                    sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
+                }
                 break;
         }
     }
@@ -335,10 +305,20 @@ public class Connection {
     private boolean checkCorrectlyReceivedData(String[] receivedData) {
         return receivedData.length == 2 && (Integer.parseInt(receivedData[0]) == FROM_BOAT_LIGHTING_MESSAGE ||
                 Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_MESSAGE ||
-                Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_IS_SWIMMING_BY_WAYPOINTS ||
                 Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS ||
-                Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_MANUALLY_FINISHED_SWIMMING_BY_WAYPOINTS ||
                 Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_COURSE_MESSAGE ||
                 Integer.parseInt(receivedData[0]) == FROM_BOAT_SENSOR_COURSE_MESSAGE);
+    }
+
+    private void privateSetProgressDialogController(String title, String content) throws IOException {
+        Stage stage1 = new Stage();
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "progress-dialog.fxml"));
+        progressDialogController = new ProgressDialogController(stage1);
+        fxmlLoader.setController(progressDialogController);
+        Parent root = fxmlLoader.load();
+        Scene scene = new Scene(root);
+        stage1.setScene(scene);
+        progressDialogController.setDescriptions(title, content);
+        stage1.show();
     }
 }
