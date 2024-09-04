@@ -18,7 +18,7 @@ public class AutonomicController {
     private OSMMap osmMap;
     @Setter
     @Getter
-    private boolean manuallyFinishSwimming = false;
+    private boolean manuallyFinishSwimming = true;
 
     public AutonomicController(OSMMap osmMap) {
         this.osmMap = osmMap;

@@ -210,7 +210,7 @@ public class Connection {
                         sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
                     } else {
                         privateSetProgressDialogController("Koniec trasy", "Łódź osiągneła cel, zatrzymywanie łodzi ...");
-                        autonomicController.setManuallyFinishSwimming(true);
+                        autonomicController.setManuallyFinishSwimming(false);
                         sendStopSwimmingInfo();
                     }
                 }
@@ -219,7 +219,6 @@ public class Connection {
                 Platform.runLater(() -> {
                     progressDialogController.closeProgressDialogController();
                     this.progressDialogController = null;
-                    autonomicController.setManuallyFinishSwimming(false);
                     boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
                     // TODO: przetestowac czy uda sie wyczyscic mape
                     osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
@@ -228,6 +227,7 @@ public class Connection {
                     } else {
                         showInformationDialog("Łódka osiągneła punkt docelowy", BOAT_FINISHED_SWIMMING_INFORMATION, 700);
                     }
+                    autonomicController.setManuallyFinishSwimming(true);
                 });
                 osmMap.setNextWaypointOnTheRoad(null);
                 osmMap.setWaypointIndex(0);
@@ -235,7 +235,6 @@ public class Connection {
                 modeChooser.setSelected(false);
                 break;
             case FROM_BOAT_GPS_COURSE_MESSAGE:
-                // TODO: aktualziacja kursu w osmmap, chociaz chyba lepiej odrazu wysylac jedne
                 Platform.runLater(() -> {
                     this.gpsCourse.setText(array[1]);
                 });
@@ -246,7 +245,6 @@ public class Connection {
                 }
                 break;
             case FROM_BOAT_SENSOR_COURSE_MESSAGE:
-                // TODO: aktualziacja kursu w osmmap
                 Platform.runLater(() -> {
                     this.sensorCourse.setText(array[1]);
                 });
