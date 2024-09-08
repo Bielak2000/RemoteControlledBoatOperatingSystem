@@ -204,7 +204,10 @@ void serialEvent3() {
     } else if(boatMode == BOAT_MODE_AUTONOMIC_CONTROL) {
       readDataFromAppForAutonomicMode(newChar);
     } else if (boatMode == FINISH_AUTONOMIC_CONTROL) {
-      // TODO: czyszczenie po zakonczeniu autonomicznosci i wyslanie zakonczenia po
+      setStopEnginePower();
+      setEnginePower();
+      clearData();
+      appendData(FINISH_SWIMMING_BY_WAYPOINTS + "_");
       boatMode = BOAT_MODE_KEYBOARD;
     }
   }
@@ -289,6 +292,10 @@ void appendData(String data) {
     dataBuffer += ";";
   }
   dataBuffer += data;
+}
+
+void clearData() {
+  dataBuffer = "";
 }
 
 bool newLocalizationHandler() {
@@ -474,7 +481,7 @@ void enginesNewPowerHandler() {
   if (setServoPowerCurrentMillis - setEnginePowerPreviousMillis >= INTERVAL_ENGINE_POWER || setEnginePowerPreviousMillis == 0) {
     //jesli dostano dane i jeszcze nie zostaly ustawione na maksa to wykonaj
     if((newDataForKeyboardHandler[0]==1 || newDataForKeyboardHandler[1]==1)){
-      setEnginePowerForKeyboardMode();
+      setEnginePower();
       setEnginePowerPreviousMillis = millis();
     }
   }
@@ -496,7 +503,12 @@ bool checkNewDataFromAppInAutonomicMode() {
   return newDataForKeyboardHandler[0]==1 || newDataForKeyboardHandler[1]==1;
 }
 
-void setEnginePowerForKeyboardMode(){
+void setStopEnginePower() {
+  newEnginesSpeed[0] = 0;
+  newEnginesSpeed[1] = 0;
+}
+
+void setEnginePower(){
     for(int i=0; i<2; i++)
     {
       if(newEnginesSpeed[i]<0 && currentEngineSpeeds[i]>newEnginesSpeed[i])
