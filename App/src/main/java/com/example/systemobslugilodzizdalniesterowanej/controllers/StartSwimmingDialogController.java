@@ -22,7 +22,7 @@ import java.io.IOException;
 import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_RESOURCES_PATH;
 
 public class StartSwimmingDialogController {
-    private static int STARTING_BOAT_TIME_SECONDS = 5;
+    private static int MAX_STARTING_BOAT_TIME_SECONDS = 10;
     private final static String BOAT_RUNNING_SWIMMING_INFORMATION = "Łódka porszua się po wyznaczonych punktach. Nie wyłączaj aplikacji i nie wykonuj żadnych czynności, czekaj na informację z łodzi o uzyskaniu docelowej pozycji. Możesz zastopować łódź przyciskiem STOP.";
     Stage stage;
     BoatModeController boatModeController;
@@ -74,9 +74,9 @@ public class StartSwimmingDialogController {
             root.requestFocus();
             LinearAndAngularSpeed linearAndAngularSpeed;
             linearAndAngularSpeed = autonomicController.designateRightEnginesPowerOnStart();
-            designateAndSendEngines(linearAndAngularSpeed);
+            startAndStopRotating(linearAndAngularSpeed);
             linearAndAngularSpeed = autonomicController.designateLeftEnginesPowerOnStart();
-            designateAndSendEngines(linearAndAngularSpeed);
+            startAndStopRotating(linearAndAngularSpeed);
             boatModeController.setBoatMode(BoatMode.AUTONOMIC_RUNNING);
             Platform.runLater(() -> {
                 runningBoatInformation.setVisible(true);
@@ -97,8 +97,19 @@ public class StartSwimmingDialogController {
         this.stage.close();
     }
 
+    private void startAndStopRotating(LinearAndAngularSpeed linearAndAngularSpeed) throws InterruptedException {
+        int waitingIteration = 0;
+        designateAndSendEngines(linearAndAngularSpeed);
+        autonomicController.setCourseOnRotateStart(osmMap.getCurrentCourse());
+        while (!autonomicController.isStopRotating() && waitingIteration < MAX_STARTING_BOAT_TIME_SECONDS) {
+            Thread.sleep(1000);
+        }
+        linearAndAngularSpeed = autonomicController.clearAfterRotating();
+        designateAndSendEngines(linearAndAngularSpeed);
+        Thread.sleep(1000);
+    }
+
     private void designateAndSendEngines(LinearAndAngularSpeed linearAndAngularSpeed) throws InterruptedException {
         connection.sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
-        Thread.sleep(STARTING_BOAT_TIME_SECONDS * 1000);
     }
 }
