@@ -15,7 +15,21 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.calcu
 public class AutonomicController {
 
     public static int DISTANCE_ACCURACY_METERS = 2;
+
     private OSMMap osmMap;
+
+    @Setter
+    @Getter
+    private Double courseOnRotateStart = null;
+
+    @Setter
+    @Getter
+    private boolean stopRotating = false;
+
+    @Setter
+    @Getter
+    private int courseCount = 0;
+
     @Setter
     @Getter
     private boolean manuallyFinishSwimming = true;
@@ -25,7 +39,7 @@ public class AutonomicController {
     }
 
     public LinearAndAngularSpeed designateRightEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(50.0, 50.0);
+        return new LinearAndAngularSpeed(50.0, -50.0);
     }
 
     public LinearAndAngularSpeed designateLeftEnginesPowerOnStart() {
@@ -45,6 +59,17 @@ public class AutonomicController {
         } else {
             return determinateLinearAndAngularSpeed();
         }
+    }
+
+    public void incrementCourseCount() {
+        this.courseCount++;
+    }
+
+    public LinearAndAngularSpeed clearAfterRotating() {
+        this.courseCount = 0;
+        this.stopRotating = false;
+        this.courseOnRotateStart = null;
+        return new LinearAndAngularSpeed(0, 0);
     }
 
     private LinearAndAngularSpeed determinateLinearAndAngularSpeed() {

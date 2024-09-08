@@ -34,6 +34,9 @@ import static jssc.SerialPort.MASK_RXCHAR;
 @Slf4j
 public class Connection {
 
+    private final static int MAX_COURSE_COUNT_IN_AUTONOMIC_STARTING_MODE = 3;
+    private final static int COURSE_ACCURACY = 5;
+
     // MESSAGE TO BOAT
     private final static String FROM_APP_KEYBOARD_CONTROL_MODE_MARKING = "0";
     private final static String FROM_APP_MOVE_TO_AUTONOMIC_MODE = "1";
@@ -252,6 +255,13 @@ public class Connection {
                 if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
                     LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
                     sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
+                } else if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_STARTING && !autonomicController.isStopRotating()) {
+                    autonomicController.incrementCourseCount();
+                    if (autonomicController.getCourseCount() > MAX_COURSE_COUNT_IN_AUTONOMIC_STARTING_MODE) {
+                        if (Math.abs(autonomicController.getCourseOnRotateStart() - Double.valueOf(array[1])) <= COURSE_ACCURACY) {
+                            autonomicController.setStopRotating(true);
+                        }
+                    }
                 }
                 break;
         }
