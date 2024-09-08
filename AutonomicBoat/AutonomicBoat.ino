@@ -184,13 +184,11 @@ void serialEvent2() {
 // RADIONADAJNIK
 void serialEvent3() {
   while (Serial3.available()) {
-    bool newMode = false;
     char newChar = Serial3.read();
     if(receivedFirstData) {
       int boatModeTemp = newChar - '0';
       if(boatMode != boatModeTemp) {
         boatMode = boatModeTemp;
-        newMode = true;
       }
     }
     receivedFirstData = false;
@@ -204,7 +202,7 @@ void serialEvent3() {
     } else if(boatMode == BOAT_MODE_TO_AUTONOMIC) {
       receivedFirstData = true;
     } else if(boatMode == BOAT_MODE_AUTONOMIC_CONTROL) {
-      // TODO: nadanie mocy na silniki --> odpowiedni odbior
+      readDataFromAppForAutonomicMode(newChar);
     } else if (boatMode == FINISH_AUTONOMIC_CONTROL) {
       // TODO: czyszczenie po zakonczeniu autonomicznosci i wyslanie zakonczenia po
       boatMode = BOAT_MODE_KEYBOARD;
@@ -218,41 +216,45 @@ void loop() {
     keyboardHandler();
   }
 
+  if(boatMode == BOAT_MODE_AUTONOMIC_CONTROL && checkNewDataFromAppInAutonomicMode()) {
+    autonomicHandler();
+  }
+
+  // OBSLUGA DANYCH LOKALIZACYJNYCH JESLI SIE POJAWILY
+  if(newLocalization) {
+    newLocalization = false;
+    if(newLocalizationHandler()) {
+      appendData(LOCALIZATION_ASSIGN + "_" + String(gps.location.lat(), 5) + "," + String(gps.location.lng(), 5) + "_");
+      // ********************************************************************************
+      // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
+      // lcd.setCursor(0,0);
+      // lcd.print(LOCALIZATION_ASSIGN + "_" + String(gps.location.lat(), 5) + "," + String(gps.location.lng(), 5) + "_");
+      // ********************************************************************************   
+    } 
+  }
+
+  // OBSLUGA DANYCH KURSU Z GPS JESLI SIE POJAWILY
+  if(newGpsCourse) {
+    newGpsCourse = false;
+    if(newGpsCourseHandler()) {
+      appendData(GPS_COURSE_ASSIGN + "_" + String(gpsCourse) + "_");
+      // ********************************************************************************
+      // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
+      // lcd.setCursor(0,1);
+      // lcd.print(GPS_COURSE_ASSIGN + "_" + String(gpsCourse) + "_");
+      // ********************************************************************************   
+    }
+  }
+
+  // OBSLUGA DANYCH KURSU Z KOMPASU JESLI SIE POJAWILY
+  if (newCompassCourse) {
+    compassRead();
+    if(newCompassCourseHandler()) {
+      appendData(COMPASS_COURSE_ASSIGN + "_" + String(compassCourse) + "_");
+    }
+  }
+
   if(boatMode == BOAT_MODE_KEYBOARD) {
-    // OBSLUGA DANYCH LOKALIZACYJNYCH JESLI SIE POJAWILY
-    if(newLocalization) {
-      newLocalization = false;
-      if(newLocalizationHandler()) {
-        appendData(LOCALIZATION_ASSIGN + "_" + String(gps.location.lat(), 5) + "," + String(gps.location.lng(), 5) + "_");
-        // ********************************************************************************
-        // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
-        // lcd.setCursor(0,0);
-        // lcd.print(LOCALIZATION_ASSIGN + "_" + String(gps.location.lat(), 5) + "," + String(gps.location.lng(), 5) + "_");
-        // ********************************************************************************   
-      } 
-    }
-
-    // OBSLUGA DANYCH KURSU Z GPS JESLI SIE POJAWILY
-    if(newGpsCourse) {
-      newGpsCourse = false;
-      if(newGpsCourseHandler()) {
-        appendData(GPS_COURSE_ASSIGN + "_" + String(gpsCourse) + "_");
-        // ********************************************************************************
-        // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
-        // lcd.setCursor(0,1);
-        // lcd.print(GPS_COURSE_ASSIGN + "_" + String(gpsCourse) + "_");
-        // ********************************************************************************   
-      }
-    }
-
-    // OBSLUGA DANYCH KURSU Z KOMPASU JESLI SIE POJAWILY
-    if (newCompassCourse) {
-      compassRead();
-      if(newCompassCourseHandler()) {
-        appendData(COMPASS_COURSE_ASSIGN + "_" + String(compassCourse) + "_");
-      }
-    }
-
     if (sentLigthingValue && newDataForKeyboardHandler[2] != 1) {
       appendData(LIGTHING_ASSIGN + "_" + String(currentLight) + "_");
       sentLigthingValue = false;
@@ -426,8 +428,48 @@ void readDataFromAppForKeyboardMode(char newChar) {
    }
 }
 
+void readDataFromAppForAutonomicMode(char newChar) {
+   if (newChar == '_') { 
+      buff[buffIndex++] = 0;
+      buffIndex = 0;
+      if(arrayIndex==2){
+        newEnginesSpeed[1] = atoi(buff);
+      }
+      else if(arrayIndex==1) {
+        newEnginesSpeed[0] = atoi(buff);
+      }
+      arrayIndex++;
+      if (arrayIndex == 3) 
+      { 
+        newDataForKeyboardHandler[0]=1;
+        newDataForKeyboardHandler[1]=1;
+        arrayIndex = 0;
+        receivedFirstData = true;
+      }
+   }
+   else if (newChar == '-' || ('0' <= newChar && newChar <= '9'))
+   {
+       buff[buffIndex++] = newChar;
+   }
+}
+
 void keyboardHandler() {
-  // szybczkosc zwiekszania mocy na silniki / oswietlenie / zapadki
+  enginesNewPowerHandler();
+
+  // jesli sa informacje to wlacz zapadke (jesli przeslano 1)
+  if(newDataForKeyboardHandler[3]==1 || newDataForKeyboardHandler[4]==1){
+    openOrCloseFlaps();
+    rightFlapState = 0;
+    leftFlapState = 0;
+  }
+}
+
+void autonomicHandler() {
+  enginesNewPowerHandler();
+}
+
+void enginesNewPowerHandler() {
+    // szybczkosc zwiekszania mocy na silniki / oswietlenie / zapadki
   setServoPowerCurrentMillis = millis();
   if (setServoPowerCurrentMillis - setEnginePowerPreviousMillis >= INTERVAL_ENGINE_POWER || setEnginePowerPreviousMillis == 0) {
     //jesli dostano dane i jeszcze nie zostaly ustawione na maksa to wykonaj
@@ -444,17 +486,14 @@ void keyboardHandler() {
       setLightingPowerPreviousMillis = millis();
     }
   }
-
-  // jesli sa informacje to wlacz zapadke (jesli przeslano 1)
-  if(newDataForKeyboardHandler[3]==1 || newDataForKeyboardHandler[4]==1){
-    openOrCloseFlaps();
-    rightFlapState = 0;
-    leftFlapState = 0;
-  }
 }
 
 bool checkNewDataFromAppInKeyboardMode() {
   return newDataForKeyboardHandler[0]==1 || newDataForKeyboardHandler[1]==1 || newDataForKeyboardHandler[2]==1 || newDataForKeyboardHandler[3]==1 || newDataForKeyboardHandler[4]==1;
+}
+
+bool checkNewDataFromAppInAutonomicMode() {
+  return newDataForKeyboardHandler[0]==1 || newDataForKeyboardHandler[1]==1;
 }
 
 void setEnginePowerForKeyboardMode(){
