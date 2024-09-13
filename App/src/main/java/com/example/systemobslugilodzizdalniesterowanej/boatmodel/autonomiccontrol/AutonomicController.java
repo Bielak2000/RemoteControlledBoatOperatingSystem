@@ -104,9 +104,8 @@ public class AutonomicController {
         }
     }
 
-    // TODO: wyznaczenie predkosci katowej
     private double getAngularSpeed(double expectedCourse, double currentCourse) {
-        return 0.0;
+        return (expectedCourse - currentCourse) / 360.0;
     }
 
 }
