@@ -142,7 +142,7 @@ public class Connection {
         try {
             if (boatModeController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
                 String sentInfo = (FROM_APP_KEYBOARD_CONTROL_MODE_MARKING + "_"
-                        + String.valueOf((int) engines.getMotorOne()) + "_" + String.valueOf((int) engines.getMotorTwo()) + "_"
+                        + String.valueOf((int) engines.getMotorLeft()) + "_" + String.valueOf((int) engines.getMotorRight()) + "_"
                         + String.valueOf((int) lighting.getPower()) + "_"
                         + String.valueOf((int) flaps.getFirstFlap()) + "_" + flaps.getSecondFlap() + "_");
                 serialPort.writeString(sentInfo);
@@ -159,7 +159,7 @@ public class Connection {
             try {
                 if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
                     String sentInfo = (FROM_APP_AUTONOMOUS_MODE_CONTROL + "_"
-                            + String.valueOf((int) engines.getMotorOne()) + "_" + String.valueOf((int) engines.getMotorTwo()) + "_");
+                            + String.valueOf((int) engines.getMotorLeft()) + "_" + String.valueOf((int) engines.getMotorRight()) + "_");
                     serialPort.writeString(sentInfo);
                     log.info("Sent: {}", sentInfo);
                 }
