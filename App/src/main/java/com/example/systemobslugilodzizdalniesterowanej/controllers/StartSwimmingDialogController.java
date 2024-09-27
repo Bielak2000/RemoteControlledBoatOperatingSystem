@@ -1,5 +1,6 @@
 package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
+import com.example.systemobslugilodzizdalniesterowanej.positionalgorithm.PositionAlgorithm;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;
@@ -7,22 +8,31 @@ import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontro
 import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_RESOURCES_PATH;
 
-public class StartSwimmingDialogController {
+public class StartSwimmingDialogController implements Initializable {
     private static int MAX_STARTING_BOAT_TIME_SECONDS = 10;
+    private ObservableList<PositionAlgorithm> algorithmsPositions = FXCollections.observableArrayList(PositionAlgorithm.values());
     private final static String BOAT_RUNNING_SWIMMING_INFORMATION = "Łódka porszua się po wyznaczonych punktach. Nie wyłączaj aplikacji i nie wykonuj żadnych czynności, czekaj na informację z łodzi o uzyskaniu docelowej pozycji. Możesz zastopować łódź przyciskiem STOP.";
     Stage stage;
     BoatModeController boatModeController;
@@ -30,20 +40,38 @@ public class StartSwimmingDialogController {
     Connection connection;
     OSMMap osmMap;
     private Label runningBoatInformation;
+    PositionAlgorithm chosenAlgorithm;
 
-    public StartSwimmingDialogController(Stage stage, BoatModeController boatModeController, Connection connection, OSMMap osmMap, AutonomicController autonomicController) {
+    public StartSwimmingDialogController(Stage stage, BoatModeController boatModeController, Connection connection, OSMMap osmMap, AutonomicController autonomicController, PositionAlgorithm chosenAlgorithm) {
         this.stage = stage;
         this.boatModeController = boatModeController;
         this.connection = connection;
         this.osmMap = osmMap;
         this.autonomicController = autonomicController;
+        this.chosenAlgorithm = chosenAlgorithm;
     }
+
+    @FXML
+    private TableView<PositionAlgorithm> algorithmsTable;
+
+    @FXML
+    private TableColumn<PositionAlgorithm, String> column;
 
     @FXML
     private Button confirmSwimming;
 
     @FXML
     private Button noConfirmSwimming;
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        column.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getDescription()));
+        algorithmsTable.setItems(algorithmsPositions);
+        algorithmsTable.getSelectionModel().select(PositionAlgorithm.ONLY_GPS);
+        algorithmsTable.setOnMouseClicked(e -> {
+            chosenAlgorithm = algorithmsTable.getSelectionModel().getSelectedItem();
+        });
+    }
 
     @FXML
     void swimming(ActionEvent event) throws IOException, InterruptedException {
