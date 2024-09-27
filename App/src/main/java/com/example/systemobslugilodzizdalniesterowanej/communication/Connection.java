@@ -2,6 +2,7 @@ package com.example.systemobslugilodzizdalniesterowanej.communication;
 
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.PositionAlgorithm;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.LinearAndAngularSpeed;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Engines;
@@ -76,10 +77,11 @@ public class Connection {
     private Stage stage;
     private Label runningBoatInformation;
     private ToggleButton modeChooser;
+    private PositionAlgorithm chosenAlgorithm;
 
     public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap,
                       Stage stage, BoatModeController boatModeController, Label runningBoatInformation, AutonomicController autonomicController,
-                      Label gpsCourse, Label sensorCourse, ToggleButton modeChooser) {
+                      Label gpsCourse, Label sensorCourse, ToggleButton modeChooser, PositionAlgorithm chosenAlgorithm) {
         com.fazecast.jSerialComm.SerialPort[] ports = com.fazecast.jSerialComm.SerialPort.getCommPorts();
         for (com.fazecast.jSerialComm.SerialPort port : ports) {
             portNames.add(port.getSystemPortName());
@@ -98,6 +100,7 @@ public class Connection {
         this.gpsCourse = gpsCourse;
         this.sensorCourse = sensorCourse;
         this.modeChooser = modeChooser;
+        this.chosenAlgorithm = chosenAlgorithm;
     }
 
     public void connect(String port, String system) {

@@ -1,5 +1,6 @@
 package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.PositionAlgorithm;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;
@@ -49,6 +50,7 @@ public class SystemController implements Initializable {
     Engines engines = new Engines();
     Flaps flaps = new Flaps();
     String chosenSystem;
+    PositionAlgorithm chosenAlgorithm = PositionAlgorithm.ONLY_GPS;
 
     public Stage getStage() {
         return stage;
@@ -73,7 +75,7 @@ public class SystemController implements Initializable {
             throw new RuntimeException(e);
         }
         this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage,
-                boatModeController, runningBoatInformation, autonomicController, gpsCourse, sensorCourse, modeChooser);
+                boatModeController, runningBoatInformation, autonomicController, gpsCourse, sensorCourse, modeChooser, chosenAlgorithm);
         connection.connect(chosenPort, chosenSystem);
         networkStatus = false;
         lightPower.setText("0%");
@@ -219,11 +221,11 @@ public class SystemController implements Initializable {
 
     @FXML
     void startSwimming(ActionEvent event) throws IOException {
-        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints() && osmMap.getCurrentCourse() != null) {
-//        if (true) {
+//        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints() && osmMap.getCurrentCourse() != null) {
+        if (true) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "start-swimming-dialog.fxml"));
             Stage mainStage = new Stage();
-            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection, osmMap, autonomicController);
+            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection, osmMap, autonomicController, chosenAlgorithm);
             fxmlLoader.setController(startSwimmingDialogController);
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
