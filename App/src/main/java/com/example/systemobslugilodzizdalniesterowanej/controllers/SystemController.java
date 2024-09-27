@@ -1,6 +1,6 @@
 package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
-import com.example.systemobslugilodzizdalniesterowanej.boatmodel.PositionAlgorithm;
+import com.example.systemobslugilodzizdalniesterowanej.positionalgorithm.PositionAlgorithm;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;

@@ -2,7 +2,7 @@ package com.example.systemobslugilodzizdalniesterowanej.communication;
 
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
-import com.example.systemobslugilodzizdalniesterowanej.boatmodel.PositionAlgorithm;
+import com.example.systemobslugilodzizdalniesterowanej.positionalgorithm.PositionAlgorithm;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.LinearAndAngularSpeed;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Engines;
@@ -35,7 +35,7 @@ import static jssc.SerialPort.MASK_RXCHAR;
 @Slf4j
 public class Connection {
 
-    private final static int MAX_COURSE_COUNT_IN_AUTONOMIC_STARTING_MODE = 3;
+    private final static int MAX_COURSE_COUNT_IN_AUTONOMIC_STARTING_MODE = 5;
     private final static int COURSE_ACCURACY = 5;
 
     // MESSAGE TO BOAT
@@ -244,18 +244,24 @@ public class Connection {
                 Platform.runLater(() -> {
                     this.gpsCourse.setText(array[1]);
                 });
-                osmMap.setCurrentCourse(Double.parseDouble(array[1]));
-                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
-                    LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
-                    sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
+                // TODO: tutaj bedzie obsluga obu algorytmow - standarodowego i z filtrem kalmana- trzeba bedzie tam przekazac dane o kursie i lokalizacji
+                if (chosenAlgorithm == PositionAlgorithm.ONLY_GPS) {
+                    osmMap.setCurrentCourse(Double.parseDouble(array[1]));
+                    if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+                        LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
+                        sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
+                    }
                 }
                 break;
             case FROM_BOAT_SENSOR_COURSE_MESSAGE:
                 Platform.runLater(() -> {
                     this.sensorCourse.setText(array[1]);
                 });
-                osmMap.setCurrentCourse(Double.parseDouble(array[1]));
-                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+                // TODO: tutaj bedzie obsluga obu algorytmow - standarodowego i z filtrem kalmana- trzeba bedzie tam przekazac dane o kursie
+                if (chosenAlgorithm == PositionAlgorithm.GPS_AND_SENSOR) {
+                    osmMap.setCurrentCourse(Double.parseDouble(array[1]));
+                }
+                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING && chosenAlgorithm == PositionAlgorithm.GPS_AND_SENSOR) {
                     LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
                     sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
                 } else if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_STARTING && !autonomicController.isStopRotating()) {

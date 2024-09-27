@@ -1,4 +1,4 @@
-package com.example.systemobslugilodzizdalniesterowanej.boatmodel;
+package com.example.systemobslugilodzizdalniesterowanej.positionalgorithm;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
