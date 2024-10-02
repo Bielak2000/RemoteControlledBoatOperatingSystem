@@ -5,11 +5,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<SplitPane dividerPositions="0.8409090909090909" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="359.0" prefWidth="566.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<SplitPane dividerPositions="0.7222222222222222" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="200.0" prefWidth="566.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
   <items>
-    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="278.0" prefWidth="564.0">
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="195.0" prefWidth="564.0">
          <children>
-            <Text layoutX="17.0" layoutY="60.0" strokeType="OUTSIDE" strokeWidth="0.0" text="W przypadku kontynuacji proszę o nie wyłączanie systemu. Łódź rozpocznie pływanie po wyznaczonych w aplikacji punktach, powinna mieć wystarczająco miejsca wkoło siebie." textAlignment="CENTER" wrappingWidth="530.0">
+            <Text layoutX="17.0" layoutY="60.0" strokeType="OUTSIDE" strokeWidth="0.0" text="W przypadku kontynuacji proszę o nie wyłączanie systemu. Łódź rozpocznie pływanie po wyznaczonych w aplikacji punktach, powinna mieć wystarczająco miejsca wokół siebie." textAlignment="CENTER" wrappingWidth="530.0">
                <font>
                   <Font size="15.0" />
                </font>
@@ -19,12 +19,7 @@
                   <Font name="System Bold" size="19.0" />
                </font>
             </Label>
-            <TableView fx:id="algorithmsTable" layoutX="103.0" layoutY="117.0" prefHeight="125.0" prefWidth="358.0">
-               <columns>
-                  <TableColumn fx:id="column" prefWidth="355.0" text="Wybierz algorytm wyznaczania pozycji" />
-               </columns>
-            </TableView>
-            <Text fill="#e10c0c" layoutX="30.0" layoutY="278.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Aby zatrzymać łódź kliknij awaryjny, czerwony przycisk." textAlignment="CENTER" wrappingWidth="505.0">
+            <Text fill="#e10c0c" layoutX="30.0" layoutY="129.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Aby zatrzymać łódź kliknij awaryjny, czerwony przycisk." textAlignment="CENTER" wrappingWidth="505.0">
                <font>
                   <Font size="15.0" />
                </font>

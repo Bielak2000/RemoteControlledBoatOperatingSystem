@@ -50,17 +50,18 @@ public class SystemController implements Initializable {
     Engines engines = new Engines();
     Flaps flaps = new Flaps();
     String chosenSystem;
-    PositionAlgorithm chosenAlgorithm = PositionAlgorithm.ONLY_GPS;
+    PositionAlgorithm chosenAlgorithm;
 
     public Stage getStage() {
         return stage;
     }
 
-    public SystemController(Stage stage, String chosenPort, String chosenSystem) {
+    public SystemController(Stage stage, String chosenPort, String chosenSystem, PositionAlgorithm chosenAlgorithm) {
         this.stage = stage;
         this.chosenPort = chosenPort;
         this.chosenSystem = chosenSystem;
         this.executorService = Executors.newFixedThreadPool(1);
+        this.chosenAlgorithm = chosenAlgorithm;
     }
 
     @Override
@@ -79,6 +80,7 @@ public class SystemController implements Initializable {
         connection.connect(chosenPort, chosenSystem);
         networkStatus = false;
         lightPower.setText("0%");
+        this.choosenAlgorithmText.setText(chosenAlgorithm.getDescription());
         exit.setCancelButton(true);
         exit.setFocusTraversable(false);
         this.autonomicController = new AutonomicController(osmMap);
@@ -152,6 +154,8 @@ public class SystemController implements Initializable {
 
     @FXML
     private CheckBox mapOsmCheckBox;
+    @FXML
+    private Label choosenAlgorithmText;
 
     // TODO: w celu testach
     @FXML
@@ -225,7 +229,7 @@ public class SystemController implements Initializable {
         if (true) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "start-swimming-dialog.fxml"));
             Stage mainStage = new Stage();
-            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection, osmMap, autonomicController, chosenAlgorithm);
+            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection, osmMap, autonomicController);
             fxmlLoader.setController(startSwimmingDialogController);
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);

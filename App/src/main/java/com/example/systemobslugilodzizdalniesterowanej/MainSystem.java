@@ -23,7 +23,7 @@ public class MainSystem extends Application {
         fxmlLoader.setController(choosePortController);
         Parent root = fxmlLoader.load();
         Scene scene = new Scene(root);
-        stage.setTitle("System obslugi lodzi zdalnie sterowanej");
+        stage.setTitle("Ustawienia początkowe systemu");
         stage.setScene(scene);
         stage.show();
         root.requestFocus();
