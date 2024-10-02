@@ -1,5 +1,6 @@
 package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
+import com.example.systemobslugilodzizdalniesterowanej.positionalgorithm.PositionAlgorithm;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -47,6 +48,11 @@ public class ChoosePortController implements Initializable {
         portsTable.setOnMouseClicked(e -> {
             chosenPort = portsTable.getSelectionModel().getSelectedItem();
         });
+        column1.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getDescription()));
+        algorithmsTable.setItems(algorithmsPositions);
+        algorithmsTable.setOnMouseClicked(e -> {
+            chosenAlgorithm = algorithmsTable.getSelectionModel().getSelectedItem();
+        });
     }
 
     @FXML
@@ -66,6 +72,13 @@ public class ChoosePortController implements Initializable {
 
     @FXML
     private CheckBox linuxBox;
+
+    @FXML
+    private TableView<PositionAlgorithm> algorithmsTable;
+    @FXML
+    private TableColumn<PositionAlgorithm, String> column1;
+    private ObservableList<PositionAlgorithm> algorithmsPositions = FXCollections.observableArrayList(PositionAlgorithm.values());
+    PositionAlgorithm chosenAlgorithm;
 
 
     @FXML
@@ -88,15 +101,15 @@ public class ChoosePortController implements Initializable {
 
     @FXML
     void connect(ActionEvent event) throws IOException, SerialPortException {
-        if (chosenPort.equals("") || chosenSystem.equals("")) {
+        if (chosenPort.equals("") || chosenSystem.equals("") || chosenAlgorithm == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Nie wybrano portu lub systemu");
-            alert.setHeaderText("Port lub system nie zostal wybrany! Wybierz port oraz system.");
+            alert.setTitle("Nie wybrano wymaganych ustawień");
+            alert.setHeaderText("Port, system lub algorytm nie zostal wybrany! Wybierz port, system oraz algorytm.");
             alert.showAndWait();
         } else {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "application-window.fxml"));
             Stage mainStage = new Stage();
-            SystemController systemController = new SystemController(mainStage, chosenPort, chosenSystem);
+            SystemController systemController = new SystemController(mainStage, chosenPort, chosenSystem, chosenAlgorithm);
             fxmlLoader.setController(systemController);
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
