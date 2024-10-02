@@ -2,7 +2,6 @@ package com.example.systemobslugilodzizdalniesterowanej.communication;
 
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
-import com.example.systemobslugilodzizdalniesterowanej.positionalgorithm.PositionAlgorithm;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.LinearAndAngularSpeed;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Engines;
@@ -10,6 +9,7 @@ import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Flap
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Lighting;
 import com.example.systemobslugilodzizdalniesterowanej.controllers.ProgressDialogController;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
+import com.example.systemobslugilodzizdalniesterowanej.positionalgorithm.PositionAlgorithm;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -244,24 +244,37 @@ public class Connection {
                 Platform.runLater(() -> {
                     this.gpsCourse.setText(array[1]);
                 });
-                // TODO: tutaj bedzie obsluga obu algorytmow - standarodowego i z filtrem kalmana- trzeba bedzie tam przekazac dane o kursie i lokalizacji
+
                 if (chosenAlgorithm == PositionAlgorithm.ONLY_GPS) {
                     osmMap.setCurrentCourse(Double.parseDouble(array[1]));
-                    if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
-                        LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
-                        sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
-                    }
+                } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
+                    // TODO: algorytm podstawowy
+                } else if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
+                    // TODO: po implementacja algorytmu z filtrem kalmana
                 }
+
+                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING &&
+                        (chosenAlgorithm == PositionAlgorithm.ONLY_GPS || chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM || chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER)) {
+                    LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
+                    sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
+                }
+
                 break;
             case FROM_BOAT_SENSOR_COURSE_MESSAGE:
                 Platform.runLater(() -> {
                     this.sensorCourse.setText(array[1]);
                 });
-                // TODO: tutaj bedzie obsluga obu algorytmow - standarodowego i z filtrem kalmana- trzeba bedzie tam przekazac dane o kursie
+
                 if (chosenAlgorithm == PositionAlgorithm.GPS_AND_SENSOR) {
                     osmMap.setCurrentCourse(Double.parseDouble(array[1]));
+                } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
+                    // TODO: algorytm podstawowy
+                } else if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
+                    // TODO: po implementacja algorytmu z filtrem kalmana
                 }
-                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING && chosenAlgorithm == PositionAlgorithm.GPS_AND_SENSOR) {
+
+                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING &&
+                        (chosenAlgorithm == PositionAlgorithm.GPS_AND_SENSOR || chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM || chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER)) {
                     LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
                     sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
                 } else if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_STARTING && !autonomicController.isStopRotating()) {
@@ -272,6 +285,7 @@ public class Connection {
                         }
                     }
                 }
+
                 break;
         }
     }
