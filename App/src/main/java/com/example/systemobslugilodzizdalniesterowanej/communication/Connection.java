@@ -3,6 +3,7 @@ package com.example.systemobslugilodzizdalniesterowanej.communication;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.BasicCourseAndGpsAlgorithm;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.LinearAndAngularSpeed;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Engines;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Flaps;
@@ -56,6 +57,7 @@ public class Connection {
     private final static int FROM_BOAT_GPS_COURSE_MESSAGE = 5;
     private final static int FROM_BOAT_SENSOR_COURSE_MESSAGE = 6;
 
+    private BasicCourseAndGpsAlgorithm basicCourseAndGpsAlgorithm;
     private AutonomicController autonomicController;
     private BoatModeController boatModeController;
     @Setter
@@ -101,6 +103,7 @@ public class Connection {
         this.sensorCourse = sensorCourse;
         this.modeChooser = modeChooser;
         this.chosenAlgorithm = chosenAlgorithm;
+        this.basicCourseAndGpsAlgorithm = new BasicCourseAndGpsAlgorithm();
     }
 
     public void connect(String port, String system) {
@@ -248,7 +251,8 @@ public class Connection {
                 if (chosenAlgorithm == PositionAlgorithm.ONLY_GPS) {
                     osmMap.setCurrentCourse(Double.parseDouble(array[1]));
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
-                    // TODO: algorytm podstawowy
+                    basicCourseAndGpsAlgorithm.setGpsCourse(Double.parseDouble(array[1]));
+                    osmMap.setCurrentCourse(basicCourseAndGpsAlgorithm.designateCurrentCourse());
                 } else if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     // TODO: po implementacja algorytmu z filtrem kalmana
                 }
@@ -268,7 +272,8 @@ public class Connection {
                 if (chosenAlgorithm == PositionAlgorithm.GPS_AND_SENSOR) {
                     osmMap.setCurrentCourse(Double.parseDouble(array[1]));
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
-                    // TODO: algorytm podstawowy
+                    basicCourseAndGpsAlgorithm.setSensorCourse(Double.parseDouble(array[1]));
+                    osmMap.setCurrentCourse(basicCourseAndGpsAlgorithm.designateCurrentCourse());
                 } else if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     // TODO: po implementacja algorytmu z filtrem kalmana
                 }
