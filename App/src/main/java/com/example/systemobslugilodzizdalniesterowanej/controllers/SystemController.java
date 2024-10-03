@@ -1,6 +1,5 @@
 package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
-import com.example.systemobslugilodzizdalniesterowanej.positionalgorithm.PositionAlgorithm;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;
@@ -10,6 +9,7 @@ import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Ligh
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.keyboardcontrol.KeyboardHandler;
 import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
+import com.example.systemobslugilodzizdalniesterowanej.positionalgorithm.PositionAlgorithm;
 import com.sothawo.mapjfx.MapView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -68,7 +68,7 @@ public class SystemController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.boatModeController = BoatModeController.getInstance(leftFlap, lightDown, lightUp, moveDown, moveLeft, moveRight,
                 moveUp, rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton,
-                gpsCourse, expectedCourse, sensorCourse, gpsCourseText, sensorCourseText, expectedCourseText);
+                gpsCourse, expectedCourse, sensorCourse, gpsCourseText, sensorCourseText, expectedCourseText, designatedCourse, designatedCourseText);
         try {
             checkConnectionWithInternet();
             osmMap = new OSMMap(mapView, boatModeController, expectedCourse);
@@ -76,7 +76,7 @@ public class SystemController implements Initializable {
             throw new RuntimeException(e);
         }
         this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage,
-                boatModeController, runningBoatInformation, autonomicController, gpsCourse, sensorCourse, modeChooser, chosenAlgorithm);
+                boatModeController, runningBoatInformation, autonomicController, gpsCourse, sensorCourse, modeChooser, chosenAlgorithm, designatedCourse);
         connection.connect(chosenPort, chosenSystem);
         networkStatus = false;
         lightPower.setText("0%");
@@ -176,6 +176,12 @@ public class SystemController implements Initializable {
     @FXML
     private Label sensorCourseText;
     // TODO: koniec testow
+
+    @FXML
+    private Label designatedCourse;
+
+    @FXML
+    private Label designatedCourseText;
 
     public Label getNetworkConnection() {
         return networkConnection;

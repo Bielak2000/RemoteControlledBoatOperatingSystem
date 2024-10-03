@@ -76,6 +76,7 @@ public class Connection {
     // TODO: do testow
     private Label gpsCourse;
     private Label sensorCourse;
+    private Label designatedCourse;
 
     private Boolean networkStatus;
     private OSMMap osmMap;
@@ -86,7 +87,7 @@ public class Connection {
 
     public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap,
                       Stage stage, BoatModeController boatModeController, Label runningBoatInformation, AutonomicController autonomicController,
-                      Label gpsCourse, Label sensorCourse, ToggleButton modeChooser, PositionAlgorithm chosenAlgorithm) {
+                      Label gpsCourse, Label sensorCourse, ToggleButton modeChooser, PositionAlgorithm chosenAlgorithm, Label designatedCourse) {
         com.fazecast.jSerialComm.SerialPort[] ports = com.fazecast.jSerialComm.SerialPort.getCommPorts();
         for (com.fazecast.jSerialComm.SerialPort port : ports) {
             portNames.add(port.getSystemPortName());
@@ -108,6 +109,7 @@ public class Connection {
         this.chosenAlgorithm = chosenAlgorithm;
         this.basicCourseAndGpsAlgorithm = new BasicCourseAndGpsAlgorithm();
         this.kalmanFilterAlgorithm = new KalmanFilterAlgorithm();
+        this.designatedCourse = designatedCourse;
     }
 
     public void connect(String port, String system) {
@@ -255,11 +257,14 @@ public class Connection {
                 if (chosenAlgorithm == PositionAlgorithm.ONLY_GPS) {
                     osmMap.setCurrentCourse(Double.parseDouble(array[1]));
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
-                    basicCourseAndGpsAlgorithm.setGpsCourse(Double.parseDouble(array[1]));
-                    osmMap.setCurrentCourse(basicCourseAndGpsAlgorithm.designateCurrentCourse());
+                    basicCourseAndGpsAlgorithm.setGpsCourseIfCorrectData(Double.parseDouble(array[1]));
+                    double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
+                    designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
+                    osmMap.setCurrentCourse(designatedCourseFromBasicAlgorithm);
                 } else if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     kalmanFilterAlgorithm.setGpsCourse(Double.parseDouble(array[1]));
                     kalmanFilterAlgorithm.designateCurrentCourseAndLocalization();
+                    designatedCourse.setText(String.format("%.2f", kalmanFilterAlgorithm.getCurrentCourse()));
                     osmMap.setCurrentCourse(kalmanFilterAlgorithm.getCurrentCourse());
                     if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING && boatModeController.getBoatMode() != BoatMode.AUTONOMIC_RUNNING) {
                         osmMap.generateTraceFromBoatPosition(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
@@ -283,11 +288,14 @@ public class Connection {
                 if (chosenAlgorithm == PositionAlgorithm.GPS_AND_SENSOR) {
                     osmMap.setCurrentCourse(Double.parseDouble(array[1]));
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
-                    basicCourseAndGpsAlgorithm.setSensorCourse(Double.parseDouble(array[1]));
-                    osmMap.setCurrentCourse(basicCourseAndGpsAlgorithm.designateCurrentCourse());
+                    basicCourseAndGpsAlgorithm.setSensorCourseIfCorrectData(Double.parseDouble(array[1]));
+                    double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
+                    designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
+                    osmMap.setCurrentCourse(designatedCourseFromBasicAlgorithm);
                 } else if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     kalmanFilterAlgorithm.setSensorCourse(Double.parseDouble(array[1]));
                     kalmanFilterAlgorithm.designateCurrentCourseAndLocalization();
+                    designatedCourse.setText(String.format("%.2f", kalmanFilterAlgorithm.getCurrentCourse()));
                     osmMap.setCurrentCourse(kalmanFilterAlgorithm.getCurrentCourse());
                     if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING && boatModeController.getBoatMode() != BoatMode.AUTONOMIC_RUNNING) {
                         osmMap.generateTraceFromBoatPosition(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
@@ -327,7 +335,7 @@ public class Connection {
                     BoatMode currentBoatMode = boatModeController.getBoatMode();
                     if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {
                         if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
-                            kalmanFilterAlgorithm.setLocalization(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])));
+                            kalmanFilterAlgorithm.setGpsLocalization(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])));
                             kalmanFilterAlgorithm.designateCurrentCourseAndLocalization();
                             osmMap.generateTraceFromBoatPosition(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
                         } else {
@@ -335,7 +343,7 @@ public class Connection {
                         }
                     } else {
                         if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
-                            kalmanFilterAlgorithm.setLocalization(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])));
+                            kalmanFilterAlgorithm.setGpsLocalization(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])));
                             kalmanFilterAlgorithm.designateCurrentCourseAndLocalization();
                             osmMap.setCurrentBoatPositionWhileRunning(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
                         } else {

@@ -11,7 +11,7 @@ public class KalmanFilterAlgorithm {
 
     private Double gpsCourse = null;
     private Double sensorCourse = null;
-    private Coordinate localization = null;
+    private Coordinate gpsLocalization = null;
     @Getter
     private Double currentCourse = null;
     @Getter
