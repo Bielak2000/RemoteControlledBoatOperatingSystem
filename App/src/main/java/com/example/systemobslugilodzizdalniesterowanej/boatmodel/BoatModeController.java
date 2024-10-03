@@ -39,12 +39,16 @@ public class BoatModeController {
     private Label expectedCourseText;
     @FXML
     private Label sensorCourseText;
+    @FXML
+    private Label designatedCourse;
+    @FXML
+    private Label designatedCourseText;
 
 
     private BoatModeController(Button leftFlap, Button lightDown, Button lightUp, Button moveDown, Button moveLeft, Button moveRight, Button moveUp,
                                Button rightFlap, Label lightingText, Label flapsText, Button startSwimming, Button clearTrace, ToggleButton modeChooser, Button exit,
                                Label runningBoatInformation, Button stopSwimmingButton, Label gpsCourse, Label expectedCourse, Label sensorCourse, Label gpsCourseText,
-                               Label sensorCourseText, Label expectedCourseText) {
+                               Label sensorCourseText, Label expectedCourseText, Label designatedCourse, Label designatedCourseText) {
         this.boatMode = BoatMode.KEYBOARD_CONTROL;
         this.leftFlap = leftFlap;
         this.lightDown = lightDown;
@@ -68,17 +72,20 @@ public class BoatModeController {
         this.gpsCourseText = gpsCourseText;
         this.expectedCourseText = expectedCourseText;
         this.sensorCourseText = sensorCourseText;
+        this.designatedCourse = designatedCourse;
+        this.designatedCourseText = designatedCourseText;
     }
 
     public static BoatModeController getInstance(Button leftFlap, Button lightDown, Button lightUp, Button moveDown, Button moveLeft, Button moveRight,
                                                  Button moveUp, Button rightFlap, Label lightingText, Label flapsText, Button startSwimming, Button clearTrace,
                                                  ToggleButton modeChooser, Button exit, Label runningBoatInformation, Button stopSwimmingButton, Label gpsCourse, Label expectedCourse, Label sensorCourse,
                                                  Label gpsCourseText,
-                                                 Label sensorCourseText, Label expectedCourseText) {
+                                                 Label sensorCourseText, Label expectedCourseText,
+                                                 Label designatedCourse, Label designatedCourseText) {
         if (boatModeController == null) {
             boatModeController = new BoatModeController(leftFlap, lightDown, lightUp, moveDown, moveLeft, moveRight, moveUp,
                     rightFlap, lightingText, flapsText, startSwimming, clearTrace, modeChooser, exit, runningBoatInformation, stopSwimmingButton,
-                    gpsCourse, expectedCourse, sensorCourse, gpsCourseText, sensorCourseText, expectedCourseText);
+                    gpsCourse, expectedCourse, sensorCourse, gpsCourseText, sensorCourseText, expectedCourseText, designatedCourse, designatedCourseText);
         }
         return boatModeController;
     }
@@ -133,6 +140,8 @@ public class BoatModeController {
         gpsCourseText.setVisible(true);
         sensorCourseText.setVisible(true);
         expectedCourseText.setVisible(true);
+        designatedCourse.setVisible(true);
+        designatedCourseText.setVisible(true);
     }
 
     private void setViewForKeyboardControlBoatMode() {
@@ -154,6 +163,8 @@ public class BoatModeController {
         gpsCourseText.setVisible(false);
         sensorCourseText.setVisible(false);
         expectedCourseText.setVisible(false);
+        designatedCourse.setVisible(false);
+        designatedCourseText.setVisible(false);
     }
 
     private void blockActionsForAutonomicRunningBoatMode() {

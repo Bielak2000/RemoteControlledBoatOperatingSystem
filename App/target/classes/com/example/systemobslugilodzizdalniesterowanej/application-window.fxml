@@ -69,14 +69,16 @@
                                         <Font size="17.0" />
                                     </font>
                                 </Button>
-                                <Label fx:id="sensorCourseText" layoutX="19.0" layoutY="78.0" text="Kurs z sensora:" visible="false" />
-                                <Label fx:id="sensorCourse" alignment="CENTER" layoutX="133.0" layoutY="70.0" prefHeight="31.0" text="-" textFill="#29acc6" visible="false" />
-                                <Label fx:id="gpsCourse" alignment="CENTER" layoutX="116.0" layoutY="95.0" prefHeight="31.0" text="-" textFill="#29acc6" visible="false" />
-                                <Label fx:id="gpsCourseText" layoutX="20.0" layoutY="103.0" text="Kurs z GPS:" visible="false" />
+                                <Label fx:id="sensorCourseText" layoutX="20.0" layoutY="80.0" text="Kurs z sensora:" visible="false" />
+                                <Label fx:id="sensorCourse" alignment="CENTER" layoutX="130.0" layoutY="80.0" prefHeight="15.0" text="-" textFill="#29acc6" visible="false" />
+                                <Label fx:id="gpsCourse" alignment="CENTER" layoutX="101.0" layoutY="100.0" prefHeight="15.0" text="-" textFill="#29acc6" visible="false" />
+                                <Label fx:id="gpsCourseText" layoutX="20.0" layoutY="100.0" text="Kurs z GPS:" visible="false" />
                         <Label fx:id="gpsCourseText1" layoutX="20.0" layoutY="141.0" text="Algorytm:" />
-                                <Label fx:id="expectedCourseText" layoutX="20.0" layoutY="50.0" text="Oczekiwany kurs:" visible="false" />
-                                <Label fx:id="expectedCourse" alignment="CENTER" layoutX="141.0" layoutY="42.0" prefHeight="31.0" text="-" textFill="#29acc6" visible="false" />
+                                <Label fx:id="expectedCourseText" layoutX="20.0" layoutY="40.0" text="Oczekiwany kurs:" visible="false" />
+                        <Label fx:id="designatedCourseText" layoutX="20.0" layoutY="60.0" text="Wyznaczony kurs:" visible="false" />
+                                <Label fx:id="expectedCourse" alignment="CENTER" layoutX="145.0" layoutY="40.0" prefHeight="15.0" text="-" textFill="#29acc6" visible="false" />
                         <Label fx:id="choosenAlgorithmText" alignment="CENTER" layoutX="93.0" layoutY="133.0" prefHeight="31.0" text="-" textFill="#29acc6" />
+                        <Label fx:id="designatedCourse" alignment="CENTER" layoutX="145.0" layoutY="60.0" prefHeight="15.0" text="-" textFill="#29acc6" visible="false" />
                             </children>
                         </AnchorPane>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="74.0" prefWidth="798.0">
