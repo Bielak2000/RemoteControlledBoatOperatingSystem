@@ -20,26 +20,18 @@ public class BasicCourseAndGpsAlgorithm {
     private Double recentDesignatedCourse = null;
 
     public void setGpsCourseIfCorrectData(Double newGpsCourse) {
-        if (gpsCourse == null) {
+        if (gpsCourse == null || recentDesignatedCourse == null) {
             this.gpsCourse = newGpsCourse;
-        } else if (Math.abs(newGpsCourse - gpsCourse) < MAX_ACCURACY_DIFF) {
-            if (sensorCourse == null) {
-                this.gpsCourse = newGpsCourse;
-            } else if (Math.abs(newGpsCourse - sensorCourse) < MAX_ACCURACY_DIFF) {
-                this.gpsCourse = newGpsCourse;
-            }
+        } else if (Math.abs(newGpsCourse - recentDesignatedCourse) < MAX_ACCURACY_DIFF) {
+            this.gpsCourse = newGpsCourse;
         }
     }
 
     public void setSensorCourseIfCorrectData(Double newSensorCourse) {
-        if (sensorCourse == null) {
+        if (sensorCourse == null || recentDesignatedCourse == null) {
             this.sensorCourse = newSensorCourse;
-        } else if (Math.abs(newSensorCourse - sensorCourse) < MAX_ACCURACY_DIFF && Math.abs(newSensorCourse - gpsCourse) < MAX_ACCURACY_DIFF) {
-            if (gpsCourse == null) {
-                this.sensorCourse = newSensorCourse;
-            } else if (Math.abs(newSensorCourse - gpsCourse) < MAX_ACCURACY_DIFF) {
-                this.sensorCourse = newSensorCourse;
-            }
+        } else if (Math.abs(newSensorCourse - recentDesignatedCourse) < MAX_ACCURACY_DIFF) {
+            this.sensorCourse = newSensorCourse;
         }
     }
 
