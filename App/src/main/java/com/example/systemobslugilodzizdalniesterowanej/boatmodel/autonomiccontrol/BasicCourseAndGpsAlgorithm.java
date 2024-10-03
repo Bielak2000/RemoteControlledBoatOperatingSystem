@@ -20,10 +20,12 @@ public class BasicCourseAndGpsAlgorithm {
     private Double recentDesignatedCourse = null;
 
     public void setGpsCourseIfCorrectData(Double newGpsCourse) {
-        if (gpsCourse == null || recentDesignatedCourse == null) {
-            this.gpsCourse = newGpsCourse;
-        } else if (Math.abs(newGpsCourse - recentDesignatedCourse) < MAX_ACCURACY_DIFF) {
-            this.gpsCourse = newGpsCourse;
+        if (newGpsCourse != 0) {
+            if (gpsCourse == null || recentDesignatedCourse == null) {
+                this.gpsCourse = newGpsCourse;
+            } else if (Math.abs(newGpsCourse - recentDesignatedCourse) < MAX_ACCURACY_DIFF) {
+                this.gpsCourse = newGpsCourse;
+            }
         }
     }
 
