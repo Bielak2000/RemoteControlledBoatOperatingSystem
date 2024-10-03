@@ -16,17 +16,19 @@ public class BasicCourseAndGpsAlgorithm {
 
     private static double MAX_ACCURACY_DIFF = 60;
     private Double gpsCourse = null;
+    private int gpsCourseIndex = 0;
     private Double sensorCourse = null;
     private Double recentDesignatedCourse = null;
 
     public void setGpsCourseIfCorrectData(Double newGpsCourse) {
-        if (newGpsCourse != 0) {
+        if (newGpsCourse != 0 && gpsCourseIndex > 3) {
             if (gpsCourse == null || recentDesignatedCourse == null) {
                 this.gpsCourse = newGpsCourse;
             } else if (Math.abs(newGpsCourse - recentDesignatedCourse) < MAX_ACCURACY_DIFF) {
                 this.gpsCourse = newGpsCourse;
             }
         }
+        gpsCourse++;
     }
 
     public void setSensorCourseIfCorrectData(Double newSensorCourse) {
