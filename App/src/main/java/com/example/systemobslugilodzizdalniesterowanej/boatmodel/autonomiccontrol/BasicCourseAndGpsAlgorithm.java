@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
  * Jeśli
  * - to pierwsza dana dla danego czujnika to przypisuję ją do kursu z danego czujnika,
  * - to kolejna to sprawdza czy nie jest ona bledna (nie rozni sie zbyt bardzo - MAX_ACCURACY_DIFF - od ostatniego kursu)
+ * - dodatkowo dla odczytow z GPS bierzeemy pod uwagę dopiero gdy dostaniemy 4 pomiar
  * <p>
  * Sam algorytm wyznacza kurs jako srednia z pomiarow z obu czujnikow oraz ostatniego pomiaru
  */
@@ -21,7 +22,7 @@ public class BasicCourseAndGpsAlgorithm {
     private Double recentDesignatedCourse = null;
 
     public void setGpsCourseIfCorrectData(Double newGpsCourse) {
-        if (newGpsCourse != 0 && gpsCourseIndex > 3) {
+        if (newGpsCourse != 0 && gpsCourseIndex > 2) {
             if (gpsCourse == null || recentDesignatedCourse == null) {
                 this.gpsCourse = newGpsCourse;
             } else if (Math.abs(newGpsCourse - recentDesignatedCourse) < MAX_ACCURACY_DIFF) {
