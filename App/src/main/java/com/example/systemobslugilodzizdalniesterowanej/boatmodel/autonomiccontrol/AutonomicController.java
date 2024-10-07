@@ -43,11 +43,11 @@ public class AutonomicController {
     }
 
     public LinearAndAngularSpeed designateRightEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(50.0, -50.0);
+        return new LinearAndAngularSpeed(50.0, 50.0);
     }
 
     public LinearAndAngularSpeed designateLeftEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(-50.0, 50.0);
+        return new LinearAndAngularSpeed(50.0, -50.0);
     }
 
     public LinearAndAngularSpeed designateEnginesPower() {
@@ -98,9 +98,9 @@ public class AutonomicController {
         if (distanceBetweenCurrentAndNextPositions <= MIN_DISTANCE_FOR_LINEAR_SPEED_METERS) {
             return MIN_LINEAR_SPEED_PERCENTAGE;
         } else if (distanceBetweenCurrentAndNextPositions >= MAX_DISTANCE_FOR_LINEAR_SPEED_METERS) {
-            return 100.0;
+            return 80.0;
         } else {
-            return (distanceBetweenCurrentAndNextPositions / (MAX_DISTANCE_FOR_LINEAR_SPEED_METERS - MIN_LINEAR_SPEED_PERCENTAGE)) * 100;
+            return (distanceBetweenCurrentAndNextPositions / (MAX_DISTANCE_FOR_LINEAR_SPEED_METERS - MIN_LINEAR_SPEED_PERCENTAGE)) * 80;
         }
     }
 
