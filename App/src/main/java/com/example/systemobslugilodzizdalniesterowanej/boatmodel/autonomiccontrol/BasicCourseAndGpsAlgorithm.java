@@ -15,7 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BasicCourseAndGpsAlgorithm {
 
-    private static double MAX_ACCURACY_DIFF = 60;
+    private static double GPS_COURSE_MAX_ACCURACY_DIFF = 90;
+    private static double SENSOR_COURSE_MAX_ACCURACY_DIFF = 15;
     private Double gpsCourse = null;
     private int gpsCourseIndex = 0;
     private Double sensorCourse = null;
@@ -25,7 +26,7 @@ public class BasicCourseAndGpsAlgorithm {
         if (newGpsCourse != 0 && gpsCourseIndex > 2) {
             if (gpsCourse == null || recentDesignatedCourse == null) {
                 this.gpsCourse = newGpsCourse;
-            } else if (Math.abs(newGpsCourse - recentDesignatedCourse) < MAX_ACCURACY_DIFF) {
+            } else if (Math.abs(newGpsCourse - recentDesignatedCourse) < GPS_COURSE_MAX_ACCURACY_DIFF) {
                 this.gpsCourse = newGpsCourse;
             }
         }
@@ -35,7 +36,7 @@ public class BasicCourseAndGpsAlgorithm {
     public void setSensorCourseIfCorrectData(Double newSensorCourse) {
         if (sensorCourse == null || recentDesignatedCourse == null) {
             this.sensorCourse = newSensorCourse;
-        } else if (Math.abs(newSensorCourse - recentDesignatedCourse) < MAX_ACCURACY_DIFF) {
+        } else if (Math.abs(newSensorCourse - recentDesignatedCourse) < SENSOR_COURSE_MAX_ACCURACY_DIFF) {
             this.sensorCourse = newSensorCourse;
         }
     }
