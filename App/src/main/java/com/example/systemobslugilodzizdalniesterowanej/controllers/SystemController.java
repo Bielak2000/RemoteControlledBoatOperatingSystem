@@ -208,19 +208,28 @@ public class SystemController implements Initializable {
     @FXML
     void changeMode(ActionEvent event) throws IOException {
         if (modeChooser.isSelected()) {
-            keyboardHandler.stopBoat();
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(200);
-                        connection.sendMoveToAutonomicInfo();
-                        changeBoatMode(BoatMode.AUTONOMIC);
-                    } catch (InterruptedException e) {
-                        log.error("Error while async sending changed boat mode and waypoints: {}", e.getMessage());
+            if (osmMap.getFoundBoatPosition()) {
+//            if (true) {
+                keyboardHandler.stopBoat();
+                executorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(200);
+                            connection.sendMoveToAutonomicInfo();
+                            changeBoatMode(BoatMode.AUTONOMIC);
+                        } catch (InterruptedException e) {
+                            log.error("Error while async sending changed boat mode and waypoints: {}", e.getMessage());
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Brak danych");
+                alert.setHeaderText("Nie wyznaczono aktualnego położenia łódki, spróbuj ponownie po pobraniu lokalizacji.");
+                alert.showAndWait();
+                modeChooser.setSelected(false);
+            }
         } else {
             ProgressDialogController progressDialogController = manuallyStopSwimmingProgressDialog();
             connection.setProgressDialogController(progressDialogController);
@@ -231,8 +240,8 @@ public class SystemController implements Initializable {
 
     @FXML
     void startSwimming(ActionEvent event) throws IOException {
-//        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints() && osmMap.getCurrentCourse() != null) {
-        if (true) {
+        if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints() && osmMap.getCurrentCourse() != null) {
+//        if (true) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "start-swimming-dialog.fxml"));
             Stage mainStage = new Stage();
             StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection, osmMap, autonomicController);
@@ -242,16 +251,9 @@ public class SystemController implements Initializable {
             mainStage.setScene(scene);
             mainStage.show();
         } else {
-            String text = "";
-            if (!osmMap.designatedWaypoints() && !osmMap.getFoundBoatPosition())
-                text = "Nie wyznaczono pozycji docelowej łódki i jej aktualnego położenia.";
-            else if (!osmMap.designatedWaypoints())
-                text = "Nie wyznaczono pozycji docelowej łódki.";
-            else if (!osmMap.getFoundBoatPosition())
-                text = "Nie wyznaczono aktualnego położenia łódki.";
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Brak danych");
-            alert.setHeaderText(text);
+            alert.setHeaderText("Nie wyznaczono pozycji docelowej łódki, jej aktualnego położenia lub aktualnego kursu.");
             alert.showAndWait();
         }
     }
