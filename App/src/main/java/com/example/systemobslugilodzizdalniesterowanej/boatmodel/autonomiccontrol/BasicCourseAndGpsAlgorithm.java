@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
  * Jeśli
  * - to pierwsza dana dla danego czujnika to przypisuję ją do kursu z danego czujnika,
  * - to kolejna to sprawdza czy nie jest ona bledna (nie rozni sie zbyt bardzo - MAX_ACCURACY_DIFF - od ostatniego kursu)
- * - dodatkowo dla odczytow z GPS bierzeemy pod uwagę dopiero gdy dostaniemy 4 pomiar
+ * - dodatkowo dla odczytow z GPS bierzemy pod uwagę dopiero gdy dostaniemy 4 pomiar
  * <p>
  * Sam algorytm wyznacza kurs jako srednia z pomiarow z obu czujnikow oraz ostatniego pomiaru
  */

@@ -1,6 +1,6 @@
 package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
-import com.example.systemobslugilodzizdalniesterowanej.positionalgorithm.PositionAlgorithm;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.PositionAlgorithm;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

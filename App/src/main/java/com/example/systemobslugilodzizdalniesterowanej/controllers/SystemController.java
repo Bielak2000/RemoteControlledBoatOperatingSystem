@@ -9,7 +9,7 @@ import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Ligh
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.keyboardcontrol.KeyboardHandler;
 import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
-import com.example.systemobslugilodzizdalniesterowanej.positionalgorithm.PositionAlgorithm;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.PositionAlgorithm;
 import com.sothawo.mapjfx.MapView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

@@ -11,7 +11,7 @@ import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Flap
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Lighting;
 import com.example.systemobslugilodzizdalniesterowanej.controllers.ProgressDialogController;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
-import com.example.systemobslugilodzizdalniesterowanej.positionalgorithm.PositionAlgorithm;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.PositionAlgorithm;
 import com.sothawo.mapjfx.Coordinate;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
