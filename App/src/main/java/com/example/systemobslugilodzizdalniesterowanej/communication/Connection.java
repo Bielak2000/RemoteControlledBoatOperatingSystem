@@ -86,12 +86,11 @@ public class Connection {
     private Boolean networkStatus;
     private OSMMap osmMap;
     private Stage stage;
-    private Label runningBoatInformation;
     private ToggleButton modeChooser;
     private PositionAlgorithm chosenAlgorithm;
 
     public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap,
-                      Stage stage, BoatModeController boatModeController, Label runningBoatInformation, AutonomicController autonomicController,
+                      Stage stage, BoatModeController boatModeController, AutonomicController autonomicController,
                       Label gpsCourse, Label sensorCourse, ToggleButton modeChooser, PositionAlgorithm chosenAlgorithm, Label designatedCourse,
                       KalmanFilterAlgorithm kalmanFilterAlgorithm) {
         com.fazecast.jSerialComm.SerialPort[] ports = com.fazecast.jSerialComm.SerialPort.getCommPorts();
@@ -107,7 +106,6 @@ public class Connection {
         this.osmMap = osmMap;
         this.stage = stage;
         this.boatModeController = boatModeController;
-        this.runningBoatInformation = runningBoatInformation;
         this.autonomicController = autonomicController;
         this.gpsCourse = gpsCourse;
         this.sensorCourse = sensorCourse;

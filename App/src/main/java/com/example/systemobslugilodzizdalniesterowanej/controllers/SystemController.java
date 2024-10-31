@@ -84,7 +84,7 @@ public class SystemController implements Initializable {
             this.kalmanFilterAlgorithm.initializeKalmanFilter();
         }
         this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage,
-                boatModeController, runningBoatInformation, autonomicController, gpsCourse, sensorCourse, modeChooser, chosenAlgorithm, designatedCourse, kalmanFilterAlgorithm);
+                boatModeController, autonomicController, gpsCourse, sensorCourse, modeChooser, chosenAlgorithm, designatedCourse, kalmanFilterAlgorithm);
         connection.connect(chosenPort, chosenSystem);
         networkStatus = false;
         lightPower.setText("0%");
