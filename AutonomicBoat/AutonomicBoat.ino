@@ -219,6 +219,7 @@ void loop() {
     keyboardHandler();
   }
 
+  // OBGLUGA DANYCH Z APLIKACJI - AUTONOMICZNE STEROWANIE
   if(boatMode == BOAT_MODE_AUTONOMIC_CONTROL && checkNewDataFromAppInAutonomicMode()) {
     autonomicHandler();
   }
@@ -227,7 +228,7 @@ void loop() {
   if(newLocalization) {
     newLocalization = false;
     if(newLocalizationHandler()) {
-      appendData(LOCALIZATION_ASSIGN + "_" + String(gps.location.lat(), 5) + "," + String(gps.location.lng(), 5) + "_");
+      replaceOrAppendStringStartingWith(LOCALIZATION_ASSIGN + "_", LOCALIZATION_ASSIGN + "_" + String(gps.location.lat(), 5) + "," + String(gps.location.lng(), 5) + "_");
       // ********************************************************************************
       // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
       // lcd.setCursor(0,0);
@@ -240,7 +241,7 @@ void loop() {
   if(newGpsCourse) {
     newGpsCourse = false;
     if(newGpsCourseHandler()) {
-      appendData(GPS_COURSE_ASSIGN + "_" + String(gpsCourse) + "_");
+      replaceOrAppendStringStartingWith(GPS_COURSE_ASSIGN + "_", GPS_COURSE_ASSIGN + "_" + String(gpsCourse) + "_");
       // ********************************************************************************
       // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
       // lcd.setCursor(0,1);
@@ -253,7 +254,7 @@ void loop() {
   if (newCompassCourse) {
     compassRead();
     if(newCompassCourseHandler()) {
-      appendData(COMPASS_COURSE_ASSIGN + "_" + String(compassCourse) + "_");
+      replaceOrAppendStringStartingWith(COMPASS_COURSE_ASSIGN + "_", COMPASS_COURSE_ASSIGN + "_" + String(compassCourse) + "_");
     }
   }
 
@@ -292,6 +293,26 @@ void appendData(String data) {
     dataBuffer += ";";
   }
   dataBuffer += data;
+}
+
+void replaceOrAppendStringStartingWith(const String &prefix, const String &newValue) {
+    int startIndex = 0;
+    int prefixLength = prefix.length();
+    bool found = false;
+    while ((startIndex = dataBuffer.indexOf(prefix, startIndex)) != -1) {
+        found = true;
+        int endIndex = dataBuffer.indexOf(';', startIndex);
+        if (endIndex == -1) {
+            endIndex = dataBuffer.length();
+        }
+        if(endIndex - startIndex > 2) {
+            dataBuffer.remove(startIndex, endIndex - startIndex + (endIndex < dataBuffer.length() ? 1 : 0));
+            dataBuffer = dataBuffer.substring(0, startIndex) + newValue + dataBuffer.substring(startIndex);
+        }
+    }
+    if (!found) {
+        appendData(newValue);
+    }
 }
 
 void clearData() {

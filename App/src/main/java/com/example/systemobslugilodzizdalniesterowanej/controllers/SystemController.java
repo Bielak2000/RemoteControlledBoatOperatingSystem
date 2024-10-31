@@ -2,14 +2,16 @@ package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicControlExecute;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.KalmanFilterAlgorithm;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.PositionAlgorithm;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Engines;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Flaps;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Lighting;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.keyboardcontrol.KeyboardHandler;
 import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
-import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.PositionAlgorithm;
 import com.sothawo.mapjfx.MapView;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -37,6 +39,8 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_
 
 @Slf4j
 public class SystemController implements Initializable {
+    KalmanFilterAlgorithm kalmanFilterAlgorithm;
+    AutonomicControlExecute autonomicControlExecute;
     ExecutorService executorService;
     AutonomicController autonomicController;
     Stage stage;
@@ -75,8 +79,12 @@ public class SystemController implements Initializable {
         } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
+        if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
+            this.kalmanFilterAlgorithm = new KalmanFilterAlgorithm();
+            this.kalmanFilterAlgorithm.initializeKalmanFilter();
+        }
         this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage,
-                boatModeController, runningBoatInformation, autonomicController, gpsCourse, sensorCourse, modeChooser, chosenAlgorithm, designatedCourse);
+                boatModeController, runningBoatInformation, autonomicController, gpsCourse, sensorCourse, modeChooser, chosenAlgorithm, designatedCourse, kalmanFilterAlgorithm);
         connection.connect(chosenPort, chosenSystem);
         networkStatus = false;
         lightPower.setText("0%");
@@ -84,6 +92,8 @@ public class SystemController implements Initializable {
         exit.setCancelButton(true);
         exit.setFocusTraversable(false);
         this.autonomicController = new AutonomicController(osmMap);
+        this.autonomicControlExecute = new AutonomicControlExecute(this.boatModeController, this.connection, this.kalmanFilterAlgorithm, this.osmMap, this.designatedCourse, this.chosenAlgorithm);
+        this.autonomicControlExecute.start();
     }
 
     public void initializeKeyboardHandler() {
