@@ -35,15 +35,17 @@ public class AutonomicControlExecute {
     public void start() {
         Runnable task = () -> {
             BoatMode currentBoatMode = boatModeController.getBoatMode();
-            if(positionAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
+            if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                 kalmanFilterAlgorithm.getLock().lock();
-                kalmanFilterAlgorithm.designateCurrentCourseAndLocalization();
-                designatedCourse.setText(String.format("%.2f", kalmanFilterAlgorithm.getCurrentCourse()));
-                osmMap.setCurrentCourse(kalmanFilterAlgorithm.getCurrentCourse());
-                if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {
-                    osmMap.generateTraceFromBoatPosition(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
-                } else {
-                    osmMap.setCurrentBoatPositionWhileRunning(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
+                boolean correctResult = kalmanFilterAlgorithm.designateCurrentCourseAndLocalization();
+                if (correctResult) {
+                    designatedCourse.setText(String.format("%.2f", kalmanFilterAlgorithm.getCurrentCourse()));
+                    osmMap.setCurrentCourse(kalmanFilterAlgorithm.getCurrentCourse());
+                    if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {
+                        osmMap.generateTraceFromBoatPosition(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
+                    } else {
+                        osmMap.setCurrentBoatPositionWhileRunning(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
+                    }
                 }
                 kalmanFilterAlgorithm.getLock().unlock();
             }

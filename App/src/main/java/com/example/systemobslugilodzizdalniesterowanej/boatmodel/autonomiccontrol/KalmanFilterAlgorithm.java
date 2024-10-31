@@ -45,10 +45,12 @@ public class KalmanFilterAlgorithm {
     @Getter
     private Lock lock = new ReentrantLock();
 
-    public void designateCurrentCourseAndLocalization() {
+    public boolean designateCurrentCourseAndLocalization() {
         if (checkValidData()) {
             if (checkNewData()) {
-                log.info("Starting kalman algorithm ...");
+                double course = designateCurrentCourse();
+                log.info("Starting kalman algorithm: ax - {}, ay - {}, aa = {}, lat - {}, long - {}, course - {} ...",
+                        accelerationX, accelerationY, accelerationA, gpsLocalization.getLatitude(), gpsLocalization.getLongitude(), course);
                 ArrayRealVector controlVector = new ArrayRealVector(new double[]{
                         accelerationX, accelerationY, accelerationA
                 });
@@ -56,7 +58,7 @@ public class KalmanFilterAlgorithm {
                 ArrayRealVector measurementVector = new ArrayRealVector(new double[]{
                         gpsLocalization.getLongitude(), // x
                         gpsLocalization.getLatitude(),  // y
-                        designateCurrentCourse()        // azymut
+                        course        // azymut
                 });
                 kalmanFilter.correct(measurementVector);
                 double[] estimatedCourse = kalmanFilter.getStateEstimation();
@@ -64,11 +66,14 @@ public class KalmanFilterAlgorithm {
                 this.currentLocalization = new Coordinate(estimatedCourse[1], estimatedCourse[0]);
                 setOldValue();
                 log.info("Ended kalman algorithm: course - {}, lat - {}, long - {}", currentCourse, currentLocalization.getLatitude(), currentLocalization.getLongitude());
+                return true;
             } else {
                 log.info("Starting kalman algorithm - failed because no new data.");
+                return false;
             }
         } else {
             log.info("Starting kalman algorithm - failed because dont valid data.");
+            return false;
         }
     }
 
@@ -98,10 +103,8 @@ public class KalmanFilterAlgorithm {
         RealMatrix H = new Array2DRowRealMatrix(new double[][]{
                 {1, 0, 0, 0, 0, 0}, // x
                 {0, 1, 0, 0, 0, 0}, // y
-                {0, 0, 0, 0, 0, 0}, // Vx
-                {0, 0, 0, 0, 0, 0}, // Vy
                 {0, 0, 0, 0, 1, 0}, // azymut
-                {0, 0, 0, 0, 0, 0}, // predkosc katowa
+                {0, 0, 0, 0, 0, 1}, // predkosc katowa
         });
 
         RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
@@ -114,9 +117,9 @@ public class KalmanFilterAlgorithm {
         });
 
         RealMatrix R = new Array2DRowRealMatrix(new double[][]{
-                {0.1, 0, 0, 0}, // ax
-                {0, 0.1, 0, 0}, // ay
-                {0, 0, 1, 0},   // azymut
+                {0.1, 0, 0, 0}, // x
+                {0, 0.1, 0, 0}, // y
+                {0, 0, 0.5, 0}, // azymut
                 {0, 0, 0, 0.1}  // przyspieszenie katowe
         });
 
