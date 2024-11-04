@@ -61,6 +61,7 @@ public class KalmanFilterAlgorithm {
                         course        // azymut
                 });
                 kalmanFilter.correct(measurementVector);
+                showCovarianceMatrix(kalmanFilter.getErrorCovarianceMatrix());
                 double[] estimatedCourse = kalmanFilter.getStateEstimation();
                 this.currentCourse = estimatedCourse[4];
                 this.currentLocalization = new Coordinate(estimatedCourse[1], estimatedCourse[0]);
@@ -83,12 +84,11 @@ public class KalmanFilterAlgorithm {
         double dt = 0.5;
 
         RealMatrix A = new Array2DRowRealMatrix(new double[][]{
-                {1, 0, dt, 0, 0, 0}, // x
-                {0, 1, 0, dt, 0, 0}, // y
-                {0, 0, 1, 0, 0, 0},  // Vx
-                {0, 0, 0, 1, 0, 0},  // Vy
-                {0, 0, 0, 0, 1, dt}, // azymut
-                {0, 0, 0, 0, 0, 1}   // predkosc katowa
+                {1, 0, dt, 0, 0}, // x
+                {0, 1, 0, dt, 0}, // y
+                {0, 0, 1, 0, 0},  // Vx
+                {0, 0, 0, 1, 0},  // Vy
+                {0, 0, 0, 0, 1} // azymut
         });
 
         RealMatrix B = new Array2DRowRealMatrix(new double[][]{
@@ -96,43 +96,38 @@ public class KalmanFilterAlgorithm {
                 {0, 0.5 * dt * dt, 0},     // wpływ przyspieszenia na położenie Y
                 {dt, 0, 0},                // wpływ przyspieszenia na prędkość X
                 {0, dt, 0},                // wpływ przyspieszenia na prędkość Y
-                {0, 0, 0.5 * dt * dt},     // wpływ przyspieszenia kątowego na azymut
-                {0, 0, dt}                 // wpływ
+                {0, 0, 0.5 * dt * dt}     // wpływ przyspieszenia kątowego na azymut
         });
 
         RealMatrix H = new Array2DRowRealMatrix(new double[][]{
-                {1, 0, 0, 0, 0, 0}, // x
-                {0, 1, 0, 0, 0, 0}, // y
-                {0, 0, 0, 0, 1, 0}, // azymut
-                {0, 0, 0, 0, 0, 1}, // predkosc katowa
+                {1, 0, 0, 0, 0}, // x
+                {0, 1, 0, 0, 0}, // y
+                {0, 0, 0, 0, 1} // azymut
         });
 
         RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
-                {0.01, 0, 0, 0, 0, 0},
-                {0, 0.01, 0, 0, 0, 0},
-                {0, 0, 0.01, 0, 0, 0},
-                {0, 0, 0, 0.01, 0, 0},
-                {0, 0, 0, 0, 1, 0},
-                {0, 0, 0, 0.01, 0, 0}
+                {0.01, 0, 0, 0, 0},
+                {0, 0.01, 0, 0, 0},
+                {0, 0, 0.01, 0, 0},
+                {0, 0, 0, 0.01, 0},
+                {0, 0, 0, 0, 1}
         });
 
         RealMatrix R = new Array2DRowRealMatrix(new double[][]{
-                {0.1, 0, 0, 0}, // x
-                {0, 0.1, 0, 0}, // y
-                {0, 0, 0.5, 0}, // azymut
-                {0, 0, 0, 0.1}  // przyspieszenie katowe
+                {0.001, 0, 0}, // x
+                {0, 0.001, 0}, // y
+                {0, 0, 0.5}, // azymut
         });
 
         RealMatrix initialP = new Array2DRowRealMatrix(new double[][]{
-                {1, 0, 0, 0, 0, 0},
-                {0, 1, 0, 0, 0, 0},
-                {0, 0, 1, 0, 0, 0},
-                {0, 0, 0, 1, 0, 0},
-                {0, 0, 0, 0, 1, 0},
-                {0, 0, 0, 0, 0, 1}
+                {1, 0, 0, 0, 0},
+                {0, 1, 0, 0, 0},
+                {0, 0, 1, 0, 0},
+                {0, 0, 0, 1, 0},
+                {0, 0, 0, 0, 1}
         });
 
-        ArrayRealVector initialState = new ArrayRealVector(new double[]{0, 0, 0, 0, 0, 0});
+        ArrayRealVector initialState = new ArrayRealVector(new double[]{0, 0, 0, 0, 0});
         DefaultProcessModel processModel = new DefaultProcessModel(A, B, Q, initialState, initialP);
         DefaultMeasurementModel measurementModel = new DefaultMeasurementModel(H, R);
         kalmanFilter = new KalmanFilter(processModel, measurementModel);
@@ -155,7 +150,7 @@ public class KalmanFilterAlgorithm {
 
     private boolean checkNewData() {
         return !oldGpsLocalization.equals(gpsLocalization) || oldAccelerationA != accelerationA || oldAccelerationX != accelerationX || oldAccelerationY != accelerationY
-                || oldSensorCourse != sensorCourse || gpsCourse != gpsCourse || gpsCourse == null || sensorCourse == null || gpsLocalization == null
+                || oldSensorCourse != sensorCourse || oldGpsCourse != gpsCourse || gpsCourse == null || sensorCourse == null || gpsLocalization == null
                 || (oldAccelerationA == 0 && accelerationA == -1) || (oldAccelerationX == 0 && accelerationX == -1) || (oldAccelerationY == 0 && accelerationY == -1);
     }
 
@@ -166,6 +161,16 @@ public class KalmanFilterAlgorithm {
         oldGpsCourse = gpsCourse;
         oldSensorCourse = sensorCourse;
         oldGpsLocalization = gpsLocalization;
+    }
+
+    private void showCovarianceMatrix(RealMatrix covarianceMatrix) {
+        log.info("Covariance matrix (P): ");
+        for (int i = 0; i < covarianceMatrix.getRowDimension(); i++) {
+            for (int j = 0; j < covarianceMatrix.getColumnDimension(); j++) {
+                System.out.print(covarianceMatrix.getEntry(i, j) + " ");
+            }
+            System.out.println();
+        }
     }
 
 }
