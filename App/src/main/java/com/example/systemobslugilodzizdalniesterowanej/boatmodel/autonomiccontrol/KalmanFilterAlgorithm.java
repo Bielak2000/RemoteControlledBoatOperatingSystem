@@ -84,50 +84,56 @@ public class KalmanFilterAlgorithm {
         double dt = 0.5;
 
         RealMatrix A = new Array2DRowRealMatrix(new double[][]{
-                {1, 0, dt, 0, 0}, // x
-                {0, 1, 0, dt, 0}, // y
-                {0, 0, 1, 0, 0},  // Vx
-                {0, 0, 0, 1, 0},  // Vy
-                {0, 0, 0, 0, 1} // azymut
+                {1, 0, dt, 0, 0, 0}, // x
+                {0, 1, 0, dt, 0, 0}, // y
+                {0, 0, 1, 0, 0, 0},  // Vx
+                {0, 0, 0, 1, 0, 0},  // Vy
+                {0, 0, 0, 0, 1, dt}, // azymut
+                {0, 0, 0, 0, 0, 1}   // predkosc katowa
         });
 
         RealMatrix B = new Array2DRowRealMatrix(new double[][]{
-                {0.5 * dt * dt, 0, 0},     // wpływ przyspieszenia na położenie X
-                {0, 0.5 * dt * dt, 0},     // wpływ przyspieszenia na położenie Y
-                {dt, 0, 0},                // wpływ przyspieszenia na prędkość X
-                {0, dt, 0},                // wpływ przyspieszenia na prędkość Y
-                {0, 0, 0.5 * dt * dt}     // wpływ przyspieszenia kątowego na azymut
+                {0.5 * dt * dt, 0},     // wpływ przyspieszenia na położenie X
+                {0, 0.5 * dt * dt},     // wpływ przyspieszenia na położenie Y
+                {dt, 0},                // wpływ przyspieszenia na prędkość X
+                {0, dt},                // wpływ przyspieszenia na prędkość Y
+                {0, 0},                 // wpływ przyspieszenia na azymut
+                {0, 0}                 // wpływ przyspieszenia na predkosc katowoa
         });
 
         RealMatrix H = new Array2DRowRealMatrix(new double[][]{
-                {1, 0, 0, 0, 0}, // x
-                {0, 1, 0, 0, 0}, // y
-                {0, 0, 0, 0, 1} // azymut
+                {1, 0, 0, 0, 0, 0}, // x
+                {0, 1, 0, 0, 0, 0}, // y
+                {0, 0, 0, 0, 1, 0}, // azymut
+                {0, 0, 0, 0, 0, 1}, // predkosc katowa
         });
 
         RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
-                {0.01, 0, 0, 0, 0},
-                {0, 0.01, 0, 0, 0},
-                {0, 0, 0.01, 0, 0},
-                {0, 0, 0, 0.01, 0},
-                {0, 0, 0, 0, 1}
+                {0.01, 0, 0, 0, 0, 0},
+                {0, 0.01, 0, 0, 0, 0},
+                {0, 0, 0.01, 0, 0, 0},
+                {0, 0, 0, 0.01, 0, 0},
+                {0, 0, 0, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0.01}
         });
 
         RealMatrix R = new Array2DRowRealMatrix(new double[][]{
-                {0.001, 0, 0}, // x
-                {0, 0.001, 0}, // y
-                {0, 0, 0.5}, // azymut
+                {0.001, 0, 0, 0}, // x
+                {0, 0.001, 0, 0}, // y
+                {0, 0, 0.5, 0}, // azymut
+                {0, 0, 0, 0.1}  // predkosc katowe
         });
 
         RealMatrix initialP = new Array2DRowRealMatrix(new double[][]{
-                {1, 0, 0, 0, 0},
-                {0, 1, 0, 0, 0},
-                {0, 0, 1, 0, 0},
-                {0, 0, 0, 1, 0},
-                {0, 0, 0, 0, 1}
+                {1, 0, 0, 0, 0, 0},
+                {0, 1, 0, 0, 0, 0},
+                {0, 0, 1, 0, 0, 0},
+                {0, 0, 0, 1, 0, 0},
+                {0, 0, 0, 0, 1, 0},
+                {0, 0, 0, 0, 0, 1}
         });
 
-        ArrayRealVector initialState = new ArrayRealVector(new double[]{0, 0, 0, 0, 0});
+        ArrayRealVector initialState = new ArrayRealVector(new double[]{0, 0, 0, 0, 0, 0});
         DefaultProcessModel processModel = new DefaultProcessModel(A, B, Q, initialState, initialP);
         DefaultMeasurementModel measurementModel = new DefaultMeasurementModel(H, R);
         kalmanFilter = new KalmanFilter(processModel, measurementModel);

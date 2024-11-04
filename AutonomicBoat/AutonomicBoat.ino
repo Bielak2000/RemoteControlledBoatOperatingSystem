@@ -65,7 +65,7 @@ bool newLocalization = false;
 double gpsCourse = 400;
 
 // ZMIENNE DO OBSLUGI BNO08X - kompas
-uint32_t COMPASS_REPORT_INTERVAL = 1000000;  // 100000 µs = 100 ms = 10 Hz
+uint32_t COMPASS_REPORT_INTERVAL = 100000 * 2;  // 10000 µs = 10 ms = 1 Hz * 2 = 2 Hz
 Adafruit_BNO08x bno08x(-1);
 sh2_SensorValue_t compassValue;
 double previousCompassCourse = 400;
@@ -307,8 +307,12 @@ void replaceOrAppendStringStartingWith(const String &prefix, const String &newVa
         }
         if(endIndex - startIndex > 2) {
             dataBuffer.remove(startIndex, endIndex - startIndex + (endIndex < dataBuffer.length() ? 1 : 0));
+            if (startIndex + newValue.length() < dataBuffer.length()) {
+              newValue += ";";
+            }
             dataBuffer = dataBuffer.substring(0, startIndex) + newValue + dataBuffer.substring(startIndex);
         }
+        startIndex += newValue.length();
     }
     if (!found) {
         appendData(newValue);
