@@ -94,6 +94,7 @@ public class SystemController implements Initializable {
         this.autonomicController = new AutonomicController(osmMap);
         this.autonomicControlExecute = new AutonomicControlExecute(this.boatModeController, this.connection, this.kalmanFilterAlgorithm, this.osmMap, this.designatedCourse, this.chosenAlgorithm);
         this.autonomicControlExecute.start();
+        this.connection.sendInitConnection();
     }
 
     public void initializeKeyboardHandler() {

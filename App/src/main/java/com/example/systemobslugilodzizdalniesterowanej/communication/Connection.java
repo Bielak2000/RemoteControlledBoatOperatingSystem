@@ -49,6 +49,7 @@ public class Connection {
     private final static String FROM_APP_MOVE_TO_AUTONOMIC_MODE = "1";
     private final static String FROM_APP_AUTONOMOUS_MODE_CONTROL = "2";
     private final static String FINISH_SWIMMING_BY_WAYPOINTS = "3";
+    private final static String FROM_APP_INIT_CONNECTION = "4";
 
     // MESSAGE FROM BOAT
     private final static int FROM_BOAT_LIGHTING_MESSAGE = 0;
@@ -151,6 +152,18 @@ public class Connection {
             connectionStatus.setText("Brak połączenia z radionadajnikiem!");
             dialogWarning("Brak połączenia", "Aplikacja nie może się połączyć z radionadajnikiem!");
             stage.close();
+        }
+    }
+
+    public void sendInitConnection() {
+        try {
+            if (boatModeController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
+                String sentInfo = (FROM_APP_INIT_CONNECTION + "_" + chosenAlgorithm.getMaking() + "_");
+                serialPort.writeString(sentInfo);
+                log.info("Sent init connection: {}", sentInfo);
+            }
+        } catch (SerialPortException e) {
+            log.error("Error while sending message: {}", e.getMessage());
         }
     }
 

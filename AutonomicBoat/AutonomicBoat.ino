@@ -14,9 +14,15 @@
 #define INTERVAL_ENGINE_POWER 50
 #define INTERVAL_LIGHTING_POWER 500
 #define BOAT_MODE_KEYBOARD 0
+#define BOAT_MODE_KEYBOARD_INIT 4
 #define BOAT_MODE_TO_AUTONOMIC 1
 #define BOAT_MODE_AUTONOMIC_CONTROL 2
 #define FINISH_AUTONOMIC_CONTROL 3
+
+#define ONLY_GPS_ALOGRITHM 0
+#define SENSOR_AND_GPS_ALOGIRTHM 1
+#define BASIC_ALGORITHM 2
+#define KALMAN_ALGORITHM 3
 
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
@@ -28,6 +34,7 @@
 
 // MODEL STEROWANIA ŁODZIĄ
 int boatMode = BOAT_MODE_KEYBOARD;
+int selectedPositionAlgorithm = 1;
 
 // SILNIKI
 Servo leftEngine;
@@ -189,12 +196,12 @@ void serialEvent3() {
       int boatModeTemp = newChar - '0';
       if(boatMode != boatModeTemp) {
         boatMode = boatModeTemp;
+        lcd.setCursor(0,0);
+        lcd.print(boatMode);
       }
     }
     receivedFirstData = false;
 
-    lcd.setCursor(1, 10);
-    lcd.print(boatMode);
     if(boatMode == BOAT_MODE_KEYBOARD) {
       if (buffIndex < buffLength-1) { 
         readDataFromAppForKeyboardMode(newChar);      
@@ -209,11 +216,17 @@ void serialEvent3() {
       clearData();
       appendData(FINISH_SWIMMING_BY_WAYPOINTS + "_");
       boatMode = BOAT_MODE_KEYBOARD;
+    } if (boatMode == BOAT_MODE_KEYBOARD_INIT) {
+      readDataFromAppForInitializeConnection(newChar);
     }
   }
 }
 
 void loop() {
+
+        lcd.setCursor(0,1);
+        lcd.print(selectedPositionAlgorithm);
+
   // OBGLUGA DANYCH Z APLIKACJI - RECZNE STEROWANIE
   if(boatMode == BOAT_MODE_KEYBOARD && checkNewDataFromAppInKeyboardMode()) {
     keyboardHandler();
@@ -477,6 +490,27 @@ void readDataFromAppForAutonomicMode(char newChar) {
         newDataForKeyboardHandler[1]=1;
         arrayIndex = 0;
         receivedFirstData = true;
+      }
+   }
+   else if (newChar == '-' || ('0' <= newChar && newChar <= '9'))
+   {
+       buff[buffIndex++] = newChar;
+   }
+}
+
+void readDataFromAppForInitializeConnection(char newChar) {
+   if (newChar == '_') { 
+      buff[buffIndex++] = 0;
+      buffIndex = 0;
+      if(arrayIndex==1){
+        selectedPositionAlgorithm = atoi(buff);
+      }
+      arrayIndex++;
+      if (arrayIndex == 2) 
+      { 
+        arrayIndex = 0;
+        receivedFirstData = true;
+        // boatMode = BOAT_MODE_KEYBOARD;
       }
    }
    else if (newChar == '-' || ('0' <= newChar && newChar <= '9'))
