@@ -62,6 +62,7 @@ public class Connection {
     // TODO: do testow
     private final static int FROM_BOAT_GPS_COURSE_MESSAGE = 5;
     private final static int FROM_BOAT_SENSOR_COURSE_MESSAGE = 6;
+    private final static int LINEAR_ACCELERATION_ANGULAR_SPEED_ASSIGN = 7;
 
     @Getter
     private Lock sendingValuesLock = new ReentrantLock();
@@ -254,7 +255,7 @@ public class Connection {
             case FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS:
                 log.info("Received boat finished swimming by waypoints.");
                 sendingValuesLock.lock();
-                if(chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
+                if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     kalmanFilterAlgorithm.getLock().lock();
                 }
                 Platform.runLater(() -> {
@@ -274,7 +275,7 @@ public class Connection {
                 osmMap.setWaypointIndex(0);
                 boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
                 modeChooser.setSelected(false);
-                if(chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
+                if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     kalmanFilterAlgorithm.getLock().unlock();
                 }
                 sendingValuesLock.unlock();
@@ -311,7 +312,9 @@ public class Connection {
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
                     basicCourseAndGpsAlgorithm.setSensorCourseIfCorrectData(Double.parseDouble(array[1]));
                     double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
-                    designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
+                    Platform.runLater(() -> {
+                        designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
+                    });
                     osmMap.setCurrentCourse(designatedCourseFromBasicAlgorithm);
                 } else if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     kalmanFilterAlgorithm.getLock().lock();
@@ -328,6 +331,21 @@ public class Connection {
                     }
                 }
                 sendingValuesLock.unlock();
+                break;
+            case LINEAR_ACCELERATION_ANGULAR_SPEED_ASSIGN:
+                log.info("Received linear acceleration and angular speed from SENSOR");
+                if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
+                    String[] linearAccelerationAndAngularSpeed = array[1].split(",");
+                    if (linearAccelerationAndAngularSpeed.length == 3) {
+                        kalmanFilterAlgorithm.getLock().lock();
+                        kalmanFilterAlgorithm.setAccelerationX(Double.parseDouble(linearAccelerationAndAngularSpeed[0]));
+                        kalmanFilterAlgorithm.setAccelerationY(Double.parseDouble(linearAccelerationAndAngularSpeed[1]));
+                        kalmanFilterAlgorithm.setAngularSpeed(Double.parseDouble(linearAccelerationAndAngularSpeed[2]));
+                        kalmanFilterAlgorithm.getLock().unlock();
+                    } else {
+                        log.error("Wrong linearAccelerationAndAngularSpeed values ...");
+                    }
+                }
                 break;
         }
     }
@@ -386,7 +404,8 @@ public class Connection {
                 Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_MESSAGE ||
                 Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS ||
                 Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_COURSE_MESSAGE ||
-                Integer.parseInt(receivedData[0]) == FROM_BOAT_SENSOR_COURSE_MESSAGE);
+                Integer.parseInt(receivedData[0]) == FROM_BOAT_SENSOR_COURSE_MESSAGE ||
+                Integer.parseInt(receivedData[0]) == LINEAR_ACCELERATION_ANGULAR_SPEED_ASSIGN);
     }
 
     private void privateSetProgressDialogController(String title, String content) throws IOException {

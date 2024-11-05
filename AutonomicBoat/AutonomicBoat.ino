@@ -32,9 +32,12 @@
 
 // ********************************************************************************
 
+double linearAccelarationAccuracy = 0.09;
+double angularSpeedAccuarcy = 0.09;
+
 // MODEL STEROWANIA ŁODZIĄ
 int boatMode = BOAT_MODE_KEYBOARD;
-int selectedPositionAlgorithm = 1;
+int selectedPositionAlgorithm = SENSOR_AND_GPS_ALOGIRTHM;
 
 // SILNIKI
 Servo leftEngine;
@@ -72,12 +75,18 @@ bool newLocalization = false;
 double gpsCourse = 400;
 
 // ZMIENNE DO OBSLUGI BNO08X - kompas
-uint32_t COMPASS_REPORT_INTERVAL = 100000 * 2;  // 10000 µs = 10 ms = 1 Hz * 2 = 2 Hz
+uint32_t COMPASS_REPORT_INTERVAL = 1000000 / 2;  // 1S / 2 = 2HZ, dwa razy na sekunde
 Adafruit_BNO08x bno08x(-1);
 sh2_SensorValue_t compassValue;
 double previousCompassCourse = 400;
 double compassCourse = 400;
-bool newCompassCourse = false;
+double linearAccelarationX = 0.0;
+double linearAccelarationY = 0.0;
+double speedAngular = 0.0;
+double previousLinearAccelarationX = 0.0;
+double previousLinearAccelarationY = 0.0;
+double previousSpeedAngular = 0.0;
+bool newSensorValue = false;
 struct euler_t {
   float yaw;
   float pitch;
@@ -117,6 +126,7 @@ const String LOCALIZATION_ASSIGN = "1";
 const String FINISH_SWIMMING_BY_WAYPOINTS = "2";
 const String GPS_COURSE_ASSIGN = "5";
 const String COMPASS_COURSE_ASSIGN = "6";
+const String LINEAR_ACCELARATION_ANGULAR_SPEED_ASSIGN = "7";
 
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
@@ -128,7 +138,7 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 6);
 // ********************************************************************************
 
 void compassInterrupt() {
-  newCompassCourse = true;
+  newSensorValue = true;
 }
 
 void enginesInit() {
@@ -155,7 +165,6 @@ void setup() {
   Serial3.begin(57600); // radionadanjnik
 
   setCompassSensor();
-  setCompassReports();
   attachInterrupt(digitalPinToInterrupt(2), compassInterrupt, FALLING);
 
   // enginesInit();
@@ -196,8 +205,10 @@ void serialEvent3() {
       int boatModeTemp = newChar - '0';
       if(boatMode != boatModeTemp) {
         boatMode = boatModeTemp;
-        lcd.setCursor(0,0);
-        lcd.print(boatMode);
+        // lcd.setCursor(0,0);
+        // lcd.print(boatMode);
+                // lcd.setCursor(5,0);
+        // lcd.print(boatModeTemp);
       }
     }
     receivedFirstData = false;
@@ -223,10 +234,8 @@ void serialEvent3() {
 }
 
 void loop() {
-
-        lcd.setCursor(0,1);
+          lcd.setCursor(0,1);
         lcd.print(selectedPositionAlgorithm);
-
   // OBGLUGA DANYCH Z APLIKACJI - RECZNE STEROWANIE
   if(boatMode == BOAT_MODE_KEYBOARD && checkNewDataFromAppInKeyboardMode()) {
     keyboardHandler();
@@ -264,10 +273,14 @@ void loop() {
   }
 
   // OBSLUGA DANYCH KURSU Z KOMPASU JESLI SIE POJAWILY
-  if (newCompassCourse) {
-    compassRead();
+  if (newSensorValue) {
+    sensorRead();
     if(newCompassCourseHandler()) {
       replaceOrAppendStringStartingWith(COMPASS_COURSE_ASSIGN + "_", COMPASS_COURSE_ASSIGN + "_" + String(compassCourse) + "_");
+    }
+    if(selectedPositionAlgorithm == KALMAN_ALGORITHM && newAccelarationOrSpeedHandler()) {
+      replaceOrAppendStringStartingWith(LINEAR_ACCELARATION_ANGULAR_SPEED_ASSIGN + "_", 
+          LINEAR_ACCELARATION_ANGULAR_SPEED_ASSIGN + "_" + String(linearAccelarationX, 2) + "," + String(linearAccelarationY, 2) + "," + String(speedAngular) + "_");
     }
   }
 
@@ -375,8 +388,28 @@ void setCompassSensor() {
 }
 
 void setCompassReports() {
-  if (!bno08x.enableReport(SH2_ROTATION_VECTOR, COMPASS_REPORT_INTERVAL)) {
-    Serial.write("Could not enable rotation vector\n");
+                  lcd.setCursor(0,0);
+        lcd.print(selectedPositionAlgorithm);
+                          lcd.setCursor(3,0);
+        lcd.print(BASIC_ALGORITHM);
+  if(selectedPositionAlgorithm == SENSOR_AND_GPS_ALOGIRTHM || selectedPositionAlgorithm == BASIC_ALGORITHM) {
+                    lcd.setCursor(5,1);
+        lcd.print(selectedPositionAlgorithm);
+    if(!bno08x.enableReport(SH2_ROTATION_VECTOR, COMPASS_REPORT_INTERVAL)) {
+                lcd.setCursor(5,1);
+        lcd.print(selectedPositionAlgorithm);
+      // Serial.println("Could not enable SH2_ROTATION_VECTOR");
+    }
+  } else if(selectedPositionAlgorithm == KALMAN_ALGORITHM) {
+    if(!bno08x.enableReport(SH2_ROTATION_VECTOR, COMPASS_REPORT_INTERVAL)) {
+      Serial.println("Could not enable SH2_ROTATION_VECTOR");
+    }
+    if(!bno08x.enableReport(SH2_LINEAR_ACCELERATION, COMPASS_REPORT_INTERVAL)) {
+      Serial.println("Could not enable SH2_LINEAR_ACCELERATION");
+    }
+    if(!bno08x.enableReport(SH2_GYROSCOPE_CALIBRATED, COMPASS_REPORT_INTERVAL)) {
+      Serial.println("Could not enable SH2_GYROSCOPE_CALIBRATED");
+    }
   }
 }
 
@@ -403,8 +436,8 @@ void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, euler_t* y
     quaternionToEuler(rotational_vector->real, rotational_vector->i, rotational_vector->j, rotational_vector->k, ypr, degrees);
 }
 
-void compassRead() {
-  newCompassCourse = false;
+void sensorRead() {
+  newSensorValue = false;
   if (bno08x.wasReset()) {
     Serial.write("sensor was reset\n");
     setCompassReports();
@@ -418,6 +451,13 @@ void compassRead() {
         // lcd.setCursor(0,0);
         // lcd.print(compassCourse);
         break;
+      case SH2_LINEAR_ACCELERATION:
+        linearAccelarationX = compassValue.un.accelerometer.x;
+        linearAccelarationY = compassValue.un.accelerometer.y;
+        break;
+      case SH2_GYROSCOPE_CALIBRATED:
+        speedAngular = compassValue.un.gyroscope.z;
+        break;
     }
   }
 }
@@ -427,6 +467,30 @@ bool newCompassCourseHandler() {
       previousCompassCourse = compassCourse;
       return true;
   }
+  return false;
+}
+
+bool newAccelarationOrSpeedHandler() {
+  if((abs(linearAccelarationX - previousLinearAccelarationX) > linearAccelarationAccuracy || abs(linearAccelarationY - previousLinearAccelarationY) > linearAccelarationAccuracy ||
+        abs(speedAngular - previousSpeedAngular) > angularSpeedAccuarcy)) {
+      if(abs(linearAccelarationX - 0.0) < 0.06) linearAccelarationX = 0.0;
+      if(abs(linearAccelarationY - 0.0) < 0.06) linearAccelarationY = 0.0;
+      if(abs(speedAngular - 0.0) < 0.06) speedAngular = 0.0;
+      previousLinearAccelarationX = linearAccelarationX;
+      previousLinearAccelarationY = linearAccelarationY;
+      previousSpeedAngular = speedAngular;
+      return true;
+  } 
+  // else if (abs(linearAccelarationX - 0.0) < 0.05 && abs(linearAccelarationY - 0.0) < 0.05 && abs(speedAngular - 0.0) < 0.05 && linearAccelarationX != previousLinearAccelarationX &&
+  //       linearAccelarationY != previousLinearAccelarationY && speedAngular != previousSpeedAngular) {
+  //     linearAccelarationX = 0.0;
+  //     linearAccelarationY = 0.0;
+  //     speedAngular = 0.0;
+  //     previousLinearAccelarationX = 0.0;
+  //     previousLinearAccelarationY = 0.0;
+  //     previousSpeedAngular = 0.0;
+  //     return true;
+  // }
   return false;
 }
 
@@ -510,6 +574,7 @@ void readDataFromAppForInitializeConnection(char newChar) {
       { 
         arrayIndex = 0;
         receivedFirstData = true;
+        setCompassReports();
         // boatMode = BOAT_MODE_KEYBOARD;
       }
    }

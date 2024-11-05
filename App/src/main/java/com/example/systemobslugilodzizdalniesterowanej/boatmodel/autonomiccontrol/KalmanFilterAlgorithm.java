@@ -28,14 +28,13 @@ public class KalmanFilterAlgorithm {
     private Coordinate gpsLocalization = null;
     private double accelerationX = 0.0;
     private double accelerationY = 0.0;
-    private double accelerationA = 0.0;
+    private double angularSpeed = 0.0;
     private Double oldGpsCourse = -1.0;
     private Double oldSensorCourse = -1.0;
     private Coordinate oldGpsLocalization = null;
-    private double oldAccelerationX = -1.0;
-    private double oldAccelerationY = -1.0;
-    private double oldAccelerationA = -1.0;
-
+    private double oldAccelerationX = -100.0;
+    private double oldAccelerationY = -100.0;
+    private double oldAngularSpeed = -100.0;
 
     @Getter
     private Double currentCourse = null;
@@ -49,16 +48,17 @@ public class KalmanFilterAlgorithm {
         if (checkValidData()) {
             if (checkNewData()) {
                 double course = designateCurrentCourse();
-                log.info("Starting kalman algorithm: ax - {}, ay - {}, aa = {}, lat - {}, long - {}, course - {} ...",
-                        accelerationX, accelerationY, accelerationA, gpsLocalization.getLatitude(), gpsLocalization.getLongitude(), course);
+                log.info("Starting kalman algorithm: ax - {}, ay - {}, w = {}, lat - {}, long - {}, course - {} ...",
+                        accelerationX, accelerationY, angularSpeed, gpsLocalization.getLatitude(), gpsLocalization.getLongitude(), course);
                 ArrayRealVector controlVector = new ArrayRealVector(new double[]{
-                        accelerationX, accelerationY, accelerationA
+                        accelerationX, accelerationY
                 });
                 kalmanFilter.predict(controlVector);
                 ArrayRealVector measurementVector = new ArrayRealVector(new double[]{
                         gpsLocalization.getLongitude(), // x
                         gpsLocalization.getLatitude(),  // y
-                        course        // azymut
+                        course,        // azymut
+                        angularSpeed // predkosc katowa
                 });
                 kalmanFilter.correct(measurementVector);
                 showCovarianceMatrix(kalmanFilter.getErrorCovarianceMatrix());
@@ -155,13 +155,13 @@ public class KalmanFilterAlgorithm {
     }
 
     private boolean checkNewData() {
-        return !oldGpsLocalization.equals(gpsLocalization) || oldAccelerationA != accelerationA || oldAccelerationX != accelerationX || oldAccelerationY != accelerationY
+        return !oldGpsLocalization.equals(gpsLocalization) || oldAngularSpeed != angularSpeed || oldAccelerationX != accelerationX || oldAccelerationY != accelerationY
                 || oldSensorCourse != sensorCourse || oldGpsCourse != gpsCourse || gpsCourse == null || sensorCourse == null || gpsLocalization == null
-                || (oldAccelerationA == 0 && accelerationA == -1) || (oldAccelerationX == 0 && accelerationX == -1) || (oldAccelerationY == 0 && accelerationY == -1);
+                || (oldAngularSpeed == 0 && angularSpeed == -1) || (oldAccelerationX == 0 && accelerationX == -1) || (oldAccelerationY == 0 && accelerationY == -1);
     }
 
     private void setOldValue() {
-        oldAccelerationA = accelerationA;
+        oldAngularSpeed = angularSpeed;
         oldAccelerationX = accelerationX;
         oldAccelerationY = accelerationY;
         oldGpsCourse = gpsCourse;
