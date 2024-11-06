@@ -15,12 +15,13 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class AutonomicControlExecute {
 
+    private final static int JOB_EXECUTE_SCHEDULER_SECONDS = 1;
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     BoatModeController boatModeController;
     Connection connection;
     KalmanFilterAlgorithm kalmanFilterAlgorithm;
     OSMMap osmMap;
-    private Label designatedCourse;
+    private final Label designatedCourse;
     PositionAlgorithm positionAlgorithm;
 
     public AutonomicControlExecute(BoatModeController boatModeController, Connection connection, KalmanFilterAlgorithm kalmanFilterAlgorithm, OSMMap osmMap, Label designatedCourse, PositionAlgorithm positionAlgorithm) {
@@ -60,7 +61,7 @@ public class AutonomicControlExecute {
                 }
             }
         };
-        scheduler.scheduleAtFixedRate(task, 5, 1, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(task, 5, JOB_EXECUTE_SCHEDULER_SECONDS, TimeUnit.SECONDS);
     }
 
 }
