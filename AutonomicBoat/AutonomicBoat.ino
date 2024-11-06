@@ -205,10 +205,6 @@ void serialEvent3() {
       int boatModeTemp = newChar - '0';
       if(boatMode != boatModeTemp) {
         boatMode = boatModeTemp;
-        // lcd.setCursor(0,0);
-        // lcd.print(boatMode);
-                // lcd.setCursor(5,0);
-        // lcd.print(boatModeTemp);
       }
     }
     receivedFirstData = false;
@@ -234,8 +230,6 @@ void serialEvent3() {
 }
 
 void loop() {
-          lcd.setCursor(0,1);
-        lcd.print(selectedPositionAlgorithm);
   // OBGLUGA DANYCH Z APLIKACJI - RECZNE STEROWANIE
   if(boatMode == BOAT_MODE_KEYBOARD && checkNewDataFromAppInKeyboardMode()) {
     keyboardHandler();
@@ -354,8 +348,6 @@ bool newLocalizationHandler() {
   if(dis > MINIMAL_DIFFERENCE_LOCALIZATION || oldLat == 0) {
       oldLat = newLat;
       oldLng = newLng;
-      // lcd.setCursor(0,1);
-      // lcd.print(dis);
       return true;
   }
   return false;
@@ -388,25 +380,20 @@ void setCompassSensor() {
 }
 
 void setCompassReports() {
-                  lcd.setCursor(0,0);
-        lcd.print(selectedPositionAlgorithm);
-                          lcd.setCursor(3,0);
-        lcd.print(BASIC_ALGORITHM);
   if(selectedPositionAlgorithm == SENSOR_AND_GPS_ALOGIRTHM || selectedPositionAlgorithm == BASIC_ALGORITHM) {
-                    lcd.setCursor(5,1);
-        lcd.print(selectedPositionAlgorithm);
     if(!bno08x.enableReport(SH2_ROTATION_VECTOR, COMPASS_REPORT_INTERVAL)) {
-                lcd.setCursor(5,1);
-        lcd.print(selectedPositionAlgorithm);
-      // Serial.println("Could not enable SH2_ROTATION_VECTOR");
+      Serial.println("Could not enable SH2_ROTATION_VECTOR");
     }
+
   } else if(selectedPositionAlgorithm == KALMAN_ALGORITHM) {
     if(!bno08x.enableReport(SH2_ROTATION_VECTOR, COMPASS_REPORT_INTERVAL)) {
       Serial.println("Could not enable SH2_ROTATION_VECTOR");
     }
+    delay(10);
     if(!bno08x.enableReport(SH2_LINEAR_ACCELERATION, COMPASS_REPORT_INTERVAL)) {
       Serial.println("Could not enable SH2_LINEAR_ACCELERATION");
     }
+    delay(10);
     if(!bno08x.enableReport(SH2_GYROSCOPE_CALIBRATED, COMPASS_REPORT_INTERVAL)) {
       Serial.println("Could not enable SH2_GYROSCOPE_CALIBRATED");
     }
@@ -575,7 +562,6 @@ void readDataFromAppForInitializeConnection(char newChar) {
         arrayIndex = 0;
         receivedFirstData = true;
         setCompassReports();
-        // boatMode = BOAT_MODE_KEYBOARD;
       }
    }
    else if (newChar == '-' || ('0' <= newChar && newChar <= '9'))
