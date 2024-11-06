@@ -40,7 +40,7 @@ double angularSpeedAccuarcy = 0.09;
 
 // MODEL STEROWANIA ŁODZIĄ
 int boatMode = BOAT_MODE_KEYBOARD;
-int selectedPositionAlgorithm = SENSOR_AND_GPS_ALOGIRTHM;
+int selectedPositionAlgorithm = -1;
 
 // SILNIKI
 Servo leftEngine;
@@ -109,7 +109,7 @@ uint8_t arrayIndex = 0;
 int newDataForKeyboardHandler[5] = {0,0,0,0,0};
 bool receivedFirstData = true;
 
-// OZNACZENIA
+// OZNACZENIA DANYCH WYSYLANYCH DO APLIKACJI
 const String LIGTHING_ASSIGN = "0";
 const String LOCALIZATION_ASSIGN = "1";
 const String FINISH_SWIMMING_BY_WAYPOINTS = "2";
