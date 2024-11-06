@@ -425,6 +425,4 @@ public class Connection {
         progressDialogController.setDescriptions(title, content);
         stage1.show();
     }
-
-
 }

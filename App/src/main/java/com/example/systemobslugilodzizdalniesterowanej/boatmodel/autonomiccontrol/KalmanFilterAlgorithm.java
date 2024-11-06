@@ -108,6 +108,7 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 1}, // predkosc katowa
         });
 
+        // NIEPEWNOSCI MODELU
         RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
                 {0.01, 0, 0, 0, 0, 0},
                 {0, 0.01, 0, 0, 0, 0},
@@ -117,6 +118,7 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 0.01}
         });
 
+        // NIEPEWNOSCI POMIAROWE
         RealMatrix R = new Array2DRowRealMatrix(new double[][]{
                 {0.001, 0, 0, 0}, // x
                 {0, 0.001, 0, 0}, // y
