@@ -24,13 +24,16 @@
 #define BASIC_ALGORITHM 2
 #define KALMAN_ALGORITHM 3
 
-// ********************************************************************************
-// *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
+
+// USTAWIĆ ODPOWIEDNIE PINY PO PODŁACZENIU
+#define LEFT_ENGINE 8
+#define RIGHT_ENGINE 9
+#define LEFT_FLAP 8
+#define RIGHT_FLAP 9
+#define LIGHTING 8
 
 #define GPS_COURSE_ACCURACY 3
 #define COMPASS_COURSE_ACCURACY 3
-
-// ********************************************************************************
 
 double linearAccelarationAccuracy = 0.09;
 double angularSpeedAccuarcy = 0.09;
@@ -106,20 +109,6 @@ uint8_t arrayIndex = 0;
 int newDataForKeyboardHandler[5] = {0,0,0,0,0};
 bool receivedFirstData = true;
 
-// AUTONOMICZNOSC - waypointy
-// struct Waypoint {
-//   double lat;
-//   double lon;
-// };
-// int currentWaypointsIndex = 0;
-// struct Waypoint waypoints[5] = {
-//   {0.0, 0.0},
-//   {0.0, 0.0},
-//   {0.0, 0.0},
-//   {0.0, 0.0},
-//   {0.0, 0.0}
-// };
-
 // OZNACZENIA
 const String LIGTHING_ASSIGN = "0";
 const String LOCALIZATION_ASSIGN = "1";
@@ -128,35 +117,30 @@ const String GPS_COURSE_ASSIGN = "5";
 const String COMPASS_COURSE_ASSIGN = "6";
 const String LINEAR_ACCELARATION_ANGULAR_SPEED_ASSIGN = "7";
 
-// ********************************************************************************
-// *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
-
 double previousGpsCourse = 400;
 bool newGpsCourse = false;
 LiquidCrystal lcd(12, 11, 5, 4, 3, 6);
-
-// ********************************************************************************
 
 void compassInterrupt() {
   newSensorValue = true;
 }
 
 void enginesInit() {
-  leftEngine.attach(8);
+  leftEngine.attach(LEFT_ENGINE);
   leftEngine.writeMicroseconds(enginesSpeed);
-  rightEngine.attach(9);
+  rightEngine.attach(RIGHT_ENGINE);
   rightEngine.writeMicroseconds(enginesSpeed);
 }
 
 void flapsInit() {
-  leftFlap.attach(9);
+  leftFlap.attach(LEFT_FLAP);
   leftFlap.writeMicroseconds(leftFlapPower);
-  rightFlap.attach(8);
+  rightFlap.attach(RIGHT_FLAP);
   rightFlap.writeMicroseconds(rightFlapPower);
 }
 
 void lightingInit() {
-  lighting.attach(8);
+  lighting.attach(LIGHTING);
   lighting.writeMicroseconds(1200);
 }
 
@@ -164,9 +148,7 @@ void setup() {
   Serial2.begin(9600); // gps
   Serial3.begin(57600); // radionadanjnik
 
-  setCompassSensor();
-  attachInterrupt(digitalPinToInterrupt(2), compassInterrupt, FALLING);
-
+  // USTAWIĆ ODPOWIEDNIE PINY PO PODŁĄCZENIU - NAJLEPIEJ ZA POMOCĄ DEFINE I ODKOMENTOWAĆ FUNKCJE
   // enginesInit();
   // flapsInit();
   lightingInit();
@@ -267,7 +249,7 @@ void loop() {
   }
 
   // OBSLUGA DANYCH KURSU Z KOMPASU JESLI SIE POJAWILY
-  if (newSensorValue) {
+  if (selectedPositionAlgorithm != ONLY_GPS_ALOGRITHM && newSensorValue) {
     sensorRead();
     if(newCompassCourseHandler()) {
       replaceOrAppendStringStartingWith(COMPASS_COURSE_ASSIGN + "_", COMPASS_COURSE_ASSIGN + "_" + String(compassCourse) + "_");
@@ -355,17 +337,6 @@ bool newLocalizationHandler() {
 
 double calculateCmDistance() {
   return TinyGPSPlus::distanceBetween(newLat, newLng, oldLat, oldLng) * 100;
-    // double lat1Rad = newLat * M_PI / 180.0;
-    // double lon1Rad = newLng * M_PI / 180.0;
-    // double lat2Rad = oldLat * M_PI / 180.0;
-    // double lon2Rad = oldLng * M_PI / 180.0;
-    // double dLat = lat2Rad - lat1Rad;
-    // double dLon = lon2Rad - lon1Rad;
-    // double a = sin(dLat / 2) * sin(dLat / 2) +
-    //            cos(lat1Rad) * cos(lat2Rad) *
-    //            sin(dLon / 2) * sin(dLon / 2);
-    // double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    // return EARTH_RADIUS * c * 100000.0;
 }
 
 // DODAĆ ODPOWIEDNIA OBSLUGE BLEDOW
@@ -467,17 +438,7 @@ bool newAccelarationOrSpeedHandler() {
       previousLinearAccelarationY = linearAccelarationY;
       previousSpeedAngular = speedAngular;
       return true;
-  } 
-  // else if (abs(linearAccelarationX - 0.0) < 0.05 && abs(linearAccelarationY - 0.0) < 0.05 && abs(speedAngular - 0.0) < 0.05 && linearAccelarationX != previousLinearAccelarationX &&
-  //       linearAccelarationY != previousLinearAccelarationY && speedAngular != previousSpeedAngular) {
-  //     linearAccelarationX = 0.0;
-  //     linearAccelarationY = 0.0;
-  //     speedAngular = 0.0;
-  //     previousLinearAccelarationX = 0.0;
-  //     previousLinearAccelarationY = 0.0;
-  //     previousSpeedAngular = 0.0;
-  //     return true;
-  // }
+  }
   return false;
 }
 
@@ -561,7 +522,11 @@ void readDataFromAppForInitializeConnection(char newChar) {
       { 
         arrayIndex = 0;
         receivedFirstData = true;
-        setCompassReports();
+        if(selectedPositionAlgorithm != ONLY_GPS_ALOGRITHM) {
+          setCompassSensor();
+          attachInterrupt(digitalPinToInterrupt(2), compassInterrupt, FALLING);
+          setCompassReports();
+        }
       }
    }
    else if (newChar == '-' || ('0' <= newChar && newChar <= '9'))
@@ -688,46 +653,6 @@ void setLight() {
   lighting.writeMicroseconds(map(currentLight, 0, 100, 1210, 2000));
 }
 
-// void readWaypointsFromApp(char newChar) {
-//    if (newChar == '_') { 
-//       buff[buffIndex++] = 0;
-//       buffIndex = 0;
-//             // TODO: odpowiednia konwersja na double
-//       if(arrayIndex==2){
-//         lcd.setCursor(0,1);
-//         lcd.print(buff);
-//         waypoints[currentWaypointsIndex].lon = strtod(buff, NULL);
-//       } else if(arrayIndex==1){
-//                 lcd.setCursor(0,0);
-//         lcd.print(buff);
-//         waypoints[currentWaypointsIndex].lat = strtod(buff, NULL);
-//       }
-//       arrayIndex++;
-//       if (arrayIndex == 3) 
-//       { 
-//         currentWaypointsIndex++;
-//         arrayIndex = 0;
-//         receivedFirstData = true;
-//       }
-//    }
-//    else if (newChar == '.' || ('0' <= newChar && newChar <= '9'))
-//    {
-//        buff[buffIndex++] = newChar;
-//    }
-// }
-
-// void clearWaypointsData() {
-//   currentWaypointsIndex = 0;
-//   waypoints[0] = {0,0};
-//   waypoints[1] = {0,0};
-//   waypoints[2] = {0,0};
-//   waypoints[3] = {0,0};
-//   waypoints[4] = {0,0};
-// }
-
-// ********************************************************************************
-// *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
-
 bool newGpsCourseHandler() {
   if(abs(gpsCourse - previousGpsCourse) > GPS_COURSE_ACCURACY) {
       previousGpsCourse = gpsCourse;
@@ -735,5 +660,3 @@ bool newGpsCourseHandler() {
   }
   return false;
 }
-
-// ********************************************************************************
