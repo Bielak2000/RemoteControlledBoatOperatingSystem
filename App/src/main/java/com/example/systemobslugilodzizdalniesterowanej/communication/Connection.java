@@ -90,6 +90,7 @@ public class Connection {
     private Stage stage;
     private ToggleButton modeChooser;
     private PositionAlgorithm chosenAlgorithm;
+    private LinearAndAngularSpeed oldLinearAndAngularSpeed = null;
 
     public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap,
                       Stage stage, BoatModeController boatModeController, AutonomicController autonomicController,
@@ -202,7 +203,12 @@ public class Connection {
     public void designateAndSendEnginesPowerByAutonomicController() throws IOException {
         LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
         if (linearAndAngularSpeed != null) {
-            sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
+            if (linearAndAngularSpeed.equals(oldLinearAndAngularSpeed)) {
+                log.info("Designated new linear and angular speed but not changed ...");
+            } else {
+                sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
+                oldLinearAndAngularSpeed = linearAndAngularSpeed;
+            }
         } else {
             privateSetProgressDialogController("Koniec trasy", "Łódź osiągneła cel, zatrzymywanie łodzi ...");
             autonomicController.setManuallyFinishSwimming(false);
