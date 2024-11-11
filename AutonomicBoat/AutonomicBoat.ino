@@ -200,6 +200,8 @@ void serialEvent3() {
     } else if(boatMode == BOAT_MODE_AUTONOMIC_CONTROL) {
       readDataFromAppForAutonomicMode(newChar);
     } else if (boatMode == FINISH_AUTONOMIC_CONTROL) {
+    lcd.setCursor(9, 1);         
+    lcd.print(boatMode);
       setStopEnginePower();
       setEnginePower();
       clearData();

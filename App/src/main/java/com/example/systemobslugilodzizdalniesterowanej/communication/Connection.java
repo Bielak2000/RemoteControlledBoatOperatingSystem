@@ -188,7 +188,7 @@ public class Connection {
         if (linearAndAngularSpeed != null) {
             engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
             try {
-                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING || boatModeController.getBoatMode() == BoatMode.AUTONOMIC_STARTING) {
                     String sentInfo = (FROM_APP_AUTONOMOUS_MODE_CONTROL + "_"
                             + String.valueOf((int) engines.getMotorLeft()) + "_" + String.valueOf((int) engines.getMotorRight()) + "_");
                     serialPort.writeString(sentInfo);
@@ -268,7 +268,6 @@ public class Connection {
                     progressDialogController.closeProgressDialogController();
                     this.progressDialogController = null;
                     boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
-                    // TODO: przetestowac czy uda sie wyczyscic mape
                     osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
                     if (autonomicController.isManuallyFinishSwimming()) {
                         showInformationDialog("Przerwano pływanie łodzi", BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION, 500);
@@ -402,16 +401,16 @@ public class Connection {
         alert.setTitle(title);
         alert.setHeaderText(text);
         alert.getDialogPane().setMaxWidth(width);
-        alert.showAndWait();
+        alert.show();
     }
 
     private boolean checkCorrectlyReceivedData(String[] receivedData) {
-        return receivedData.length == 2 && (Integer.parseInt(receivedData[0]) == FROM_BOAT_LIGHTING_MESSAGE ||
+        return (receivedData.length == 2 && (Integer.parseInt(receivedData[0]) == FROM_BOAT_LIGHTING_MESSAGE ||
                 Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_MESSAGE ||
                 Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS ||
                 Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_COURSE_MESSAGE ||
                 Integer.parseInt(receivedData[0]) == FROM_BOAT_SENSOR_COURSE_MESSAGE ||
-                Integer.parseInt(receivedData[0]) == LINEAR_ACCELERATION_ANGULAR_SPEED_ASSIGN);
+                Integer.parseInt(receivedData[0]) == LINEAR_ACCELERATION_ANGULAR_SPEED_ASSIGN)) || Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS;
     }
 
     private void privateSetProgressDialogController(String title, String content) throws IOException {

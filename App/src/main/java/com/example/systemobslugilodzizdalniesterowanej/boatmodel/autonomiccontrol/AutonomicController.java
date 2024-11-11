@@ -43,14 +43,17 @@ public class AutonomicController {
     }
 
     public LinearAndAngularSpeed designateRightEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(50.0, 50.0);
+        return new LinearAndAngularSpeed(50.0, 0.0);
     }
 
     public LinearAndAngularSpeed designateLeftEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(50.0, -50.0);
+        return new LinearAndAngularSpeed(-50.0, 0.0);
     }
 
     public LinearAndAngularSpeed designateEnginesPower() {
+        if(osmMap.getNextWaypointOnTheRoad() == null) {
+            osmMap.setNextWaypointOnTheRoad(osmMap.getDesignatedWaypoints().get(osmMap.getWaypointIndex()).getPosition());
+        }
         double distance = calculateDistance(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
         if (distance < DISTANCE_ACCURACY_METERS) {
             osmMap.incrementWaypointIndex();
@@ -79,7 +82,7 @@ public class AutonomicController {
 
     private LinearAndAngularSpeed determinateLinearAndAngularSpeed(double distance) {
         double newCourse = Utils.determineCourseBetweenTwoWaypoints(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
-        osmMap.setExpectedCourse(String.valueOf(newCourse));
+        osmMap.setExpectedCourse(String.format("%.2f", newCourse));
         double linearSpeed = getLinearSpeed(distance);
         double angularSpeed = getAngularSpeed(newCourse, osmMap.getCurrentCourse());
         return new LinearAndAngularSpeed(angularSpeed, linearSpeed);
@@ -105,7 +108,7 @@ public class AutonomicController {
     }
 
     private double getAngularSpeed(double expectedCourse, double currentCourse) {
-        return (expectedCourse - currentCourse) / 360.0;
+        return ((expectedCourse - currentCourse) / 360.0) * 80;
     }
 
 }

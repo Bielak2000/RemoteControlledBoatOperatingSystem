@@ -81,8 +81,13 @@ public class SystemController implements Initializable {
         }
         if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
             this.kalmanFilterAlgorithm = new KalmanFilterAlgorithm();
-            this.kalmanFilterAlgorithm.initializeKalmanFilter();
+            try {
+                this.kalmanFilterAlgorithm.initializeKalmanFilter();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
+        this.autonomicController = new AutonomicController(osmMap);
         this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage,
                 boatModeController, autonomicController, gpsCourse, sensorCourse, modeChooser, chosenAlgorithm, designatedCourse, kalmanFilterAlgorithm);
         connection.connect(chosenPort, chosenSystem);
@@ -91,7 +96,6 @@ public class SystemController implements Initializable {
         this.choosenAlgorithmText.setText(chosenAlgorithm.getDescription());
         exit.setCancelButton(true);
         exit.setFocusTraversable(false);
-        this.autonomicController = new AutonomicController(osmMap);
         this.autonomicControlExecute = new AutonomicControlExecute(this.boatModeController, this.connection, this.kalmanFilterAlgorithm, this.osmMap, this.designatedCourse, this.chosenAlgorithm);
         this.autonomicControlExecute.start();
         this.connection.sendInitConnection();
@@ -255,7 +259,7 @@ public class SystemController implements Initializable {
 //        if (true) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "start-swimming-dialog.fxml"));
             Stage mainStage = new Stage();
-            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection, osmMap, autonomicController);
+            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection, osmMap, autonomicController, runningBoatInformation);
             fxmlLoader.setController(startSwimmingDialogController);
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
