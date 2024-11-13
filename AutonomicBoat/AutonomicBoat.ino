@@ -9,7 +9,7 @@
 // ********************************************************************************
 
 #define EARTH_RADIUS 6371.0
-#define MINIMAL_DIFFERENCE_LOCALIZATION 200
+#define MINIMAL_DIFFERENCE_LOCALIZATION 100
 #define INTERVAL_SEND_DATA 300
 #define INTERVAL_ENGINE_POWER 50
 #define INTERVAL_LIGHTING_POWER 500
@@ -190,8 +190,6 @@ void serialEvent3() {
       }
     }
     receivedFirstData = false;
-    lcd.setCursor(0, 1);
-    lcd.print(boatMode);
 
     if(boatMode == BOAT_MODE_KEYBOARD) {
       if (buffIndex < buffLength-1) { 
@@ -208,16 +206,6 @@ void serialEvent3() {
       delay(1000);
       appendData(FINISH_SWIMMING_BY_WAYPOINTS + "_");
       boatMode = BOAT_MODE_KEYBOARD;
-
-          lcd.setCursor(3, 1);
-    lcd.print(arrayIndex);
-    //           lcd.setCursor(0, 1);
-    // lcd.print(boatMode);
-    //       lcd.setCursor(3, 1);
-    // lcd.print(BOAT_MODE_KEYBOARD);
-    //     lcd.setCursor(6, 1);
-    // lcd.print(BOAT_MODE_KEYBOARD - '0');
-      // receivedFirstData = true;
     } else if (boatMode == BOAT_MODE_KEYBOARD_INIT) {
       readDataFromAppForInitializeConnection(newChar);
     }
