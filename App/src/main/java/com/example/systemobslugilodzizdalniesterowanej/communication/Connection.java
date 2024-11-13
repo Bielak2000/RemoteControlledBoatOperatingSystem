@@ -267,7 +267,6 @@ public class Connection {
                 Platform.runLater(() -> {
                     progressDialogController.closeProgressDialogController();
                     this.progressDialogController = null;
-                    boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
                     osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
                     if (autonomicController.isManuallyFinishSwimming()) {
                         showInformationDialog("Przerwano pływanie łodzi", BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION, 500);
@@ -276,6 +275,8 @@ public class Connection {
                     }
                     autonomicController.setManuallyFinishSwimming(true);
                 });
+                boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
+                engines.setTemp(false);
                 osmMap.setNextWaypointOnTheRoad(null);
                 osmMap.setWaypointIndex(0);
                 boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
