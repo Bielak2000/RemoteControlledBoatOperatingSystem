@@ -227,7 +227,7 @@ void loop() {
   if(newLocalization) {
     newLocalization = false;
     if(newLocalizationHandler()) {
-      replaceOrAppendStringStartingWith(LOCALIZATION_ASSIGN + "_", LOCALIZATION_ASSIGN + "_" + String(gps.location.lat(), 6) + "," + String(gps.location.lng(), 6) + "_");
+      replaceOrAppendStringStartingWith(LOCALIZATION_ASSIGN + "_", LOCALIZATION_ASSIGN + "_" + String(gps.location.lat(), 7) + "," + String(gps.location.lng(), 7) + "_");
       // ********************************************************************************
       // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
       // lcd.setCursor(0,0);

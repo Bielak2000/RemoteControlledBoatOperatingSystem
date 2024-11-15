@@ -30,6 +30,7 @@ public class OSMMap {
     private List<CoordinateLine> coordinateLines = new ArrayList<>();
     private BoatModeController boatModeController;
     private Boolean foundBoatPosition;
+    private List<Marker> currentBoatPositionWhileRunningList = new ArrayList<>();
     private Marker currentBoatPositionWhileRunning = null;
     @Getter
     @Setter
@@ -152,21 +153,27 @@ public class OSMMap {
 
     public void setCurrentBoatPositionWhileRunning(double latitude, double longitude) {
         if (currentBoatPositionWhileRunning != null) {
-            mapView.removeMarker(currentBoatPositionWhileRunning);
+//            Platform.runLater(() -> {
+//                mapView.removeMarker(currentBoatPositionWhileRunning);
+//            });
         }
         currentBoatPositionWhileRunning = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
-        Platform.runLater(()->{
+        currentBoatPositionWhileRunningList.add(currentBoatPositionWhileRunning);
+        Platform.runLater(() -> {
             mapView.addMarker(currentBoatPositionWhileRunning);
             mapView.setCenter(new Coordinate(latitude, longitude));
         });
     }
 
     public void clearCurrentBoatPositionAfterFinishedLastWaypoint() {
-        Platform.runLater(()->{
-            if(currentBoatPositionWhileRunning != null) {
-                mapView.removeMarker(currentBoatPositionWhileRunning);
+        if (!currentBoatPositionWhileRunningList.isEmpty()) {
+            for (Marker marker : currentBoatPositionWhileRunningList) {
+                Platform.runLater(() -> {
+                    mapView.removeMarker(marker);
+                });
             }
-        });
+            currentBoatPositionWhileRunningList.clear();
+        }
         removeAllMarkersAndLinesWithoutBoatPosition();
         if (currentBoatPositionWhileRunning != null) {
             generateTraceFromBoatPosition(currentBoatPositionWhileRunning.getPosition().getLatitude(), currentBoatPositionWhileRunning.getPosition().getLongitude());
@@ -179,7 +186,7 @@ public class OSMMap {
     }
 
     public void setExpectedCourse(String expectedCourse) {
-        Platform.runLater(()->{
+        Platform.runLater(() -> {
             this.expectedCourse.setText(expectedCourse);
         });
     }

@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class AutonomicControlExecute {
 
-    private final static int JOB_EXECUTE_SCHEDULER_SECONDS = 5;
+    private final static int JOB_EXECUTE_SCHEDULER_SECONDS = 2;
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     BoatModeController boatModeController;
     Connection connection;

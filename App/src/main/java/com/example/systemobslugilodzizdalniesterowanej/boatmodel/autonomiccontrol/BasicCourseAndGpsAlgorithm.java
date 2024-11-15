@@ -30,7 +30,7 @@ public class BasicCourseAndGpsAlgorithm {
                 this.gpsCourse = newGpsCourse;
             }
         }
-        gpsCourse++;
+        gpsCourseIndex++;
     }
 
     public void setSensorCourseIfCorrectData(Double newSensorCourse) {
@@ -41,7 +41,7 @@ public class BasicCourseAndGpsAlgorithm {
         }
     }
 
-    public double designateCurrentCourse() {
+    public Double designateCurrentCourse() {
         if (recentDesignatedCourse == null) {
             if (gpsCourse == null) {
                 recentDesignatedCourse = sensorCourse;

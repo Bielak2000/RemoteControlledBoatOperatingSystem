@@ -108,8 +108,9 @@ public class AutonomicController {
     }
 
     private double getAngularSpeed(double expectedCourse, double currentCourse) {
-        double angularSpeed = ((expectedCourse - currentCourse) / 360.0) * 80;
-        if(Math.abs(angularSpeed) < 180 ) {
+        double courseDifference = expectedCourse - currentCourse;
+        double angularSpeed = (courseDifference / 360.0) * 80;
+        if(Math.abs(courseDifference) < 180 ) {
             angularSpeed = -1 * angularSpeed;
         }
         return angularSpeed;

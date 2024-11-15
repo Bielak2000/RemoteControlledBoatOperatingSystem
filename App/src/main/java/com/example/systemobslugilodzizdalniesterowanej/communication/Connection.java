@@ -296,9 +296,13 @@ public class Connection {
                     osmMap.setCurrentCourse(Double.parseDouble(array[1]));
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
                     basicCourseAndGpsAlgorithm.setGpsCourseIfCorrectData(Double.parseDouble(array[1]));
-                    double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
-                    designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
-                    osmMap.setCurrentCourse(designatedCourseFromBasicAlgorithm);
+                    Double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
+                    if(designatedCourseFromBasicAlgorithm != null) {
+                        Platform.runLater(()->{
+                            designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
+                            osmMap.setCurrentCourse(designatedCourseFromBasicAlgorithm);
+                        });
+                    }
                 } else if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     kalmanFilterAlgorithm.getLock().lock();
                     kalmanFilterAlgorithm.setGpsCourse(Double.parseDouble(array[1]));
@@ -317,11 +321,13 @@ public class Connection {
                     osmMap.setCurrentCourse(Double.parseDouble(array[1]));
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
                     basicCourseAndGpsAlgorithm.setSensorCourseIfCorrectData(Double.parseDouble(array[1]));
-                    double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
-                    Platform.runLater(() -> {
-                        designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
-                    });
-                    osmMap.setCurrentCourse(designatedCourseFromBasicAlgorithm);
+                    Double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
+                    if(designatedCourseFromBasicAlgorithm != null) {
+                        Platform.runLater(() -> {
+                            designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
+                        });
+                        osmMap.setCurrentCourse(designatedCourseFromBasicAlgorithm);
+                    }
                 } else if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     kalmanFilterAlgorithm.getLock().lock();
                     kalmanFilterAlgorithm.setSensorCourse(Double.parseDouble(array[1]));
@@ -406,12 +412,26 @@ public class Connection {
     }
 
     private boolean checkCorrectlyReceivedData(String[] receivedData) {
-        return (receivedData.length == 2 && (Integer.parseInt(receivedData[0]) == FROM_BOAT_LIGHTING_MESSAGE ||
-                Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_MESSAGE ||
-                Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS ||
-                Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_COURSE_MESSAGE ||
-                Integer.parseInt(receivedData[0]) == FROM_BOAT_SENSOR_COURSE_MESSAGE ||
-                Integer.parseInt(receivedData[0]) == LINEAR_ACCELERATION_ANGULAR_SPEED_ASSIGN)) || Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS;
+        if (receivedData.length == 1) {
+            try {
+                return Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS;
+            } catch (NumberFormatException ex) {
+                return false;
+            }
+        } else if (receivedData.length == 2) {
+            try {
+                return Integer.parseInt(receivedData[0]) == FROM_BOAT_LIGHTING_MESSAGE ||
+                        Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_MESSAGE ||
+                        Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS ||
+                        Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_COURSE_MESSAGE ||
+                        Integer.parseInt(receivedData[0]) == FROM_BOAT_SENSOR_COURSE_MESSAGE ||
+                        Integer.parseInt(receivedData[0]) == LINEAR_ACCELERATION_ANGULAR_SPEED_ASSIGN;
+            } catch (NumberFormatException ex) {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     private void privateSetProgressDialogController(String title, String content) throws IOException {
