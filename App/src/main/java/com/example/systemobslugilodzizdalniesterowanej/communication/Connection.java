@@ -305,7 +305,11 @@ public class Connection {
                     }
                 } else if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     kalmanFilterAlgorithm.getLock().lock();
-                    kalmanFilterAlgorithm.setGpsCourse(Double.parseDouble(array[1]));
+                    double gpsCourse = Double.parseDouble(array[1]);
+                    kalmanFilterAlgorithm.setGpsCourse(gpsCourse);
+                    if(gpsCourse != 0) {
+                        kalmanFilterAlgorithm.setFoundGpsCourse(true);
+                    }
                     kalmanFilterAlgorithm.getLock().unlock();
                 }
                 sendingValuesLock.unlock();

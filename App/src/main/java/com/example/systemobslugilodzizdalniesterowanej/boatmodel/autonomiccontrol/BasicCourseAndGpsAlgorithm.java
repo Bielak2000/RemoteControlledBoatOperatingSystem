@@ -17,6 +17,7 @@ public class BasicCourseAndGpsAlgorithm {
 
     private static double GPS_COURSE_MAX_ACCURACY_DIFF = 90;
     private static double SENSOR_COURSE_MAX_ACCURACY_DIFF = 15;
+    private boolean foundGpsCourse = false;
     private Double gpsCourse = null;
     private int gpsCourseIndex = 0;
     private Double sensorCourse = null;
@@ -25,8 +26,10 @@ public class BasicCourseAndGpsAlgorithm {
     public void setGpsCourseIfCorrectData(Double newGpsCourse) {
         if (newGpsCourse != 0 && gpsCourseIndex > 2) {
             if (gpsCourse == null || recentDesignatedCourse == null) {
+                this.foundGpsCourse = true;
                 this.gpsCourse = newGpsCourse;
             } else if (Math.abs(newGpsCourse - recentDesignatedCourse) < GPS_COURSE_MAX_ACCURACY_DIFF) {
+                this.foundGpsCourse = true;
                 this.gpsCourse = newGpsCourse;
             }
         }
@@ -43,7 +46,7 @@ public class BasicCourseAndGpsAlgorithm {
 
     public Double designateCurrentCourse() {
         if (recentDesignatedCourse == null) {
-            if (gpsCourse == null) {
+            if (gpsCourse == null || !foundGpsCourse) {
                 recentDesignatedCourse = sensorCourse;
                 return sensorCourse;
             } else if (sensorCourse == null) {
@@ -55,7 +58,7 @@ public class BasicCourseAndGpsAlgorithm {
                 return newCourse;
             }
         } else {
-            if (gpsCourse == null) {
+            if (gpsCourse == null || !foundGpsCourse) {
                 double newCourse = (sensorCourse + recentDesignatedCourse) / 2.0;
                 recentDesignatedCourse = newCourse;
                 return newCourse;

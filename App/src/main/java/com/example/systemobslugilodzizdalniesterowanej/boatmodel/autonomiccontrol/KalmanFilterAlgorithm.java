@@ -28,6 +28,7 @@ public class KalmanFilterAlgorithm {
     private static double GPS_COURSE_MAX_ACCURACY_DIFF = 30;
     private KalmanFilter kalmanFilter;
 
+    private boolean foundGpsCourse = false;
     private Double gpsCourse = null;
     private Double sensorCourse = null;
     private Coordinate gpsLocalization = null;
@@ -164,8 +165,6 @@ public class KalmanFilterAlgorithm {
         });
 
 
-
-
         ArrayRealVector initialState = new ArrayRealVector(new double[]{0, 0, 0, 0, 0, 0});
         DefaultProcessModel processModel = new DefaultProcessModel(A, B, Q, initialState, initialP);
         DefaultMeasurementModel measurementModel = new DefaultMeasurementModel(H, R);
@@ -176,7 +175,7 @@ public class KalmanFilterAlgorithm {
     private double designateCurrentCourse() {
         if (gpsCourse == null) {
             return sensorCourse;
-        } else if ((Math.abs(gpsCourse - sensorCourse) < GPS_COURSE_MAX_ACCURACY_DIFF)) {
+        } else if (foundGpsCourse && (Math.abs(gpsCourse - sensorCourse) < GPS_COURSE_MAX_ACCURACY_DIFF)) {
             return (sensorCourse + gpsCourse) / 2.0;
         } else {
             return sensorCourse;
@@ -188,9 +187,8 @@ public class KalmanFilterAlgorithm {
     }
 
     private boolean checkNewData() {
-        boolean x = (oldGpsLocalization == null && gpsLocalization != null) || !oldGpsLocalization.equals(gpsLocalization) || oldAngularSpeed != angularSpeed || oldAccelerationX != accelerationX || oldAccelerationY != accelerationY
+        return (oldGpsLocalization == null && gpsLocalization != null) || !oldGpsLocalization.equals(gpsLocalization) || oldAngularSpeed != angularSpeed || oldAccelerationX != accelerationX || oldAccelerationY != accelerationY
                 || oldSensorCourse != sensorCourse || oldGpsCourse != gpsCourse;
-        return x;
     }
 
     private void setOldValue() {
