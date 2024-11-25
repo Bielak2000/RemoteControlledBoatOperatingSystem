@@ -201,7 +201,7 @@ void serialEvent3() {
       readDataFromAppForAutonomicMode(newChar);
     } else if (boatMode == FINISH_AUTONOMIC_CONTROL) {
       setStopEnginePower();
-      setEnginePower();
+      setEnginePowerAutonomicMode();
       clearData();
       delay(1000);
       appendData(FINISH_SWIMMING_BY_WAYPOINTS + "_");
@@ -432,9 +432,9 @@ bool newCompassCourseHandler() {
 bool newAccelarationOrSpeedHandler() {
   if((abs(linearAccelarationX - previousLinearAccelarationX) > linearAccelarationAccuracy || abs(linearAccelarationY - previousLinearAccelarationY) > linearAccelarationAccuracy ||
         abs(speedAngular - previousSpeedAngular) > angularSpeedAccuarcy)) {
-      if(abs(linearAccelarationX - 0.0) < 0.06) linearAccelarationX = 0.0;
-      if(abs(linearAccelarationY - 0.0) < 0.06) linearAccelarationY = 0.0;
-      if(abs(speedAngular - 0.0) < 0.06) speedAngular = 0.0;
+      if(abs(linearAccelarationX - 0.0) < 0.1) linearAccelarationX = 0.0;
+      if(abs(linearAccelarationY - 0.0) < 0.1) linearAccelarationY = 0.0;
+      if(abs(speedAngular - 0.0) < 0.1) speedAngular = 0.0;
       previousLinearAccelarationX = linearAccelarationX;
       previousLinearAccelarationY = linearAccelarationY;
       previousSpeedAngular = speedAngular;
@@ -492,15 +492,21 @@ void readDataFromAppForAutonomicMode(char newChar) {
       buffIndex = 0;
       if(arrayIndex==2){
         newEnginesSpeed[1] = atoi(buff);
+                    lcd.setCursor(8, 1);         
+    lcd.print(newEnginesSpeed[1]);
       }
       else if(arrayIndex==1) {
         newEnginesSpeed[0] = atoi(buff);
+            lcd.setCursor(0, 1);         
+    lcd.print(newEnginesSpeed[0]);
       }
       arrayIndex++;
       if (arrayIndex == 3) 
       { 
         newDataForKeyboardHandler[0]=1;
         newDataForKeyboardHandler[1]=1;
+                        lcd.setCursor(12, 1);         
+    lcd.print("y");
         arrayIndex = 0;
         receivedFirstData = true;
       }
@@ -537,7 +543,7 @@ void readDataFromAppForInitializeConnection(char newChar) {
 }
 
 void keyboardHandler() {
-  enginesNewPowerHandler();
+  enginesNewPowerHandler(INTERVAL_ENGINE_POWER, false);
 
   // jesli sa informacje to wlacz zapadke (jesli przeslano 1)
   if(newDataForKeyboardHandler[3]==1 || newDataForKeyboardHandler[4]==1){
@@ -548,16 +554,24 @@ void keyboardHandler() {
 }
 
 void autonomicHandler() {
-  enginesNewPowerHandler();
+  enginesNewPowerHandler(INTERVAL_ENGINE_POWER, true);
 }
 
-void enginesNewPowerHandler() {
+void enginesNewPowerHandler(int intervalEnginePower, bool auonomicMode) {
     // szybczkosc zwiekszania mocy na silniki / oswietlenie / zapadki
   setServoPowerCurrentMillis = millis();
-  if (setServoPowerCurrentMillis - setEnginePowerPreviousMillis >= INTERVAL_ENGINE_POWER || setEnginePowerPreviousMillis == 0) {
+  if (setServoPowerCurrentMillis - setEnginePowerPreviousMillis >= intervalEnginePower || setEnginePowerPreviousMillis == 0) {
+                lcd.setCursor(12, 1);         
+    lcd.print("T");
+        Serial.write("new value in 567\n");
     //jesli dostano dane i jeszcze nie zostaly ustawione na maksa to wykonaj
     if((newDataForKeyboardHandler[0]==1 || newDataForKeyboardHandler[1]==1)){
-      setEnginePower();
+          Serial.write("new value in 570\n");
+          if(auonomicMode) {
+            setEnginePowerAutonomicMode();
+          } else {
+            setEnginePowerKeyboardMode();
+          }
       setEnginePowerPreviousMillis = millis();
     }
   }
@@ -584,7 +598,7 @@ void setStopEnginePower() {
   newEnginesSpeed[1] = 0;
 }
 
-void setEnginePower(){
+void setEnginePowerKeyboardMode(){
     for(int i=0; i<2; i++)
     {
       if(newEnginesSpeed[i]<0 && currentEngineSpeeds[i]>newEnginesSpeed[i])
@@ -602,6 +616,42 @@ void setEnginePower(){
       }
       else
       {
+        newDataForKeyboardHandler[i]=0;
+      }
+    }
+
+    enginesSpeed = map(currentEngineSpeeds[0], -100, 100, 1000, 2000);
+    leftEngine.writeMicroseconds(enginesSpeed); 
+    lcd.setCursor(0, 0);         
+    lcd.print(enginesSpeed);
+
+    enginesSpeed = map(currentEngineSpeeds[1], -100, 100, 1000, 2000);
+    rightEngine.writeMicroseconds(enginesSpeed);
+    lcd.setCursor(8, 0);         
+    lcd.print(enginesSpeed);
+}
+
+void setEnginePowerAutonomicMode(){
+    Serial.write("setEnginePower\n");
+    for(int i=0; i<2; i++)
+    {
+          Serial.print(newEnginesSpeed[i]);
+          Serial.print(" : ");
+                    Serial.print(currentEngineSpeeds[i]);
+                    Serial.print(" : ");
+                    Serial.print(newDataForKeyboardHandler[i]);
+          Serial.print("\n");
+      if(newEnginesSpeed[i]==0)
+      {
+        currentEngineSpeeds[i]=0;
+        newDataForKeyboardHandler[i]=0;
+                            Serial.print("koniec");
+          Serial.print("\n");
+      } else if (newEnginesSpeed[i] - currentEngineSpeeds[i] > 0) {
+        currentEngineSpeeds[i]=currentEngineSpeeds[i]+1;
+      } else if(newEnginesSpeed[i] - currentEngineSpeeds[i] < 0) {
+        currentEngineSpeeds[i]=currentEngineSpeeds[i]-1;
+      } else {
         newDataForKeyboardHandler[i]=0;
       }
     }

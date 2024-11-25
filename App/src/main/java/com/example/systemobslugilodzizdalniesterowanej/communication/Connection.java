@@ -42,7 +42,7 @@ import static jssc.SerialPort.MASK_RXCHAR;
 public class Connection {
 
     private final static int MAX_COURSE_COUNT_IN_AUTONOMIC_STARTING_MODE = 5;
-    private final static int COURSE_ACCURACY = 5;
+    private final static int COURSE_ACCURACY = 10;
 
     // MESSAGE TO BOAT
     private final static String FROM_APP_KEYBOARD_CONTROL_MODE_MARKING = "0";
@@ -252,7 +252,7 @@ public class Connection {
                     localization = array[1].split(",");
                     log.info("New localization: {}", array[1]);
                 }
-                if (localization.length == 2) {
+                if (localization.length == 2 && boatModeController.getBoatMode() != BoatMode.AUTONOMIC_STARTING) {
                     sendingValuesLock.lock();
                     setBoatPositionOnMap(localization);
                     sendingValuesLock.unlock();
@@ -265,8 +265,10 @@ public class Connection {
                     kalmanFilterAlgorithm.getLock().lock();
                 }
                 Platform.runLater(() -> {
-                    progressDialogController.closeProgressDialogController();
-                    this.progressDialogController = null;
+                    if (progressDialogController != null) {
+                        progressDialogController.closeProgressDialogController();
+                        this.progressDialogController = null;
+                    }
                     osmMap.clearCurrentBoatPositionAfterFinishedLastWaypoint();
                     if (autonomicController.isManuallyFinishSwimming()) {
                         showInformationDialog("Przerwano pływanie łodzi", BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION, 500);
@@ -297,8 +299,8 @@ public class Connection {
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
                     basicCourseAndGpsAlgorithm.setGpsCourseIfCorrectData(Double.parseDouble(array[1]));
                     Double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
-                    if(designatedCourseFromBasicAlgorithm != null) {
-                        Platform.runLater(()->{
+                    if (designatedCourseFromBasicAlgorithm != null) {
+                        Platform.runLater(() -> {
                             designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
                             osmMap.setCurrentCourse(designatedCourseFromBasicAlgorithm);
                         });
@@ -307,7 +309,7 @@ public class Connection {
                     kalmanFilterAlgorithm.getLock().lock();
                     double gpsCourse = Double.parseDouble(array[1]);
                     kalmanFilterAlgorithm.setGpsCourse(gpsCourse);
-                    if(gpsCourse != 0) {
+                    if (gpsCourse != 0) {
                         kalmanFilterAlgorithm.setFoundGpsCourse(true);
                     }
                     kalmanFilterAlgorithm.getLock().unlock();
@@ -326,7 +328,7 @@ public class Connection {
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
                     basicCourseAndGpsAlgorithm.setSensorCourseIfCorrectData(Double.parseDouble(array[1]));
                     Double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
-                    if(designatedCourseFromBasicAlgorithm != null) {
+                    if (designatedCourseFromBasicAlgorithm != null) {
                         Platform.runLater(() -> {
                             designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
                         });
@@ -353,11 +355,15 @@ public class Connection {
                 if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     String[] linearAccelerationAndAngularSpeed = array[1].split(",");
                     if (linearAccelerationAndAngularSpeed.length == 3) {
-                        kalmanFilterAlgorithm.getLock().lock();
-                        kalmanFilterAlgorithm.setAccelerationX(Double.parseDouble(linearAccelerationAndAngularSpeed[0]));
-                        kalmanFilterAlgorithm.setAccelerationY(Double.parseDouble(linearAccelerationAndAngularSpeed[1]));
-                        kalmanFilterAlgorithm.setAngularSpeed(Double.parseDouble(linearAccelerationAndAngularSpeed[2]));
-                        kalmanFilterAlgorithm.getLock().unlock();
+                        try {
+                            kalmanFilterAlgorithm.getLock().lock();
+                            kalmanFilterAlgorithm.setAccelerationX(Double.parseDouble(linearAccelerationAndAngularSpeed[0]));
+                            kalmanFilterAlgorithm.setAccelerationY(Double.parseDouble(linearAccelerationAndAngularSpeed[1]));
+                            kalmanFilterAlgorithm.setAngularSpeed(Double.parseDouble(linearAccelerationAndAngularSpeed[2]));
+                            kalmanFilterAlgorithm.getLock().unlock();
+                        } catch (NumberFormatException ex) {
+                            log.error("Wrong linearAccelerationAndAngularSpeed values ...");
+                        }
                     } else {
                         log.error("Wrong linearAccelerationAndAngularSpeed values ...");
                     }

@@ -85,6 +85,13 @@ public class OSMMap {
 
     public void generateTrace() {
         if (markerList.size() > 1) {
+            if(boatModeController.getBoatMode() != BoatMode.AUTONOMIC_RUNNING && !coordinateLines.isEmpty()) {
+                CoordinateLine coordinateLineToRemove = coordinateLines.get(0);
+                coordinateLines.remove(0);
+                Platform.runLater(()->{
+                    mapView.removeCoordinateLine(coordinateLineToRemove);
+                });
+            }
             coordinateLine = null;
             coordinateLine = new CoordinateLine(markerList.stream().map(
                     marker1 -> new Coordinate(marker1.getPosition().getLatitude(), marker1.getPosition().getLongitude())

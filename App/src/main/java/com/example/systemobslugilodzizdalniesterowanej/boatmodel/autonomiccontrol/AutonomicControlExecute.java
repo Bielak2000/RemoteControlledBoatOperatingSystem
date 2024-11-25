@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class AutonomicControlExecute {
 
-    private final static int JOB_EXECUTE_SCHEDULER_SECONDS = 2;
+    private final static int JOB_EXECUTE_SCHEDULER_SECONDS = 5;
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     BoatModeController boatModeController;
     Connection connection;
@@ -52,7 +52,7 @@ public class AutonomicControlExecute {
                     osmMap.setCurrentCourse(kalmanFilterAlgorithm.getCurrentCourse());
                     if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {
                         osmMap.generateTraceFromBoatPosition(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
-                    } else {
+                    } else if(currentBoatMode != BoatMode.AUTONOMIC_STARTING) {
                         osmMap.setCurrentBoatPositionWhileRunning(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
                     }
                 }
