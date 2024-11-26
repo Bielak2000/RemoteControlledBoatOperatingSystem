@@ -497,16 +497,14 @@ void readDataFromAppForAutonomicMode(char newChar) {
       }
       else if(arrayIndex==1) {
         newEnginesSpeed[0] = atoi(buff);
-            lcd.setCursor(0, 1);         
-    lcd.print(newEnginesSpeed[0]);
+        lcd.setCursor(0, 1);         
+        lcd.print(newEnginesSpeed[0]);
       }
       arrayIndex++;
       if (arrayIndex == 3) 
       { 
         newDataForKeyboardHandler[0]=1;
         newDataForKeyboardHandler[1]=1;
-                        lcd.setCursor(12, 1);         
-    lcd.print("y");
         arrayIndex = 0;
         receivedFirstData = true;
       }
@@ -561,12 +559,8 @@ void enginesNewPowerHandler(int intervalEnginePower, bool auonomicMode) {
     // szybczkosc zwiekszania mocy na silniki / oswietlenie / zapadki
   setServoPowerCurrentMillis = millis();
   if (setServoPowerCurrentMillis - setEnginePowerPreviousMillis >= intervalEnginePower || setEnginePowerPreviousMillis == 0) {
-                lcd.setCursor(12, 1);         
-    lcd.print("T");
-        Serial.write("new value in 567\n");
     //jesli dostano dane i jeszcze nie zostaly ustawione na maksa to wykonaj
     if((newDataForKeyboardHandler[0]==1 || newDataForKeyboardHandler[1]==1)){
-          Serial.write("new value in 570\n");
           if(auonomicMode) {
             setEnginePowerAutonomicMode();
           } else {
@@ -632,21 +626,12 @@ void setEnginePowerKeyboardMode(){
 }
 
 void setEnginePowerAutonomicMode(){
-    Serial.write("setEnginePower\n");
     for(int i=0; i<2; i++)
     {
-          Serial.print(newEnginesSpeed[i]);
-          Serial.print(" : ");
-                    Serial.print(currentEngineSpeeds[i]);
-                    Serial.print(" : ");
-                    Serial.print(newDataForKeyboardHandler[i]);
-          Serial.print("\n");
       if(newEnginesSpeed[i]==0)
       {
         currentEngineSpeeds[i]=0;
         newDataForKeyboardHandler[i]=0;
-                            Serial.print("koniec");
-          Serial.print("\n");
       } else if (newEnginesSpeed[i] - currentEngineSpeeds[i] > 0) {
         currentEngineSpeeds[i]=currentEngineSpeeds[i]+1;
       } else if(newEnginesSpeed[i] - currentEngineSpeeds[i] < 0) {
@@ -699,8 +684,6 @@ void setLight() {
   } else {
     newDataForKeyboardHandler[2] = 0;
   }
-  lcd.setCursor(0, 1);
-  // lcd.print(currentLight);
   lighting.writeMicroseconds(map(currentLight, 0, 100, 1210, 2000));
 }
 
