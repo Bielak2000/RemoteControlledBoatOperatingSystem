@@ -81,11 +81,7 @@ public class SystemController implements Initializable {
         }
         if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
             this.kalmanFilterAlgorithm = new KalmanFilterAlgorithm();
-            try {
-                this.kalmanFilterAlgorithm.initializeKalmanFilter();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            this.kalmanFilterAlgorithm.initializeKalmanFilter();
         }
         this.autonomicController = new AutonomicController(osmMap);
         this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage,

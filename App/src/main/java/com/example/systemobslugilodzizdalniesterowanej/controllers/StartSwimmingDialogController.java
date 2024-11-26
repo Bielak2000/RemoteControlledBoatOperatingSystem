@@ -73,12 +73,7 @@ public class StartSwimmingDialogController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "progress-dialog.fxml"));
             progressDialogController = new ProgressDialogController(stage1);
             fxmlLoader.setController(progressDialogController);
-            Parent root = null;
-            try {
-                root = fxmlLoader.load();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
             stage1.setScene(scene);
             progressDialogController.setDescriptions("Rozpoczęto kalibrację", "Trwa kalibracja łodzi, proszę o cierpliwość ...");

@@ -51,7 +51,7 @@ public class KalmanFilterAlgorithm {
     @Getter
     private Lock lock = new ReentrantLock();
 
-    public boolean designateCurrentCourseAndLocalization() throws IOException {
+    public boolean designateCurrentCourseAndLocalization() {
         if (checkValidData()) {
             if (checkNewData()) {
                 double course = designateCurrentCourse();
@@ -73,10 +73,12 @@ public class KalmanFilterAlgorithm {
                 this.currentCourse = estimatedCourse[4];
                 this.currentLocalization = new Coordinate(estimatedCourse[1], estimatedCourse[0]);
                 setOldValue();
-
-                saveDesignatedValueToCSVFile(course);
-                saveCovarianceMatrixToCSVFile(kalmanFilter.getErrorCovarianceMatrix());
-
+                try {
+                    saveDesignatedValueToCSVFile(course);
+                    saveCovarianceMatrixToCSVFile(kalmanFilter.getErrorCovarianceMatrix());
+                } catch (IOException ex) {
+                    log.error("Error while initialize csv files: {}", ex);
+                }
                 log.info("Ended kalman algorithm: course - {}, lat - {}, long - {}", currentCourse, currentLocalization.getLatitude(), currentLocalization.getLongitude());
                 return true;
             } else {
@@ -90,10 +92,15 @@ public class KalmanFilterAlgorithm {
     }
 
 
-    public void initializeKalmanFilter() throws IOException {
-        List<String[]> data = new ArrayList<>();
-        data.add(new String[]{"Przyspieszenie x", "Przyspieszenie y", "Predkosc katowa", "Kurs z sensora", "Kurs z GPS", "Kurs usredniony", "Kurs z kalmana", "GPS wspol.", "Kalman wspol."});
-        Utils.saveToCsv(data, "kalman-" + now.toString() + ".csv");
+    public void initializeKalmanFilter() {
+        try {
+            List<String[]> data = new ArrayList<>();
+            data.add(new String[]{"Przyspieszenie x", "Przyspieszenie y", "Predkosc katowa", "Kurs z sensora", "Kurs z GPS", "Kurs usredniony", "Kurs z kalmana", "GPS wspol.", "Kalman wspol."});
+            Utils.saveToCsv(data, "kalman-" + now.toString() + ".csv");
+        } catch (IOException ex) {
+            log.error("Error while initialize csv files: {}", ex);
+        }
+
 
         log.info("Starting kalman filter initialization ...");
         double dt = 0.5;
