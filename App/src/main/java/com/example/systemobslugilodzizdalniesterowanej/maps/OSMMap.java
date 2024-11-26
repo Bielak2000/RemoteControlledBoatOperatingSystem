@@ -10,6 +10,7 @@ import com.sothawo.mapjfx.MapView;
 import com.sothawo.mapjfx.Marker;
 import com.sothawo.mapjfx.WMSParam;
 import com.sothawo.mapjfx.event.MapViewEvent;
+import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class OSMMap {
     private List<CoordinateLine> coordinateLines = new ArrayList<>();
     private BoatModeController boatModeController;
     private Boolean foundBoatPosition;
+    private List<Marker> currentBoatPositionWhileRunningList = new ArrayList<>();
     private Marker currentBoatPositionWhileRunning = null;
     @Getter
     @Setter
@@ -83,6 +85,13 @@ public class OSMMap {
 
     public void generateTrace() {
         if (markerList.size() > 1) {
+            if(boatModeController.getBoatMode() != BoatMode.AUTONOMIC_RUNNING && !coordinateLines.isEmpty()) {
+                CoordinateLine coordinateLineToRemove = coordinateLines.get(0);
+                coordinateLines.remove(0);
+                Platform.runLater(()->{
+                    mapView.removeCoordinateLine(coordinateLineToRemove);
+                });
+            }
             coordinateLine = null;
             coordinateLine = new CoordinateLine(markerList.stream().map(
                     marker1 -> new Coordinate(marker1.getPosition().getLatitude(), marker1.getPosition().getLongitude())
@@ -97,16 +106,20 @@ public class OSMMap {
     public void generateTraceFromBoatPosition(double latitude, double longitude) {
         Marker newMarker = Marker.createProvided(Marker.Provided.BLUE).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
         if (foundBoatPosition) {
-            mapView.removeMarker(markerList.get(0));
-            markerList.remove(0);
-            markerList.add(0, newMarker);
+            Platform.runLater(() -> {
+                mapView.removeMarker(markerList.get(0));
+                markerList.remove(0);
+                markerList.add(0, newMarker);
+            });
         } else {
             markerList.add(0, newMarker);
         }
-        mapView.addMarker(newMarker);
-        generateTrace();
-        foundBoatPosition = true;
-        mapView.setCenter(new Coordinate(latitude, longitude));
+        Platform.runLater(() -> {
+            mapView.addMarker(newMarker);
+            generateTrace();
+            foundBoatPosition = true;
+            mapView.setCenter(new Coordinate(latitude, longitude));
+        });
     }
 
     public void changeMapTypeToOSM() {
@@ -147,15 +160,27 @@ public class OSMMap {
 
     public void setCurrentBoatPositionWhileRunning(double latitude, double longitude) {
         if (currentBoatPositionWhileRunning != null) {
-            mapView.removeMarker(currentBoatPositionWhileRunning);
+//            Platform.runLater(() -> {
+//                mapView.removeMarker(currentBoatPositionWhileRunning);
+//            });
         }
         currentBoatPositionWhileRunning = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
-        mapView.addMarker(currentBoatPositionWhileRunning);
-        mapView.setCenter(new Coordinate(latitude, longitude));
+        currentBoatPositionWhileRunningList.add(currentBoatPositionWhileRunning);
+        Platform.runLater(() -> {
+            mapView.addMarker(currentBoatPositionWhileRunning);
+            mapView.setCenter(new Coordinate(latitude, longitude));
+        });
     }
 
     public void clearCurrentBoatPositionAfterFinishedLastWaypoint() {
-        mapView.removeMarker(currentBoatPositionWhileRunning);
+        if (!currentBoatPositionWhileRunningList.isEmpty()) {
+            for (Marker marker : currentBoatPositionWhileRunningList) {
+                Platform.runLater(() -> {
+                    mapView.removeMarker(marker);
+                });
+            }
+            currentBoatPositionWhileRunningList.clear();
+        }
         removeAllMarkersAndLinesWithoutBoatPosition();
         if (currentBoatPositionWhileRunning != null) {
             generateTraceFromBoatPosition(currentBoatPositionWhileRunning.getPosition().getLatitude(), currentBoatPositionWhileRunning.getPosition().getLongitude());
@@ -168,14 +193,20 @@ public class OSMMap {
     }
 
     public void setExpectedCourse(String expectedCourse) {
-        this.expectedCourse.setText(expectedCourse);
+        Platform.runLater(() -> {
+            this.expectedCourse.setText(expectedCourse);
+        });
     }
 
     public void incrementWaypointIndex() {
-            this.waypointIndex++;
+        this.waypointIndex++;
     }
 
     public Coordinate getCurrentBoatPosition() {
-        return markerList.get(0).getPosition();
+        if(markerList.size() > 0) {
+            return markerList.get(0).getPosition();
+        } else {
+            return null;
+        }
     }
 }

@@ -58,8 +58,20 @@ public class Engines {
     }
 
     public void setEnginesPowerByAngularAndLinearSpeed(LinearAndAngularSpeed linearAndAngularSpeed) {
-        this.motorLeft = (int) Math.round(linearAndAngularSpeed.getLinearSpeed() + ((linearAndAngularSpeed.getAngularSpeed() * ANGULAR_FACTORY) / 2));
-        this.motorRight = (int) Math.round(linearAndAngularSpeed.getLinearSpeed() - ((linearAndAngularSpeed.getAngularSpeed() * ANGULAR_FACTORY) / 2));
+        if (linearAndAngularSpeed.getLinearSpeed() == 0) {
+            if (linearAndAngularSpeed.getAngularSpeed() != 0) {
+                this.motorLeft = (int) Math.round((linearAndAngularSpeed.getAngularSpeed()) / 2);
+                this.motorRight = -1 * ((int) Math.round(-(linearAndAngularSpeed.getAngularSpeed()) / 2));
+            } else {
+                this.motorLeft = 0;
+                this.motorRight = 0;
+            }
+        } else {
+            double leftValue = (linearAndAngularSpeed.getLinearSpeed() + ((linearAndAngularSpeed.getAngularSpeed() * ANGULAR_FACTORY))) / (1.0 + ANGULAR_FACTORY);
+            double rightValue = (linearAndAngularSpeed.getLinearSpeed() - ((linearAndAngularSpeed.getAngularSpeed() * ANGULAR_FACTORY))) / (1.0 + ANGULAR_FACTORY);
+            this.motorLeft = (int) leftValue;
+            this.motorRight = -1 * ((int) rightValue);
+        }
         this.temp = true;
     }
 }

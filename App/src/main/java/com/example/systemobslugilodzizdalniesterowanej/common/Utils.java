@@ -1,12 +1,15 @@
 package com.example.systemobslugilodzizdalniesterowanej.common;
 
 import com.sothawo.mapjfx.Coordinate;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class Utils {
 
     public static String FXML_RESOURCES_PATH = "/com/example/systemobslugilodzizdalniesterowanej/";
@@ -20,8 +23,8 @@ public class Utils {
         }
     }
 
-    public static void saveCourseToCsv(List<String[]> courseData, String fileName) throws IOException {
-        FileWriter csvOutputFile = new FileWriter("/home/kacperbielak/Desktop/testy2/" + fileName, true);
+    public static void saveToCsv(List<String[]> courseData, String fileName) throws IOException {
+        FileWriter csvOutputFile = new FileWriter("/home/kacperbielak/Desktop/kalman-tests/" + fileName, true);
         try (PrintWriter pw = new PrintWriter(csvOutputFile)) {
             courseData.stream()
                     .map(Utils::convertToCSV)
@@ -71,6 +74,27 @@ public class Utils {
         double y = Math.sin(longDiff) * Math.cos(latitude2);
         double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
         return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
+    }
+
+    public static void saveInitValToCsvForNotBasicAndKalmanAlgorithm(String fileName) {
+        try {
+            List<String[]> data = new ArrayList<>();
+            data.add(new String[]{"Kurs", "GPS wspol."});
+            Utils.saveToCsv(data, fileName + ".csv");
+        } catch (IOException ex) {
+            log.error("Error while initalize csv file: {}", ex);
+        }
+    }
+
+    public static void saveDesignatedValueToCSVFile(String fileName, Coordinate currentLocalization, Double course) {
+        try {
+            List<String[]> data = new ArrayList<>();
+            data.add(new String[]{String.valueOf(course),
+                    String.valueOf(currentLocalization == null ? "null" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude()))});
+            Utils.saveToCsv(data, fileName + ".csv");
+        } catch (IOException ex) {
+            log.error("Error while initalize csv file: {}", ex);
+        }
     }
 
 }

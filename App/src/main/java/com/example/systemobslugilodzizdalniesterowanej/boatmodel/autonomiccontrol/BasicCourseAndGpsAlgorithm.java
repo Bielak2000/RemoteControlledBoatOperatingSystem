@@ -1,6 +1,14 @@
 package com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol;
 
+import com.example.systemobslugilodzizdalniesterowanej.common.Utils;
+import com.sothawo.mapjfx.Coordinate;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Podstawowy algorytm wyznaczania aktualnego kursu łodzi
@@ -13,24 +21,29 @@ import lombok.NoArgsConstructor;
  * Sam algorytm wyznacza kurs jako srednia z pomiarow z obu czujnikow oraz ostatniego pomiaru
  */
 @NoArgsConstructor
+@Slf4j
 public class BasicCourseAndGpsAlgorithm {
 
-    private static double GPS_COURSE_MAX_ACCURACY_DIFF = 90;
-    private static double SENSOR_COURSE_MAX_ACCURACY_DIFF = 15;
+    private static double GPS_COURSE_MAX_ACCURACY_DIFF = 45;
+    private static double SENSOR_COURSE_MAX_ACCURACY_DIFF = 45;
+    private boolean foundGpsCourse = false;
     private Double gpsCourse = null;
     private int gpsCourseIndex = 0;
     private Double sensorCourse = null;
     private Double recentDesignatedCourse = null;
+    private LocalDateTime now = LocalDateTime.now();
 
     public void setGpsCourseIfCorrectData(Double newGpsCourse) {
         if (newGpsCourse != 0 && gpsCourseIndex > 2) {
             if (gpsCourse == null || recentDesignatedCourse == null) {
+                this.foundGpsCourse = true;
                 this.gpsCourse = newGpsCourse;
             } else if (Math.abs(newGpsCourse - recentDesignatedCourse) < GPS_COURSE_MAX_ACCURACY_DIFF) {
+                this.foundGpsCourse = true;
                 this.gpsCourse = newGpsCourse;
             }
         }
-        gpsCourse++;
+        gpsCourseIndex++;
     }
 
     public void setSensorCourseIfCorrectData(Double newSensorCourse) {
@@ -41,9 +54,9 @@ public class BasicCourseAndGpsAlgorithm {
         }
     }
 
-    public double designateCurrentCourse() {
+    public Double designateCurrentCourse() {
         if (recentDesignatedCourse == null) {
-            if (gpsCourse == null) {
+            if (gpsCourse == null || !foundGpsCourse) {
                 recentDesignatedCourse = sensorCourse;
                 return sensorCourse;
             } else if (sensorCourse == null) {
@@ -55,7 +68,7 @@ public class BasicCourseAndGpsAlgorithm {
                 return newCourse;
             }
         } else {
-            if (gpsCourse == null) {
+            if (gpsCourse == null || !foundGpsCourse) {
                 double newCourse = (sensorCourse + recentDesignatedCourse) / 2.0;
                 recentDesignatedCourse = newCourse;
                 return newCourse;
@@ -68,6 +81,30 @@ public class BasicCourseAndGpsAlgorithm {
                 recentDesignatedCourse = newCourse;
                 return newCourse;
             }
+        }
+    }
+
+    public void saveInitValToCsv() {
+        try {
+            List<String[]> data = new ArrayList<>();
+            data.add(new String[]{"Kurs GPS", "Kurs sensor", "Wyzonaczny kurs", "GPS wspol."});
+            Utils.saveToCsv(data, "basic-" + now.toString() + ".csv");
+        } catch (IOException ex) {
+            log.error("Error while initalize csv file: {}", ex);
+        }
+    }
+
+    public void saveDesignatedValueToCSVFile(Coordinate currentLocalization, Double course) {
+        try {
+            List<String[]> data = new ArrayList<>();
+            if (course == null) {
+                course = recentDesignatedCourse;
+            }
+            data.add(new String[]{String.valueOf(gpsCourse), String.valueOf(sensorCourse), String.valueOf(course),
+                    String.valueOf(currentLocalization == null ? "null" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude()))});
+            Utils.saveToCsv(data, "basic-" + now.toString() + ".csv");
+        } catch (IOException ex) {
+            log.error("Error while initalize csv file: {}", ex);
         }
     }
 

@@ -16,12 +16,17 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_RESOURCES_PATH;
 
+@Slf4j
 public class StartSwimmingDialogController {
+    ExecutorService executor = Executors.newFixedThreadPool(2);
     private static int MAX_STARTING_BOAT_TIME_SECONDS = 10;
     private final static String BOAT_RUNNING_SWIMMING_INFORMATION = "Łódka porszua się po wyznaczonych punktach. Nie wyłączaj aplikacji i nie wykonuj żadnych czynności, czekaj na informację z łodzi o uzyskaniu docelowej pozycji. Możesz zastopować łódź przyciskiem STOP.";
     Stage stage;
@@ -31,12 +36,13 @@ public class StartSwimmingDialogController {
     OSMMap osmMap;
     private Label runningBoatInformation;
 
-    public StartSwimmingDialogController(Stage stage, BoatModeController boatModeController, Connection connection, OSMMap osmMap, AutonomicController autonomicController) {
+    public StartSwimmingDialogController(Stage stage, BoatModeController boatModeController, Connection connection, OSMMap osmMap, AutonomicController autonomicController, Label runningBoatInformation) {
         this.stage = stage;
         this.boatModeController = boatModeController;
         this.connection = connection;
         this.osmMap = osmMap;
         this.autonomicController = autonomicController;
+        this.runningBoatInformation = runningBoatInformation;
     }
 
     @FXML
@@ -62,35 +68,46 @@ public class StartSwimmingDialogController {
         } else {
             this.stage.close();
             boatModeController.setBoatMode(BoatMode.AUTONOMIC_STARTING);
+            ProgressDialogController progressDialogController;
             Stage stage1 = new Stage();
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "progress-dialog.fxml"));
-            ProgressDialogController progressDialogController = new ProgressDialogController(stage1);
+            progressDialogController = new ProgressDialogController(stage1);
             fxmlLoader.setController(progressDialogController);
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
             stage1.setScene(scene);
-            progressDialogController.setDescriptions("Kalibracja łodzi", "Trwa kalibracja łodzi, proszę o cierpliwość.");
+            progressDialogController.setDescriptions("Rozpoczęto kalibrację", "Trwa kalibracja łodzi, proszę o cierpliwość ...");
             stage1.show();
             root.requestFocus();
-            LinearAndAngularSpeed linearAndAngularSpeed;
-            linearAndAngularSpeed = autonomicController.designateRightEnginesPowerOnStart();
-            startAndStopRotating(linearAndAngularSpeed);
-            linearAndAngularSpeed = autonomicController.designateLeftEnginesPowerOnStart();
-            startAndStopRotating(linearAndAngularSpeed);
-            boatModeController.setBoatMode(BoatMode.AUTONOMIC_RUNNING);
-            Platform.runLater(() -> {
-                runningBoatInformation.setVisible(true);
-                progressDialogController.closeProgressDialogController();
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Łódka rozpoczeła pływanie");
-                alert.setHeaderText(BOAT_RUNNING_SWIMMING_INFORMATION);
-                alert.getDialogPane().setMaxWidth(700);
-                alert.showAndWait();
+            executor.submit(() -> {
+                LinearAndAngularSpeed linearAndAngularSpeed;
+                linearAndAngularSpeed = autonomicController.designateRightEnginesPowerOnStart();
+                try {
+                    startAndStopRotating(linearAndAngularSpeed);
+                } catch (InterruptedException e) {
+                    log.error("Error while startAndStopRotatnig: {}", e.getMessage());
+                }
+                linearAndAngularSpeed = autonomicController.designateLeftEnginesPowerOnStart();
+                try {
+                    startAndStopRotating(linearAndAngularSpeed);
+                } catch (InterruptedException e) {
+                    log.error("Error while startAndStopRotatnig: {}", e.getMessage());
+                }
+                Platform.runLater(() -> {
+                    runningBoatInformation.setVisible(true);
+                    progressDialogController.closeProgressDialogController();
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Łódka rozpoczeła pływanie");
+                    alert.setHeaderText(BOAT_RUNNING_SWIMMING_INFORMATION);
+                    alert.getDialogPane().setMaxWidth(700);
+                    alert.show();
+                    boatModeController.setBoatMode(BoatMode.AUTONOMIC_RUNNING);
+                });
             });
-            linearAndAngularSpeed = autonomicController.designateEnginesPower();
-            connection.sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
+            executor.shutdown();
         }
     }
+
 
     @FXML
     void notSwimming(ActionEvent event) {
@@ -103,13 +120,14 @@ public class StartSwimmingDialogController {
         autonomicController.setCourseOnRotateStart(osmMap.getCurrentCourse());
         while (!autonomicController.isStopRotating() && waitingIteration < MAX_STARTING_BOAT_TIME_SECONDS) {
             Thread.sleep(1000);
+            waitingIteration++;
         }
         linearAndAngularSpeed = autonomicController.clearAfterRotating();
         designateAndSendEngines(linearAndAngularSpeed);
         Thread.sleep(1000);
     }
 
-    private void designateAndSendEngines(LinearAndAngularSpeed linearAndAngularSpeed) throws InterruptedException {
+    private void designateAndSendEngines(LinearAndAngularSpeed linearAndAngularSpeed) {
         connection.sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
     }
 }

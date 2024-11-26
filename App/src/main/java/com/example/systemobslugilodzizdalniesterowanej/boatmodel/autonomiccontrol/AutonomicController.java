@@ -43,17 +43,22 @@ public class AutonomicController {
     }
 
     public LinearAndAngularSpeed designateRightEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(50.0, 50.0);
+        return new LinearAndAngularSpeed(50.0, 0.0);
     }
 
     public LinearAndAngularSpeed designateLeftEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(50.0, -50.0);
+        return new LinearAndAngularSpeed(-50.0, 0.0);
     }
 
     public LinearAndAngularSpeed designateEnginesPower() {
+        if(osmMap.getNextWaypointOnTheRoad() == null) {
+            osmMap.setNextWaypointOnTheRoad(osmMap.getDesignatedWaypoints().get(osmMap.getWaypointIndex()).getPosition());
+        }
         double distance = calculateDistance(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
+        log.info("Distance to next waypoint: {}", distance);
         if (distance < DISTANCE_ACCURACY_METERS) {
             osmMap.incrementWaypointIndex();
+            log.info("Another destination point has been reached. Current waypoint index: {}", osmMap.getWaypointIndex() + 1);
             List<Marker> markerList = osmMap.getDesignatedWaypoints();
             if (osmMap.getWaypointIndex() < markerList.size()) {
                 osmMap.setNextWaypointOnTheRoad(markerList.get(osmMap.getWaypointIndex()).getPosition());
@@ -79,7 +84,7 @@ public class AutonomicController {
 
     private LinearAndAngularSpeed determinateLinearAndAngularSpeed(double distance) {
         double newCourse = Utils.determineCourseBetweenTwoWaypoints(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
-        osmMap.setExpectedCourse(String.valueOf(newCourse));
+        osmMap.setExpectedCourse(String.format("%.2f", newCourse));
         double linearSpeed = getLinearSpeed(distance);
         double angularSpeed = getAngularSpeed(newCourse, osmMap.getCurrentCourse());
         return new LinearAndAngularSpeed(angularSpeed, linearSpeed);
@@ -105,7 +110,12 @@ public class AutonomicController {
     }
 
     private double getAngularSpeed(double expectedCourse, double currentCourse) {
-        return (expectedCourse - currentCourse) / 360.0;
+        double courseDifference = expectedCourse - currentCourse;
+        double angularSpeed = (courseDifference / 360.0) * 80;
+        if(Math.abs(courseDifference) < 180 ) {
+            angularSpeed = -1 * angularSpeed;
+        }
+        return angularSpeed;
     }
 
 }

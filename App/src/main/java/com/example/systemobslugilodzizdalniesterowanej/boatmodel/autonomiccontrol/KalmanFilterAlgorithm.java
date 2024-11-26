@@ -1,5 +1,6 @@
 package com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol;
 
+import com.example.systemobslugilodzizdalniesterowanej.common.Utils;
 import com.sothawo.mapjfx.Coordinate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,10 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -23,6 +28,7 @@ public class KalmanFilterAlgorithm {
     private static double GPS_COURSE_MAX_ACCURACY_DIFF = 30;
     private KalmanFilter kalmanFilter;
 
+    private boolean foundGpsCourse = false;
     private Double gpsCourse = null;
     private Double sensorCourse = null;
     private Coordinate gpsLocalization = null;
@@ -35,6 +41,7 @@ public class KalmanFilterAlgorithm {
     private double oldAccelerationX = -100.0;
     private double oldAccelerationY = -100.0;
     private double oldAngularSpeed = -100.0;
+    private LocalDateTime now = LocalDateTime.now();
 
     @Getter
     private Double currentCourse = null;
@@ -66,6 +73,12 @@ public class KalmanFilterAlgorithm {
                 this.currentCourse = estimatedCourse[4];
                 this.currentLocalization = new Coordinate(estimatedCourse[1], estimatedCourse[0]);
                 setOldValue();
+                try {
+                    saveDesignatedValueToCSVFile(course);
+                    saveCovarianceMatrixToCSVFile(kalmanFilter.getErrorCovarianceMatrix());
+                } catch (IOException ex) {
+                    log.error("Error while initialize csv files: {}", ex);
+                }
                 log.info("Ended kalman algorithm: course - {}, lat - {}, long - {}", currentCourse, currentLocalization.getLatitude(), currentLocalization.getLongitude());
                 return true;
             } else {
@@ -80,6 +93,15 @@ public class KalmanFilterAlgorithm {
 
 
     public void initializeKalmanFilter() {
+        try {
+            List<String[]> data = new ArrayList<>();
+            data.add(new String[]{"Przyspieszenie x", "Przyspieszenie y", "Predkosc katowa", "Kurs z sensora", "Kurs z GPS", "Kurs usredniony", "Kurs z kalmana", "GPS wspol.", "Kalman wspol."});
+            Utils.saveToCsv(data, "kalman-" + now.toString() + ".csv");
+        } catch (IOException ex) {
+            log.error("Error while initialize csv files: {}", ex);
+        }
+
+
         log.info("Starting kalman filter initialization ...");
         double dt = 0.5;
 
@@ -120,8 +142,8 @@ public class KalmanFilterAlgorithm {
 
         // NIEPEWNOSCI POMIAROWE
         RealMatrix R = new Array2DRowRealMatrix(new double[][]{
-                {0.001, 0, 0, 0}, // x
-                {0, 0.001, 0, 0}, // y
+                {0.0001, 0, 0, 0}, // x
+                {0, 0.0001, 0, 0}, // y
                 {0, 0, 0.5, 0}, // azymut
                 {0, 0, 0, 0.1}  // predkosc katowe
         });
@@ -133,7 +155,22 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 1, 0, 0},
                 {0, 0, 0, 0, 1, 0},
                 {0, 0, 0, 0, 0, 1}
+
+//                {0.0000994011761326715,	0,	0.0000773837107347111,	0,	0,	0},
+//                {0,	0.0000994011761326715,	0,	0.0000773837107347111,	0,	0},
+//                {0.0000773837107347092,	0,	0.0256904651708843,	0,	0,	0},
+//                {0,	0.0000773837107347092,	0,	0.0256904651708843,	0,	0},
+//                {0,	0,	0,	0,	0.366635772248373,	0.00324969912198902},
+//                {0,	0,	0,	0,	0.00324969912198901,	0.0268459638398375}
+
+//                {0.0000994011761323349,	0,	0.0000773837106674363,	0,	0,	0},
+//                {0,	0.0000994011761323349,	0,	0.0000773837106674363,	0,	0},
+//                {0.0000773837106674384,	0,	0.0256904651573303,	0,	0,	0},
+//                {0,	0.0000773837106674384,	0,	0.0256904651573303,	0,	0},
+//                {0,	0,	0,	0,	0.366635771024806,	0.00324969354031049},
+//                {0,	0,	0,	0,	0.00324969354031049,	0.0268459383772641},
         });
+
 
         ArrayRealVector initialState = new ArrayRealVector(new double[]{0, 0, 0, 0, 0, 0});
         DefaultProcessModel processModel = new DefaultProcessModel(A, B, Q, initialState, initialP);
@@ -145,7 +182,7 @@ public class KalmanFilterAlgorithm {
     private double designateCurrentCourse() {
         if (gpsCourse == null) {
             return sensorCourse;
-        } else if ((Math.abs(gpsCourse - sensorCourse) < GPS_COURSE_MAX_ACCURACY_DIFF)) {
+        } else if (foundGpsCourse && (Math.abs(gpsCourse - sensorCourse) < GPS_COURSE_MAX_ACCURACY_DIFF)) {
             return (sensorCourse + gpsCourse) / 2.0;
         } else {
             return sensorCourse;
@@ -157,9 +194,8 @@ public class KalmanFilterAlgorithm {
     }
 
     private boolean checkNewData() {
-        return !oldGpsLocalization.equals(gpsLocalization) || oldAngularSpeed != angularSpeed || oldAccelerationX != accelerationX || oldAccelerationY != accelerationY
-                || oldSensorCourse != sensorCourse || oldGpsCourse != gpsCourse || gpsCourse == null || sensorCourse == null || gpsLocalization == null
-                || (oldAngularSpeed == 0 && angularSpeed == -1) || (oldAccelerationX == 0 && accelerationX == -1) || (oldAccelerationY == 0 && accelerationY == -1);
+        return (oldGpsLocalization == null && gpsLocalization != null) || !oldGpsLocalization.equals(gpsLocalization) || oldAngularSpeed != angularSpeed || oldAccelerationX != accelerationX || oldAccelerationY != accelerationY
+                || oldSensorCourse != sensorCourse || oldGpsCourse != gpsCourse;
     }
 
     private void setOldValue() {
@@ -179,6 +215,31 @@ public class KalmanFilterAlgorithm {
             }
             System.out.println();
         }
+    }
+
+    private void saveCovarianceMatrixToCSVFile(RealMatrix covarianceMatrix) throws IOException {
+        log.info("Save covarianve matrix to CSV file.");
+        List<String[]> covariance = new ArrayList<>();
+        for (int i = 0; i < kalmanFilter.getErrorCovarianceMatrix().getRowDimension(); i++) {
+            String[] temp = new String[6];
+            for (int j = 0; j < kalmanFilter.getErrorCovarianceMatrix().getColumnDimension(); j++) {
+                temp[j] = String.valueOf(kalmanFilter.getErrorCovarianceMatrix().getEntry(i, j));
+            }
+            covariance.add(temp);
+        }
+        String[] empty = {" ", " ", " ", " ", " ", " "};
+        covariance.add(empty);
+        Utils.saveToCsv(covariance, "kalman-" + now.toString() + "-covariance_matrix.csv");
+
+    }
+
+    private void saveDesignatedValueToCSVFile(double course) throws IOException {
+        List<String[]> data = new ArrayList<>();
+        data.add(new String[]{String.valueOf(accelerationX), String.valueOf(accelerationY), String.valueOf(angularSpeed), String.valueOf(sensorCourse),
+                String.valueOf(gpsCourse), String.valueOf(course), String.valueOf(this.currentCourse),
+                String.valueOf(gpsLocalization.getLongitude() + ";" + gpsLocalization.getLatitude()),
+                String.valueOf(this.currentLocalization.getLongitude() + ";" + this.currentLocalization.getLatitude())});
+        Utils.saveToCsv(data, "kalman-" + now.toString() + ".csv");
     }
 
 }
