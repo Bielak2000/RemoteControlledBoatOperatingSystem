@@ -80,12 +80,12 @@ public class SystemController implements Initializable {
             throw new RuntimeException(e);
         }
         if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
-            this.kalmanFilterAlgorithm = new KalmanFilterAlgorithm();
+            this.kalmanFilterAlgorithm = new KalmanFilterAlgorithm(expectedCourse);
             this.kalmanFilterAlgorithm.initializeKalmanFilter();
         }
         this.autonomicController = new AutonomicController(osmMap);
         this.connection = new Connection(engines, lighting, flaps, connectionStatus, lightPower, networkStatus, osmMap, stage,
-                boatModeController, autonomicController, gpsCourse, sensorCourse, modeChooser, chosenAlgorithm, designatedCourse, kalmanFilterAlgorithm);
+                boatModeController, autonomicController, gpsCourse, sensorCourse, modeChooser, chosenAlgorithm, designatedCourse, kalmanFilterAlgorithm, expectedCourse);
         connection.connect(chosenPort, chosenSystem);
         networkStatus = false;
         lightPower.setText("0%");

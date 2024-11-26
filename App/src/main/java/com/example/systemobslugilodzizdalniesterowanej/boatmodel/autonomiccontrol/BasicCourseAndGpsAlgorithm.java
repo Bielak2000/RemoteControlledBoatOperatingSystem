@@ -2,7 +2,7 @@ package com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontr
 
 import com.example.systemobslugilodzizdalniesterowanej.common.Utils;
 import com.sothawo.mapjfx.Coordinate;
-import lombok.NoArgsConstructor;
+import javafx.scene.control.Label;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -20,7 +20,6 @@ import java.util.List;
  * <p>
  * Sam algorytm wyznacza kurs jako srednia z pomiarow z obu czujnikow oraz ostatniego pomiaru
  */
-@NoArgsConstructor
 @Slf4j
 public class BasicCourseAndGpsAlgorithm {
 
@@ -32,6 +31,11 @@ public class BasicCourseAndGpsAlgorithm {
     private Double sensorCourse = null;
     private Double recentDesignatedCourse = null;
     private LocalDateTime now = LocalDateTime.now();
+    private Label expectedCourse;
+
+    public BasicCourseAndGpsAlgorithm(Label expectedCourse) {
+        this.expectedCourse = expectedCourse;
+    }
 
     public void setGpsCourseIfCorrectData(Double newGpsCourse) {
         if (newGpsCourse != 0 && gpsCourseIndex > 2) {
@@ -87,8 +91,8 @@ public class BasicCourseAndGpsAlgorithm {
     public void saveInitValToCsv() {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Kurs GPS", "Kurs sensor", "Wyzonaczny kurs", "GPS wspol."});
-            Utils.saveToCsv(data, "basic-" + now.toString() + ".csv");
+            data.add(new String[]{"Kurs GPS", "Kurs sensor", "Wyzonaczny kurs", "Kurs oczekiwany", "GPS wspol."});
+            Utils.saveToCsv(data, "basic-" + now.format(Utils.formatter) + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
         }
@@ -100,9 +104,9 @@ public class BasicCourseAndGpsAlgorithm {
             if (course == null) {
                 course = recentDesignatedCourse;
             }
-            data.add(new String[]{String.valueOf(gpsCourse), String.valueOf(sensorCourse), String.valueOf(course),
+            data.add(new String[]{String.valueOf(gpsCourse), String.valueOf(sensorCourse), String.valueOf(course), expectedCourse.getText(),
                     String.valueOf(currentLocalization == null ? "null" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude()))});
-            Utils.saveToCsv(data, "basic-" + now.toString() + ".csv");
+            Utils.saveToCsv(data, "basic-" + now.format(Utils.formatter) + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
         }

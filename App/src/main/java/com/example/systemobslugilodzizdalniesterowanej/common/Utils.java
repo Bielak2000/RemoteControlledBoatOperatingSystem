@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
 public class Utils {
 
     public static String FXML_RESOURCES_PATH = "/com/example/systemobslugilodzizdalniesterowanej/";
+    public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss");
 
     public static void saveGpsToCsv(List<String[]> gpsData) throws IOException {
         FileWriter csvOutputFile = new FileWriter("/home/kacperbielak/Desktop/testy2/gps.csv", true);
@@ -79,17 +81,17 @@ public class Utils {
     public static void saveInitValToCsvForNotBasicAndKalmanAlgorithm(String fileName) {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Kurs", "GPS wspol."});
+            data.add(new String[]{"Kurs", "Kurs oczekiwany", "GPS wspol."});
             Utils.saveToCsv(data, fileName + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
         }
     }
 
-    public static void saveDesignatedValueToCSVFile(String fileName, Coordinate currentLocalization, Double course) {
+    public static void saveDesignatedValueToCSVFile(String fileName, Coordinate currentLocalization, Double course, String expectedCourse) {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{String.valueOf(course),
+            data.add(new String[]{String.valueOf(course), expectedCourse,
                     String.valueOf(currentLocalization == null ? "null" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude()))});
             Utils.saveToCsv(data, fileName + ".csv");
         } catch (IOException ex) {

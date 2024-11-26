@@ -2,8 +2,8 @@ package com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontr
 
 import com.example.systemobslugilodzizdalniesterowanej.common.Utils;
 import com.sothawo.mapjfx.Coordinate;
+import javafx.scene.control.Label;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.filter.DefaultMeasurementModel;
@@ -21,12 +21,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Setter
-@NoArgsConstructor
 @Slf4j
 public class KalmanFilterAlgorithm {
 
     private static double GPS_COURSE_MAX_ACCURACY_DIFF = 30;
     private KalmanFilter kalmanFilter;
+    private Label expectedCourse;
 
     private boolean foundGpsCourse = false;
     private Double gpsCourse = null;
@@ -50,6 +50,10 @@ public class KalmanFilterAlgorithm {
 
     @Getter
     private Lock lock = new ReentrantLock();
+
+    public KalmanFilterAlgorithm(Label expectedCourse) {
+        this.expectedCourse = expectedCourse;
+    }
 
     public boolean designateCurrentCourseAndLocalization() {
         if (checkValidData()) {
@@ -95,8 +99,8 @@ public class KalmanFilterAlgorithm {
     public void initializeKalmanFilter() {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Przyspieszenie x", "Przyspieszenie y", "Predkosc katowa", "Kurs z sensora", "Kurs z GPS", "Kurs usredniony", "Kurs z kalmana", "GPS wspol.", "Kalman wspol."});
-            Utils.saveToCsv(data, "kalman-" + now.toString() + ".csv");
+            data.add(new String[]{"Przyspieszenie x", "Przyspieszenie y", "Predkosc katowa", "Kurs z sensora", "Kurs z GPS", "Kurs usredniony", "Kurs z kalmana", "Kurs oczekiwany", "GPS wspol.", "Kalman wspol."});
+            Utils.saveToCsv(data, "kalman-" + now.format(Utils.formatter) + ".csv");
         } catch (IOException ex) {
             log.error("Error while initialize csv files: {}", ex);
         }
@@ -229,7 +233,7 @@ public class KalmanFilterAlgorithm {
         }
         String[] empty = {" ", " ", " ", " ", " ", " "};
         covariance.add(empty);
-        Utils.saveToCsv(covariance, "kalman-" + now.toString() + "-covariance_matrix.csv");
+        Utils.saveToCsv(covariance, "kalman-" + now.format(Utils.formatter) + "-covariance_matrix.csv");
 
     }
 
@@ -237,9 +241,10 @@ public class KalmanFilterAlgorithm {
         List<String[]> data = new ArrayList<>();
         data.add(new String[]{String.valueOf(accelerationX), String.valueOf(accelerationY), String.valueOf(angularSpeed), String.valueOf(sensorCourse),
                 String.valueOf(gpsCourse), String.valueOf(course), String.valueOf(this.currentCourse),
+                expectedCourse.getText(),
                 String.valueOf(gpsLocalization.getLongitude() + ";" + gpsLocalization.getLatitude()),
                 String.valueOf(this.currentLocalization.getLongitude() + ";" + this.currentLocalization.getLatitude())});
-        Utils.saveToCsv(data, "kalman-" + now.toString() + ".csv");
+        Utils.saveToCsv(data, "kalman-" + now.format(Utils.formatter) + ".csv");
     }
 
 }

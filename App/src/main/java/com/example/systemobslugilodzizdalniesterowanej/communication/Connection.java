@@ -95,11 +95,12 @@ public class Connection {
     private LinearAndAngularSpeed oldLinearAndAngularSpeed = null;
     private LocalDateTime now = LocalDateTime.now();
     private String fileName;
+    private Label expectedCourse;
 
     public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap,
                       Stage stage, BoatModeController boatModeController, AutonomicController autonomicController,
                       Label gpsCourse, Label sensorCourse, ToggleButton modeChooser, PositionAlgorithm chosenAlgorithm, Label designatedCourse,
-                      KalmanFilterAlgorithm kalmanFilterAlgorithm) {
+                      KalmanFilterAlgorithm kalmanFilterAlgorithm, Label expectedCourse) {
         com.fazecast.jSerialComm.SerialPort[] ports = com.fazecast.jSerialComm.SerialPort.getCommPorts();
         for (com.fazecast.jSerialComm.SerialPort port : ports) {
             portNames.add(port.getSystemPortName());
@@ -118,7 +119,8 @@ public class Connection {
         this.sensorCourse = sensorCourse;
         this.modeChooser = modeChooser;
         this.chosenAlgorithm = chosenAlgorithm;
-        this.basicCourseAndGpsAlgorithm = new BasicCourseAndGpsAlgorithm();
+        this.basicCourseAndGpsAlgorithm = new BasicCourseAndGpsAlgorithm(expectedCourse);
+        this.expectedCourse = expectedCourse;
         this.kalmanFilterAlgorithm = kalmanFilterAlgorithm;
         this.designatedCourse = designatedCourse;
         initCSV();
@@ -301,7 +303,7 @@ public class Connection {
                 sendingValuesLock.lock();
                 if (chosenAlgorithm == PositionAlgorithm.ONLY_GPS) {
                     osmMap.setCurrentCourse(Double.parseDouble(array[1]));
-                    Utils.saveDesignatedValueToCSVFile(fileName, osmMap.getCurrentBoatPosition(), osmMap.getCurrentCourse());
+                    Utils.saveDesignatedValueToCSVFile(fileName, osmMap.getCurrentBoatPosition(), osmMap.getCurrentCourse(), expectedCourse.getText());
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
                     basicCourseAndGpsAlgorithm.setGpsCourseIfCorrectData(Double.parseDouble(array[1]));
                     Double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
@@ -332,7 +334,7 @@ public class Connection {
 
                 if (chosenAlgorithm == PositionAlgorithm.GPS_AND_SENSOR) {
                     osmMap.setCurrentCourse(Double.parseDouble(array[1]));
-                    Utils.saveDesignatedValueToCSVFile(fileName, osmMap.getCurrentBoatPosition(), osmMap.getCurrentCourse());
+                    Utils.saveDesignatedValueToCSVFile(fileName, osmMap.getCurrentBoatPosition(), osmMap.getCurrentCourse(), expectedCourse.getText());
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
                     basicCourseAndGpsAlgorithm.setSensorCourseIfCorrectData(Double.parseDouble(array[1]));
                     Double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
@@ -406,7 +408,7 @@ public class Connection {
                         if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
                             basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), null);
                         } else {
-                            Utils.saveDesignatedValueToCSVFile(fileName, new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), osmMap.getCurrentCourse());
+                            Utils.saveDesignatedValueToCSVFile(fileName, new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), osmMap.getCurrentCourse(), expectedCourse.getText());
                         }
                     }
                 }
@@ -474,10 +476,10 @@ public class Connection {
         if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
             basicCourseAndGpsAlgorithm.saveInitValToCsv();
         } else if (chosenAlgorithm == PositionAlgorithm.GPS_AND_SENSOR) {
-            fileName = "gps-and-sensor-" + now.toString();
+            fileName = "gps-and-sensor-" + now.format(Utils.formatter);
             Utils.saveInitValToCsvForNotBasicAndKalmanAlgorithm(fileName);
         } else if (chosenAlgorithm == PositionAlgorithm.ONLY_GPS) {
-            fileName = "gps-" + now.toString();
+            fileName = "gps-" + now.format(Utils.formatter);
             Utils.saveInitValToCsvForNotBasicAndKalmanAlgorithm(fileName);
         }
     }
