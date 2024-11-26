@@ -10,6 +10,7 @@ import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontro
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Engines;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Flaps;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Lighting;
+import com.example.systemobslugilodzizdalniesterowanej.common.Utils;
 import com.example.systemobslugilodzizdalniesterowanej.controllers.ProgressDialogController;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
 import com.sothawo.mapjfx.Coordinate;
@@ -30,6 +31,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -91,6 +93,8 @@ public class Connection {
     private ToggleButton modeChooser;
     private PositionAlgorithm chosenAlgorithm;
     private LinearAndAngularSpeed oldLinearAndAngularSpeed = null;
+    private LocalDateTime now = LocalDateTime.now();
+    private String fileName;
 
     public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap,
                       Stage stage, BoatModeController boatModeController, AutonomicController autonomicController,
@@ -117,6 +121,7 @@ public class Connection {
         this.basicCourseAndGpsAlgorithm = new BasicCourseAndGpsAlgorithm();
         this.kalmanFilterAlgorithm = kalmanFilterAlgorithm;
         this.designatedCourse = designatedCourse;
+        initCSV();
     }
 
     public void connect(String port, String system) {
@@ -296,9 +301,11 @@ public class Connection {
                 sendingValuesLock.lock();
                 if (chosenAlgorithm == PositionAlgorithm.ONLY_GPS) {
                     osmMap.setCurrentCourse(Double.parseDouble(array[1]));
+                    Utils.saveDesignatedValueToCSVFile(fileName, osmMap.getCurrentBoatPosition(), osmMap.getCurrentCourse());
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
                     basicCourseAndGpsAlgorithm.setGpsCourseIfCorrectData(Double.parseDouble(array[1]));
                     Double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
+                    basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(osmMap.getCurrentBoatPosition(), designatedCourseFromBasicAlgorithm);
                     if (designatedCourseFromBasicAlgorithm != null) {
                         Platform.runLater(() -> {
                             designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
@@ -325,9 +332,11 @@ public class Connection {
 
                 if (chosenAlgorithm == PositionAlgorithm.GPS_AND_SENSOR) {
                     osmMap.setCurrentCourse(Double.parseDouble(array[1]));
+                    Utils.saveDesignatedValueToCSVFile(fileName, osmMap.getCurrentBoatPosition(), osmMap.getCurrentCourse());
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
                     basicCourseAndGpsAlgorithm.setSensorCourseIfCorrectData(Double.parseDouble(array[1]));
                     Double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
+                    basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(osmMap.getCurrentBoatPosition(), designatedCourseFromBasicAlgorithm);
                     if (designatedCourseFromBasicAlgorithm != null) {
                         Platform.runLater(() -> {
                             designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
@@ -394,6 +403,11 @@ public class Connection {
                         } else {
                             osmMap.setCurrentBoatPositionWhileRunning(Double.parseDouble(localization[0]), Double.parseDouble(localization[1]));
                         }
+                        if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
+                            basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), null);
+                        } else {
+                            Utils.saveDesignatedValueToCSVFile(fileName, new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), osmMap.getCurrentCourse());
+                        }
                     }
                 }
             });
@@ -454,5 +468,17 @@ public class Connection {
         stage1.setScene(scene);
         progressDialogController.setDescriptions(title, content);
         stage1.show();
+    }
+
+    private void initCSV() {
+        if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
+            basicCourseAndGpsAlgorithm.saveInitValToCsv();
+        } else if (chosenAlgorithm == PositionAlgorithm.GPS_AND_SENSOR) {
+            fileName = "gps-and-sensor-" + now.toString();
+            Utils.saveInitValToCsvForNotBasicAndKalmanAlgorithm(fileName);
+        } else if (chosenAlgorithm == PositionAlgorithm.ONLY_GPS) {
+            fileName = "gps-" + now.toString();
+            Utils.saveInitValToCsvForNotBasicAndKalmanAlgorithm(fileName);
+        }
     }
 }

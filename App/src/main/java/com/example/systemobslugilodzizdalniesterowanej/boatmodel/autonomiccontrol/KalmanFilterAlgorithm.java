@@ -93,7 +93,7 @@ public class KalmanFilterAlgorithm {
     public void initializeKalmanFilter() throws IOException {
         List<String[]> data = new ArrayList<>();
         data.add(new String[]{"Przyspieszenie x", "Przyspieszenie y", "Predkosc katowa", "Kurs z sensora", "Kurs z GPS", "Kurs usredniony", "Kurs z kalmana", "GPS wspol.", "Kalman wspol."});
-        Utils.saveToCsv(data, now.toString() + ".csv");
+        Utils.saveToCsv(data, "kalman-" + now.toString() + ".csv");
 
         log.info("Starting kalman filter initialization ...");
         double dt = 0.5;
@@ -222,7 +222,7 @@ public class KalmanFilterAlgorithm {
         }
         String[] empty = {" ", " ", " ", " ", " ", " "};
         covariance.add(empty);
-        Utils.saveToCsv(covariance, now.toString() + "-covariance_matrix.csv");
+        Utils.saveToCsv(covariance, "kalman-" + now.toString() + "-covariance_matrix.csv");
 
     }
 
@@ -232,7 +232,7 @@ public class KalmanFilterAlgorithm {
                 String.valueOf(gpsCourse), String.valueOf(course), String.valueOf(this.currentCourse),
                 String.valueOf(gpsLocalization.getLongitude() + ";" + gpsLocalization.getLatitude()),
                 String.valueOf(this.currentLocalization.getLongitude() + ";" + this.currentLocalization.getLatitude())});
-        Utils.saveToCsv(data, now.toString() + ".csv");
+        Utils.saveToCsv(data, "kalman-" + now.toString() + ".csv");
     }
 
 }

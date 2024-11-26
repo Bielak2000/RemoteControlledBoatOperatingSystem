@@ -203,6 +203,10 @@ public class OSMMap {
     }
 
     public Coordinate getCurrentBoatPosition() {
-        return markerList.get(0).getPosition();
+        if(markerList.size() > 0) {
+            return markerList.get(0).getPosition();
+        } else {
+            return null;
+        }
     }
 }
