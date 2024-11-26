@@ -55,8 +55,10 @@ public class AutonomicController {
             osmMap.setNextWaypointOnTheRoad(osmMap.getDesignatedWaypoints().get(osmMap.getWaypointIndex()).getPosition());
         }
         double distance = calculateDistance(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
+        log.info("Distance to next waypoint: {}", distance);
         if (distance < DISTANCE_ACCURACY_METERS) {
             osmMap.incrementWaypointIndex();
+            log.info("Another destination point has been reached. Current waypoint index: {}", osmMap.getWaypointIndex() + 1);
             List<Marker> markerList = osmMap.getDesignatedWaypoints();
             if (osmMap.getWaypointIndex() < markerList.size()) {
                 osmMap.setNextWaypointOnTheRoad(markerList.get(osmMap.getWaypointIndex()).getPosition());

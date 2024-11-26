@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BasicCourseAndGpsAlgorithm {
 
-    private static double GPS_COURSE_MAX_ACCURACY_DIFF = 90;
-    private static double SENSOR_COURSE_MAX_ACCURACY_DIFF = 15;
+    private static double GPS_COURSE_MAX_ACCURACY_DIFF = 45;
+    private static double SENSOR_COURSE_MAX_ACCURACY_DIFF = 45;
     private boolean foundGpsCourse = false;
     private Double gpsCourse = null;
     private int gpsCourseIndex = 0;
