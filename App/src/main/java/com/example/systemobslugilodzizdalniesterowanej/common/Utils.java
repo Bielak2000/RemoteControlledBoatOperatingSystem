@@ -92,9 +92,9 @@ public class Utils {
         try {
             List<String[]> data = new ArrayList<>();
             data.add(new String[]{String.valueOf(course), expectedCourse,
-                    String.valueOf(currentLocalization == null ? "null" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude())),
-                    String.valueOf(nextWaypoint == null ? "null" : (nextWaypoint.getLongitude() + ";" + nextWaypoint.getLatitude())),
-                    String.valueOf(startWaypoint == null ? "null" : (startWaypoint.getLongitude() + ";" + startWaypoint.getLatitude()))});
+                    String.valueOf(currentLocalization == null ? "brak" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude())),
+                    String.valueOf(nextWaypoint == null ? "brak" : (nextWaypoint.getLongitude() + ";" + nextWaypoint.getLatitude())),
+                    String.valueOf(startWaypoint == null ? "brak" : (startWaypoint.getLongitude() + ";" + startWaypoint.getLatitude()))});
             Utils.saveToCsv(data, fileName + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);

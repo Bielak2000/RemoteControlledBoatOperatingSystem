@@ -105,8 +105,8 @@ public class BasicCourseAndGpsAlgorithm {
                 course = recentDesignatedCourse;
             }
             data.add(new String[]{String.valueOf(gpsCourse), String.valueOf(sensorCourse), String.valueOf(course), expectedCourse.getText(),
-                    String.valueOf(currentLocalization == null ? "null" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude())),
-                    String.valueOf(nextWaypoint == null ? "null" : (nextWaypoint.getLongitude() + ";" + nextWaypoint.getLatitude())),
+                    String.valueOf(currentLocalization == null ? "brak" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude())),
+                    String.valueOf(nextWaypoint == null ? "brak" : (nextWaypoint.getLongitude() + ";" + nextWaypoint.getLatitude())),
                     String.valueOf(startWaypoint == null ? "brak" : startWaypoint.getLongitude() + ";" + startWaypoint.getLatitude())});
             Utils.saveToCsv(data, "basic-" + now.format(Utils.formatter) + ".csv");
         } catch (IOException ex) {
