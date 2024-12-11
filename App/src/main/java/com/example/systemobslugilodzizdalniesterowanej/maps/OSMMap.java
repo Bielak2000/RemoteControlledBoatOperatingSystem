@@ -42,6 +42,9 @@ public class OSMMap {
     @Getter
     @Setter
     private Double currentCourse = null;
+    @Setter
+    @Getter
+    private Coordinate startWaypoint = null;
 
     /**
      * GREEN TAG - waypoint determined by user
@@ -214,13 +217,8 @@ public class OSMMap {
     }
 
     public Coordinate getStartWaypoint() {
-        if (waypointIndex != 0 && getDesignatedWaypoints().size() > waypointIndex) {
-            return getDesignatedWaypoints().get(waypointIndex - 1).getPosition();
-        }
-        if (markerList.size() > 0) {
-            return markerList.get(0).getPosition();
-        } else {
-            return null;
-        }
+        if (startWaypoint != null) return startWaypoint;
+        else if (markerList.size() > 0) return markerList.get(0).getPosition();
+        else return null;
     }
 }
