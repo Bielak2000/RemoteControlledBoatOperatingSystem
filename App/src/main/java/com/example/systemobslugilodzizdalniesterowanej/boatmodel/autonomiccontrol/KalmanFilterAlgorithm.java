@@ -32,6 +32,9 @@ public class KalmanFilterAlgorithm {
     private Double gpsCourse = null;
     private Double sensorCourse = null;
     private Coordinate gpsLocalization = null;
+    @Getter
+    private Coordinate nextWaypoint = null;
+    private Coordinate startWaypoint = null;
     private double accelerationX = 0.0;
     private double accelerationY = 0.0;
     private double angularSpeed = 0.0;
@@ -57,38 +60,39 @@ public class KalmanFilterAlgorithm {
 
     public boolean designateCurrentCourseAndLocalization() {
         if (checkValidData()) {
-            if (checkNewData()) {
-                double course = designateCurrentCourse();
-                log.info("Starting kalman algorithm: ax - {}, ay - {}, w = {}, lat - {}, long - {}, course - {} ...",
-                        accelerationX, accelerationY, angularSpeed, gpsLocalization.getLatitude(), gpsLocalization.getLongitude(), course);
-                ArrayRealVector controlVector = new ArrayRealVector(new double[]{
-                        accelerationX, accelerationY
-                });
-                kalmanFilter.predict(controlVector);
-                ArrayRealVector measurementVector = new ArrayRealVector(new double[]{
-                        gpsLocalization.getLongitude(), // x
-                        gpsLocalization.getLatitude(),  // y
-                        course,        // azymut
-                        angularSpeed // predkosc katowa
-                });
-                kalmanFilter.correct(measurementVector);
-                showCovarianceMatrix(kalmanFilter.getErrorCovarianceMatrix());
-                double[] estimatedCourse = kalmanFilter.getStateEstimation();
-                this.currentCourse = estimatedCourse[4];
-                this.currentLocalization = new Coordinate(estimatedCourse[1], estimatedCourse[0]);
-                setOldValue();
-                try {
-                    saveDesignatedValueToCSVFile(course);
-                    saveCovarianceMatrixToCSVFile(kalmanFilter.getErrorCovarianceMatrix());
-                } catch (IOException ex) {
-                    log.error("Error while initialize csv files: {}", ex);
-                }
-                log.info("Ended kalman algorithm: course - {}, lat - {}, long - {}", currentCourse, currentLocalization.getLatitude(), currentLocalization.getLongitude());
-                return true;
-            } else {
-                log.info("Starting kalman algorithm - failed because no new data.");
-                return false;
+//            if (checkNewData()) {
+            double course = designateCurrentCourse();
+            log.info("Starting kalman algorithm: ax - {}, ay - {}, w = {}, lat - {}, long - {}, course - {} ...",
+                    accelerationX, accelerationY, angularSpeed, gpsLocalization.getLatitude(), gpsLocalization.getLongitude(), course);
+            ArrayRealVector controlVector = new ArrayRealVector(new double[]{
+                    accelerationX, accelerationY
+            });
+            kalmanFilter.predict(controlVector);
+            ArrayRealVector measurementVector = new ArrayRealVector(new double[]{
+                    gpsLocalization.getLongitude(), // x
+                    gpsLocalization.getLatitude(),  // y
+                    course,        // azymut
+                    angularSpeed // predkosc katowa
+            });
+            kalmanFilter.correct(measurementVector);
+            showCovarianceMatrix(kalmanFilter.getErrorCovarianceMatrix());
+            double[] estimatedCourse = kalmanFilter.getStateEstimation();
+            this.currentCourse = estimatedCourse[4];
+            this.currentLocalization = new Coordinate(estimatedCourse[1], estimatedCourse[0]);
+            setOldValue();
+            try {
+                saveDesignatedValueToCSVFile(course);
+                saveCovarianceMatrixToCSVFile(kalmanFilter.getErrorCovarianceMatrix());
+            } catch (IOException ex) {
+                log.error("Error while initialize csv files: {}", ex);
             }
+            log.info("Ended kalman algorithm: course - {}, lat - {}, long - {}", currentCourse, currentLocalization.getLatitude(), currentLocalization.getLongitude());
+            return true;
+//            }
+//        else {
+//                log.info("Starting kalman algorithm - failed because no new data.");
+//                return false;
+//            }
         } else {
             log.info("Starting kalman algorithm - failed because dont valid data.");
             return false;
@@ -99,7 +103,7 @@ public class KalmanFilterAlgorithm {
     public void initializeKalmanFilter() {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Przyspieszenie x", "Przyspieszenie y", "Predkosc katowa", "Kurs z sensora", "Kurs z GPS", "Kurs usredniony", "Kurs z kalmana", "Kurs oczekiwany", "GPS wspol.", "Kalman wspol."});
+            data.add(new String[]{"Przyspieszenie x", "Przyspieszenie y", "Predkosc katowa", "Kurs z sensora", "Kurs z GPS", "Kurs usredniony", "Kurs z kalmana", "Kurs oczekiwany", "GPS wspol.", "Kalman wspol.", "Punkt docelowy", "Punkt startowy"});
             Utils.saveToCsv(data, "kalman-" + now.format(Utils.formatter) + ".csv");
         } catch (IOException ex) {
             log.error("Error while initialize csv files: {}", ex);
@@ -107,15 +111,15 @@ public class KalmanFilterAlgorithm {
 
 
         log.info("Starting kalman filter initialization ...");
-        double dt = 0.5;
+        double dt = 1;
 
         RealMatrix A = new Array2DRowRealMatrix(new double[][]{
-                {1, 0, dt, 0, 0, 0}, // x
-                {0, 1, 0, dt, 0, 0}, // y
-                {0, 0, 1, 0, 0, 0},  // Vx
-                {0, 0, 0, 1, 0, 0},  // Vy
-                {0, 0, 0, 0, 1, dt}, // azymut
-                {0, 0, 0, 0, 0, 1}   // predkosc katowa
+                {1, 0, 0, 0, 0, 0}, // x
+                {0, 1, 0, 0, 0, 0}, // y
+                {dt, 0, 1, 0, 0, 0},  // Vx
+                {0, dt, 0, 1, 0, 0},  // Vy
+                {0, 0, 0, 0, 1, 0}, // azymut
+                {0, 0, 0, 0, dt, 1}   // predkosc katowa
         });
 
         RealMatrix B = new Array2DRowRealMatrix(new double[][]{
@@ -134,23 +138,82 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 1}, // predkosc katowa
         });
 
+        // NASTEPNIE SPRAWDZIC BEZ PRZYSPIESZENIA
+//        // 1 --------------------------------------------------------------------------------------
+        // NIEPEWNOSCI MODELU
+//        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
+//                {0.01, 0, 0, 0, 0, 0},
+//                {0, 0.01, 0, 0, 0, 0},
+//                {0, 0, 0.01, 0, 0, 0},
+//                {0, 0, 0, 0.01, 0, 0},
+//                {0, 0, 0, 0, 10, 0},
+//                {0, 0, 0, 0, 0, 0.1}
+//        });
+//
+//        // NIEPEWNOSCI POMIAROWE
+//        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
+//                {0.00001, 0, 0, 0}, // x
+//                {0, 0.00001, 0, 0}, // y
+//                {0, 0, 1, 0}, // azymut
+//                {0, 0, 0, 0.1}  // predkosc katowe
+//        });
+
+//        // 2 --------------------------------------------------------------------------------------
+//        // NIEPEWNOSCI MODELU
+//        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
+//                {0.1, 0, 0, 0, 0, 0},
+//                {0, 0.1, 0, 0, 0, 0},
+//                {0, 0, 0.01, 0, 0, 0},
+//                {0, 0, 0, 0.01, 0, 0},
+//                {0, 0, 0, 0, 10, 0},
+//                {0, 0, 0, 0, 0, 0.1}
+//        });
+//
+//        // NIEPEWNOSCI POMIAROWE
+//        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
+//                {0.00001, 0, 0, 0}, // x
+//                {0, 0.00001, 0, 0}, // y
+//                {0, 0, 0.5, 0}, // azymut
+//                {0, 0, 0, 0.1}  // predkosc katowe
+//        });
+
+//        // 3 -------------------------------------------------------------------------------------- - NAJLEPSZY
         // NIEPEWNOSCI MODELU
         RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
-                {0.01, 0, 0, 0, 0, 0},
-                {0, 0.01, 0, 0, 0, 0},
-                {0, 0, 0.01, 0, 0, 0},
-                {0, 0, 0, 0.01, 0, 0},
-                {0, 0, 0, 0, 1, 0},
-                {0, 0, 0, 0, 0, 0.01}
+                {0.1, 0, 0, 0, 0, 0},
+                {0, 0.1, 0, 0, 0, 0},
+                {0, 0, 0.1, 0, 0, 0},
+                {0, 0, 0, 0.1, 0, 0},
+                {0, 0, 0, 0, 10, 0},
+                {0, 0, 0, 0, 0, 0.1}
         });
 
         // NIEPEWNOSCI POMIAROWE
         RealMatrix R = new Array2DRowRealMatrix(new double[][]{
-                {0.0001, 0, 0, 0}, // x
-                {0, 0.0001, 0, 0}, // y
+                {0.00001, 0, 0, 0}, // x
+                {0, 0.00001, 0, 0}, // y
                 {0, 0, 0.5, 0}, // azymut
                 {0, 0, 0, 0.1}  // predkosc katowe
         });
+
+//        // 4 --------------------------------------------------------------------------------------
+//        // NIEPEWNOSCI MODELU
+//        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
+//                {0.1, 0, 0, 0, 0, 0},
+//                {0, 0.1, 0, 0, 0, 0},
+//                {0, 0, 0.1, 0, 0, 0},
+//                {0, 0, 0, 0.1, 0, 0},
+//                {0, 0, 0, 0, 10, 0},
+//                {0, 0, 0, 0, 0, 0.1}
+//        });
+//
+//        // NIEPEWNOSCI POMIAROWE
+//        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
+//                {0.0001, 0, 0, 0}, // x
+//                {0, 0.0001, 0, 0}, // y
+//                {0, 0, 0.5, 0}, // azymut
+//                {0, 0, 0, 0.1}  // predkosc katowe
+//        });
 
         RealMatrix initialP = new Array2DRowRealMatrix(new double[][]{
                 {1, 0, 0, 0, 0, 0},
@@ -159,14 +222,13 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 1, 0, 0},
                 {0, 0, 0, 0, 1, 0},
                 {0, 0, 0, 0, 0, 1}
-
 //                {0.0000994011761326715,	0,	0.0000773837107347111,	0,	0,	0},
 //                {0,	0.0000994011761326715,	0,	0.0000773837107347111,	0,	0},
 //                {0.0000773837107347092,	0,	0.0256904651708843,	0,	0,	0},
 //                {0,	0.0000773837107347092,	0,	0.0256904651708843,	0,	0},
 //                {0,	0,	0,	0,	0.366635772248373,	0.00324969912198902},
 //                {0,	0,	0,	0,	0.00324969912198901,	0.0268459638398375}
-
+//
 //                {0.0000994011761323349,	0,	0.0000773837106674363,	0,	0,	0},
 //                {0,	0.0000994011761323349,	0,	0.0000773837106674363,	0,	0},
 //                {0.0000773837106674384,	0,	0.0256904651573303,	0,	0,	0},
@@ -243,7 +305,9 @@ public class KalmanFilterAlgorithm {
                 String.valueOf(gpsCourse), String.valueOf(course), String.valueOf(this.currentCourse),
                 expectedCourse.getText(),
                 String.valueOf(gpsLocalization.getLongitude() + ";" + gpsLocalization.getLatitude()),
-                String.valueOf(this.currentLocalization.getLongitude() + ";" + this.currentLocalization.getLatitude())});
+                String.valueOf(this.currentLocalization.getLongitude() + ";" + this.currentLocalization.getLatitude()),
+                String.valueOf(this.nextWaypoint == null ? "brak" : this.nextWaypoint.getLongitude() + ";" + this.nextWaypoint.getLatitude()),
+                String.valueOf(this.startWaypoint == null ? "brak" : this.startWaypoint.getLongitude() + ";" + this.startWaypoint.getLatitude())});
         Utils.saveToCsv(data, "kalman-" + now.format(Utils.formatter) + ".csv");
     }
 

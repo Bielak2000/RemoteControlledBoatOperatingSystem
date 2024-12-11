@@ -91,21 +91,23 @@ public class BasicCourseAndGpsAlgorithm {
     public void saveInitValToCsv() {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Kurs GPS", "Kurs sensor", "Wyzonaczny kurs", "Kurs oczekiwany", "GPS wspol."});
+            data.add(new String[]{"Kurs GPS", "Kurs sensor", "Wyzonaczny kurs", "Kurs oczekiwany", "GPS wspol.", "Punkt docelowy", "Punkt startowy"});
             Utils.saveToCsv(data, "basic-" + now.format(Utils.formatter) + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
         }
     }
 
-    public void saveDesignatedValueToCSVFile(Coordinate currentLocalization, Double course) {
+    public void saveDesignatedValueToCSVFile(Coordinate currentLocalization, Double course, Coordinate nextWaypoint, Coordinate startWaypoint) {
         try {
             List<String[]> data = new ArrayList<>();
             if (course == null) {
                 course = recentDesignatedCourse;
             }
             data.add(new String[]{String.valueOf(gpsCourse), String.valueOf(sensorCourse), String.valueOf(course), expectedCourse.getText(),
-                    String.valueOf(currentLocalization == null ? "null" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude()))});
+                    String.valueOf(currentLocalization == null ? "null" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude())),
+                    String.valueOf(nextWaypoint == null ? "null" : (nextWaypoint.getLongitude() + ";" + nextWaypoint.getLatitude())),
+                    String.valueOf(startWaypoint == null ? "brak" : startWaypoint.getLongitude() + ";" + startWaypoint.getLatitude())});
             Utils.saveToCsv(data, "basic-" + now.format(Utils.formatter) + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);

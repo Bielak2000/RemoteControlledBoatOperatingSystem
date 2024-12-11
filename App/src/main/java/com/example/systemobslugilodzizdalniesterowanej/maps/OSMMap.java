@@ -203,6 +203,17 @@ public class OSMMap {
     }
 
     public Coordinate getCurrentBoatPosition() {
+        if(currentBoatPositionWhileRunning != null && boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+            return currentBoatPositionWhileRunning.getPosition();
+        }
+        if(markerList.size() > 0) {
+            return markerList.get(0).getPosition();
+        } else {
+            return null;
+        }
+    }
+
+    public Coordinate getStartWaypoint() {
         if(markerList.size() > 0) {
             return markerList.get(0).getPosition();
         } else {

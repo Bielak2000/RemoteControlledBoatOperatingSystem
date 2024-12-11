@@ -81,18 +81,20 @@ public class Utils {
     public static void saveInitValToCsvForNotBasicAndKalmanAlgorithm(String fileName) {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Kurs", "Kurs oczekiwany", "GPS wspol."});
+            data.add(new String[]{"Kurs", "Kurs oczekiwany", "GPS wspol.", "Punkt docelowy", "Punkt startowy"});
             Utils.saveToCsv(data, fileName + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
         }
     }
 
-    public static void saveDesignatedValueToCSVFile(String fileName, Coordinate currentLocalization, Double course, String expectedCourse) {
+    public static void saveDesignatedValueToCSVFile(String fileName, Coordinate currentLocalization, Double course, String expectedCourse, Coordinate nextWaypoint, Coordinate startWaypoint) {
         try {
             List<String[]> data = new ArrayList<>();
             data.add(new String[]{String.valueOf(course), expectedCourse,
-                    String.valueOf(currentLocalization == null ? "null" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude()))});
+                    String.valueOf(currentLocalization == null ? "null" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude())),
+                    String.valueOf(nextWaypoint == null ? "null" : (nextWaypoint.getLongitude() + ";" + nextWaypoint.getLatitude())),
+                    String.valueOf(startWaypoint == null ? "null" : (startWaypoint.getLongitude() + ";" + startWaypoint.getLatitude()))});
             Utils.saveToCsv(data, fileName + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
