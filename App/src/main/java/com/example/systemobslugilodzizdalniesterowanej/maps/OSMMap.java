@@ -43,7 +43,6 @@ public class OSMMap {
     @Setter
     private Double currentCourse = null;
     @Setter
-    @Getter
     private Coordinate startWaypoint = null;
 
     /**

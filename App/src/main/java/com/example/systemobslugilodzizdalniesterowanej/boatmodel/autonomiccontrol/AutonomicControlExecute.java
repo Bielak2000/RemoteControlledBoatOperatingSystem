@@ -48,7 +48,6 @@ public class AutonomicControlExecute {
                     osmMap.setCurrentCourse(kalmanFilterAlgorithm.getCurrentCourse());
                     if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {
                         osmMap.generateTraceFromBoatPosition(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
-                        kalmanFilterAlgorithm.setStartWaypoint(kalmanFilterAlgorithm.getCurrentLocalization());
                     } else if (currentBoatMode != BoatMode.AUTONOMIC_STARTING) {
                         osmMap.setCurrentBoatPositionWhileRunning(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
                     }

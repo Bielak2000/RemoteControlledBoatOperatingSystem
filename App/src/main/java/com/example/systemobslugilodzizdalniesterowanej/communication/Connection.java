@@ -222,9 +222,6 @@ public class Connection {
             }
         } else {
             privateSetProgressDialogController("Koniec trasy", "Łódź osiągneła cel, zatrzymywanie łodzi ...");
-            if (chosenAlgorithm.equals(PositionAlgorithm.KALMAN_FILTER)) {
-                kalmanFilterAlgorithm.setNextWaypoint(null);
-            }
             autonomicController.setManuallyFinishSwimming(false);
             sendStopSwimmingInfo();
         }
@@ -299,6 +296,8 @@ public class Connection {
                 boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
                 modeChooser.setSelected(false);
                 if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
+                    kalmanFilterAlgorithm.setStartWaypoint(null);
+                    kalmanFilterAlgorithm.setNextWaypoint(null);
                     kalmanFilterAlgorithm.getLock().unlock();
                 }
                 sendingValuesLock.unlock();
