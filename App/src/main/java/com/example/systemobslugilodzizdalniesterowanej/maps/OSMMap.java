@@ -85,10 +85,10 @@ public class OSMMap {
 
     public void generateTrace() {
         if (markerList.size() > 1) {
-            if(boatModeController.getBoatMode() != BoatMode.AUTONOMIC_RUNNING && !coordinateLines.isEmpty()) {
+            if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_RUNNING && !coordinateLines.isEmpty()) {
                 CoordinateLine coordinateLineToRemove = coordinateLines.get(0);
                 coordinateLines.remove(0);
-                Platform.runLater(()->{
+                Platform.runLater(() -> {
                     mapView.removeCoordinateLine(coordinateLineToRemove);
                 });
             }
@@ -203,10 +203,10 @@ public class OSMMap {
     }
 
     public Coordinate getCurrentBoatPosition() {
-        if(currentBoatPositionWhileRunning != null && boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+        if (currentBoatPositionWhileRunning != null && boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
             return currentBoatPositionWhileRunning.getPosition();
         }
-        if(markerList.size() > 0) {
+        if (markerList.size() > 0) {
             return markerList.get(0).getPosition();
         } else {
             return null;
@@ -214,7 +214,10 @@ public class OSMMap {
     }
 
     public Coordinate getStartWaypoint() {
-        if(markerList.size() > 0) {
+        if (waypointIndex != 0 && getDesignatedWaypoints().size() > waypointIndex) {
+            return getDesignatedWaypoints().get(waypointIndex - 1).getPosition();
+        }
+        if (markerList.size() > 0) {
             return markerList.get(0).getPosition();
         } else {
             return null;
