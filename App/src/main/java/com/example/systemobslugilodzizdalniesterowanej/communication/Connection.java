@@ -413,6 +413,7 @@ public class Connection {
                             osmMap.setCurrentBoatPositionWhileRunning(Double.parseDouble(localization[0]), Double.parseDouble(localization[1]));
                         }
                         if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
+                            System.out.println(localization[0] + "," + localization[1]);
                             basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), null, osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
                         } else {
                             Utils.saveDesignatedValueToCSVFile(fileName, new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), osmMap.getCurrentCourse(), expectedCourse.getText(), osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());

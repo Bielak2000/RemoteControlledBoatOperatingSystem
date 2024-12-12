@@ -64,20 +64,27 @@ public class KalmanFilterAlgorithm {
             double course = designateCurrentCourse();
             log.info("Starting kalman algorithm: ax - {}, ay - {}, w = {}, lat - {}, long - {}, course - {} ...",
                     accelerationX, accelerationY, angularSpeed, gpsLocalization.getLatitude(), gpsLocalization.getLongitude(), course);
-            ArrayRealVector controlVector = new ArrayRealVector(new double[]{
-                    accelerationX, accelerationY
-            });
-            kalmanFilter.predict(controlVector);
+//            ArrayRealVector controlVector = new ArrayRealVector(new double[]{
+//                    accelerationX, accelerationY
+//            });
+            kalmanFilter.predict();
             ArrayRealVector measurementVector = new ArrayRealVector(new double[]{
                     gpsLocalization.getLongitude(), // x
                     gpsLocalization.getLatitude(),  // y
-                    course,        // azymut
-                    angularSpeed // predkosc katowa
+                    accelerationX,              // ax
+                    accelerationY,              // ay
+                    course,                      // azymut
+                    angularSpeed                // predkosc katowa
             });
-            kalmanFilter.correct(measurementVector);
+            try {
+                kalmanFilter.correct(measurementVector);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+
             showCovarianceMatrix(kalmanFilter.getErrorCovarianceMatrix());
             double[] estimatedCourse = kalmanFilter.getStateEstimation();
-            this.currentCourse = estimatedCourse[4];
+            this.currentCourse = estimatedCourse[6];
             this.currentLocalization = new Coordinate(estimatedCourse[1], estimatedCourse[0]);
             setOldValue();
             try {
@@ -114,28 +121,33 @@ public class KalmanFilterAlgorithm {
         double dt = 1;
 
         RealMatrix A = new Array2DRowRealMatrix(new double[][]{
-                {1, 0, 0, 0, 0, 0}, // x
-                {0, 1, 0, 0, 0, 0}, // y
-                {dt, 0, 1, 0, 0, 0},  // Vx
-                {0, dt, 0, 1, 0, 0},  // Vy
-                {0, 0, 0, 0, 1, 0}, // azymut
-                {0, 0, 0, 0, dt, 1}   // predkosc katowa
+                {1,                 0,              0, 0, 0, 0, 0, 0}, // x
+                {0,                 1,              0, 0, 0, 0, 0, 0}, // y
+                {dt,                0,              1, 0, 0, 0, 0, 0},  // Vx
+                {0,                dt,              0, 1, 0, 0, 0, 0},  // Vy
+                {0.5 * dt * dt,     0,             dt, 0, 1, 0, 0, 0},  // ax
+                {0,                 0.5 * dt * dt,  0, dt, 0, 1, 0, 0}, // ay
+                {0,                 0,              0, 0, 0, 0, 1, 0}, // azymut
+                {0,                 0,              0, 0, 0, 0, dt, 1}   // predkosc katowa
         });
 
-        RealMatrix B = new Array2DRowRealMatrix(new double[][]{
-                {0.5 * dt * dt, 0},     // wpływ przyspieszenia na położenie X
-                {0, 0.5 * dt * dt},     // wpływ przyspieszenia na położenie Y
-                {dt, 0},                // wpływ przyspieszenia na prędkość X
-                {0, dt},                // wpływ przyspieszenia na prędkość Y
-                {0, 0},                 // wpływ przyspieszenia na azymut
-                {0, 0}                 // wpływ przyspieszenia na predkosc katowoa
-        });
+        RealMatrix B = null;
+//                new Array2DRowRealMatrix(new double[][]{
+//                {0.5 * dt * dt, 0},     // wpływ przyspieszenia na położenie X
+//                {0, 0.5 * dt * dt},     // wpływ przyspieszenia na położenie Y
+//                {dt, 0},                // wpływ przyspieszenia na prędkość X
+//                {0, dt},                // wpływ przyspieszenia na prędkość Y
+//                {0, 0},                 // wpływ przyspieszenia na azymut
+//                {0, 0}                 // wpływ przyspieszenia na predkosc katowoa
+//        });
 
         RealMatrix H = new Array2DRowRealMatrix(new double[][]{
-                {1, 0, 0, 0, 0, 0}, // x
-                {0, 1, 0, 0, 0, 0}, // y
-                {0, 0, 0, 0, 1, 0}, // azymut
-                {0, 0, 0, 0, 0, 1}, // predkosc katowa
+                {1, 0, 0, 0, 0, 0, 0, 0}, // x
+                {0, 1, 0, 0, 0, 0, 0, 0}, // y
+                {0, 0, 0, 0, 1, 0, 0, 0}, // ax
+                {0, 0, 0, 0, 0, 1, 0, 0}, // ay
+                {0, 0, 0, 0, 0, 0, 1, 0}, // ax
+                {0, 0, 0, 0, 0, 0, 0, 1} // ay
         });
 
         // NASTEPNIE SPRAWDZIC BEZ PRZYSPIESZENIA
@@ -180,20 +192,24 @@ public class KalmanFilterAlgorithm {
 //        // 3 -------------------------------------------------------------------------------------- - NAJLEPSZY
         // NIEPEWNOSCI MODELU
         RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
-                {0.1, 0, 0, 0, 0, 0},
-                {0, 0.1, 0, 0, 0, 0},
-                {0, 0, 0.1, 0, 0, 0},
-                {0, 0, 0, 0.1, 0, 0},
-                {0, 0, 0, 0, 10, 0},
-                {0, 0, 0, 0, 0, 0.1}
+                {0.1, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0.1, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0.1, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0.1, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0.1, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0.1, 0, 0},
+                {0, 0, 0, 0, 0, 0, 10, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0.1}
         });
 
         // NIEPEWNOSCI POMIAROWE
         RealMatrix R = new Array2DRowRealMatrix(new double[][]{
-                {0.00001, 0, 0, 0}, // x
-                {0, 0.00001, 0, 0}, // y
-                {0, 0, 0.5, 0}, // azymut
-                {0, 0, 0, 0.1}  // predkosc katowe
+                {0.00001, 0, 0, 0, 0, 0}, // x
+                {0, 0.00001, 0, 0, 0, 0}, // y
+                {0, 0, 0.2, 0, 0, 0}, // ax
+                {0, 0, 0, 0.2, 0, 0}, // ay
+                {0, 0, 0, 0, 0.5, 0}, // azymut
+                {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
         });
 
 //        // 4 --------------------------------------------------------------------------------------
@@ -216,12 +232,14 @@ public class KalmanFilterAlgorithm {
 //        });
 
         RealMatrix initialP = new Array2DRowRealMatrix(new double[][]{
-                {1, 0, 0, 0, 0, 0},
-                {0, 1, 0, 0, 0, 0},
-                {0, 0, 1, 0, 0, 0},
-                {0, 0, 0, 1, 0, 0},
-                {0, 0, 0, 0, 1, 0},
-                {0, 0, 0, 0, 0, 1}
+                {1, 0, 0, 0, 0, 0, 0, 0},
+                {0, 1, 0, 0, 0, 0, 0, 0},
+                {0, 0, 1, 0, 0, 0, 0, 0},
+                {0, 0, 0, 1, 0, 0, 0, 0},
+                {0, 0, 0, 0, 1, 0, 0, 0},
+                {0, 0, 0, 0, 0, 1, 0, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 1}
 //                {0.0000994011761326715,	0,	0.0000773837107347111,	0,	0,	0},
 //                {0,	0.0000994011761326715,	0,	0.0000773837107347111,	0,	0},
 //                {0.0000773837107347092,	0,	0.0256904651708843,	0,	0,	0},
@@ -238,7 +256,7 @@ public class KalmanFilterAlgorithm {
         });
 
 
-        ArrayRealVector initialState = new ArrayRealVector(new double[]{0, 0, 0, 0, 0, 0});
+        ArrayRealVector initialState = new ArrayRealVector(new double[]{0, 0, 0, 0, 0, 0, 0, 0});
         DefaultProcessModel processModel = new DefaultProcessModel(A, B, Q, initialState, initialP);
         DefaultMeasurementModel measurementModel = new DefaultMeasurementModel(H, R);
         kalmanFilter = new KalmanFilter(processModel, measurementModel);
@@ -287,7 +305,7 @@ public class KalmanFilterAlgorithm {
         log.info("Save covarianve matrix to CSV file.");
         List<String[]> covariance = new ArrayList<>();
         for (int i = 0; i < kalmanFilter.getErrorCovarianceMatrix().getRowDimension(); i++) {
-            String[] temp = new String[6];
+            String[] temp = new String[8];
             for (int j = 0; j < kalmanFilter.getErrorCovarianceMatrix().getColumnDimension(); j++) {
                 temp[j] = String.valueOf(kalmanFilter.getErrorCovarianceMatrix().getEntry(i, j));
             }
