@@ -156,10 +156,11 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 0, 0, 1} // ay
         });
 
-        // NAJLEPSZE
+        //        // NAJLEPSZE
+                // NIEPEWNOSCI MODELU
         RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
-                {0.1, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0.1, 0, 0, 0, 0, 0, 0},
+                {0.001, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0.001, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0.05, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0.05, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0.05, 0, 0, 0},
@@ -170,18 +171,19 @@ public class KalmanFilterAlgorithm {
 
         // NIEPEWNOSCI POMIAROWE
         RealMatrix R = new Array2DRowRealMatrix(new double[][]{
-                {0.5, 0, 0, 0, 0, 0}, // x
-                {0, 0.5, 0, 0, 0, 0}, // y
+                {0.01, 0, 0, 0, 0, 0}, // x
+                {0, 0.01, 0, 0, 0, 0}, // y
                 {0, 0, 0.1, 0, 0, 0}, // ax
                 {0, 0, 0, 0.1, 0, 0}, // ay
                 {0, 0, 0, 0, 0.5, 0}, // azymut
                 {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
         });
 
-        //        // NIEPEWNOSCI MODELU
+
+
 //        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
-//                {0.001, 0, 0, 0, 0, 0, 0, 0},
-//                {0, 0.001, 0, 0, 0, 0, 0, 0},
+//                {0.1, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0.1, 0, 0, 0, 0, 0, 0},
 //                {0, 0, 0.05, 0, 0, 0, 0, 0},
 //                {0, 0, 0, 0.05, 0, 0, 0, 0},
 //                {0, 0, 0, 0, 0.05, 0, 0, 0},
@@ -192,8 +194,30 @@ public class KalmanFilterAlgorithm {
 //
 //        // NIEPEWNOSCI POMIAROWE
 //        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
-//                {0.01, 0, 0, 0, 0, 0}, // x
-//                {0, 0.01, 0, 0, 0, 0}, // y
+//                {0.5, 0, 0, 0, 0, 0}, // x
+//                {0, 0.5, 0, 0, 0, 0}, // y
+//                {0, 0, 0.1, 0, 0, 0}, // ax
+//                {0, 0, 0, 0.1, 0, 0}, // ay
+//                {0, 0, 0, 0, 0.5, 0}, // azymut
+//                {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
+//        });
+
+//        // NIEPEWNOSCI MODELU
+//        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
+//                {0.01, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0.01, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0.05, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0.05, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0.05, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0.05, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 1, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0.5}
+//        });
+//
+//        // NIEPEWNOSCI POMIAROWE
+//        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
+//                {0.1, 0, 0, 0, 0, 0}, // x
+//                {0, 0.1, 0, 0, 0, 0}, // y
 //                {0, 0, 0.1, 0, 0, 0}, // ax
 //                {0, 0, 0, 0.1, 0, 0}, // ay
 //                {0, 0, 0, 0, 0.5, 0}, // azymut
