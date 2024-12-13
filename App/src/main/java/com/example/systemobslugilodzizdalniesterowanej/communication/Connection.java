@@ -404,7 +404,7 @@ public class Connection {
                     BoatMode currentBoatMode = boatModeController.getBoatMode();
                     if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                         kalmanFilterAlgorithm.getLock().lock();
-                        kalmanFilterAlgorithm.setGpsLocalization(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])));
+                        kalmanFilterAlgorithm.setGpsLocalizationWithCalibrationHandler(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])));
                         kalmanFilterAlgorithm.getLock().unlock();
                     } else {
                         if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {

@@ -1,6 +1,7 @@
 package com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol;
 
 import com.example.systemobslugilodzizdalniesterowanej.common.Utils;
+import com.example.systemobslugilodzizdalniesterowanej.maps.OwnCoordinate;
 import com.sothawo.mapjfx.Coordinate;
 import javafx.scene.control.Label;
 import lombok.Getter;
@@ -19,28 +20,36 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 @Setter
 @Slf4j
 public class KalmanFilterAlgorithm {
 
     private static double GPS_COURSE_MAX_ACCURACY_DIFF = 30;
+    private static int MIN_GPS_CALIBRATION_COUNT = 0;
+    private static int GPS_CALIBRATION_ACCURACY = 10;
+
     private KalmanFilter kalmanFilter;
     private Label expectedCourse;
 
     private boolean foundGpsCourse = false;
     private Double gpsCourse = null;
     private Double sensorCourse = null;
-    private Coordinate gpsLocalization = null;
+
+    private List<Coordinate> gpsLocalizationCalibration = new ArrayList<>();
+    private OwnCoordinate gpsLocalization = null;
+    private Coordinate startWaypointToKalmanAlgorithm = null;
+
     @Getter
     private Coordinate nextWaypoint = null;
     private Coordinate startWaypoint = null;
     private double accelerationX = 0.0;
     private double accelerationY = 0.0;
-    private double angularSpeed = 0.0;
+    private double angularSpeed = 0.0; // rad/s
     private Double oldGpsCourse = -1.0;
     private Double oldSensorCourse = -1.0;
-    private Coordinate oldGpsLocalization = null;
+    private OwnCoordinate oldGpsLocalization = null;
     private double oldAccelerationX = -100.0;
     private double oldAccelerationY = -100.0;
     private double oldAngularSpeed = -100.0;
@@ -62,19 +71,16 @@ public class KalmanFilterAlgorithm {
         if (checkValidData()) {
 //            if (checkNewData()) {
             double course = designateCurrentCourse();
-            log.info("Starting kalman algorithm: ax - {}, ay - {}, w = {}, lat - {}, long - {}, course - {} ...",
-                    accelerationX, accelerationY, angularSpeed, gpsLocalization.getLatitude(), gpsLocalization.getLongitude(), course);
-//            ArrayRealVector controlVector = new ArrayRealVector(new double[]{
-//                    accelerationX, accelerationY
-//            });
+            log.info("Starting kalman algorithm: ax - {}, ay - {}, w = {}, x - {}, y - {}, course - {} ...",
+                    accelerationX, accelerationY, angularSpeed, gpsLocalization.getX(), gpsLocalization.getY(), course);
             kalmanFilter.predict();
             ArrayRealVector measurementVector = new ArrayRealVector(new double[]{
-                    gpsLocalization.getLongitude(), // x
-                    gpsLocalization.getLatitude(),  // y
-                    accelerationX,              // ax
-                    accelerationY,              // ay
+                    gpsLocalization.getX(),      // x
+                    gpsLocalization.getY(),      // y
+                    accelerationX,               // ax
+                    accelerationY,               // ay
                     course,                      // azymut
-                    angularSpeed                // predkosc katowa
+                    angularSpeed * 57.2958       // predkosc katowa
             });
             try {
                 kalmanFilter.correct(measurementVector);
@@ -83,9 +89,10 @@ public class KalmanFilterAlgorithm {
             }
 
             showCovarianceMatrix(kalmanFilter.getErrorCovarianceMatrix());
-            double[] estimatedCourse = kalmanFilter.getStateEstimation();
-            this.currentCourse = estimatedCourse[6];
-            this.currentLocalization = new Coordinate(estimatedCourse[1], estimatedCourse[0]);
+            double[] estimatedData = kalmanFilter.getStateEstimation();
+            this.currentCourse = estimatedData[6];
+            OwnCoordinate estimatedCoordinate = new OwnCoordinate(estimatedData[1], estimatedData[0]);
+            this.currentLocalization = estimatedCoordinate.transformCoordinateToGlobalCoordinateSystem(startWaypointToKalmanAlgorithm);
             setOldValue();
             try {
                 saveDesignatedValueToCSVFile(course);
@@ -93,9 +100,8 @@ public class KalmanFilterAlgorithm {
             } catch (IOException ex) {
                 log.error("Error while initialize csv files: {}", ex);
             }
-            log.info("Ended kalman algorithm: course - {}, lat - {}, long - {}", currentCourse, currentLocalization.getLatitude(), currentLocalization.getLongitude());
+            log.info("Ended kalman algorithm: course - {}, x - {}, y - {}", currentCourse, estimatedCoordinate.getX(), estimatedCoordinate.getY());
             return true;
-//            }
 //        else {
 //                log.info("Starting kalman algorithm - failed because no new data.");
 //                return false;
@@ -118,7 +124,7 @@ public class KalmanFilterAlgorithm {
 
 
         log.info("Starting kalman filter initialization ...");
-        double dt = 1;
+        double dt = 0.3;
 
         RealMatrix A = new Array2DRowRealMatrix(new double[][]{
                 {1,                 0,              0, 0, 0, 0, 0, 0}, // x
@@ -150,85 +156,112 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 0, 0, 1} // ay
         });
 
-        // NASTEPNIE SPRAWDZIC BEZ PRZYSPIESZENIA
-//        // 1 --------------------------------------------------------------------------------------
-        // NIEPEWNOSCI MODELU
-//        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
-//                {0.01, 0, 0, 0, 0, 0},
-//                {0, 0.01, 0, 0, 0, 0},
-//                {0, 0, 0.01, 0, 0, 0},
-//                {0, 0, 0, 0.01, 0, 0},
-//                {0, 0, 0, 0, 10, 0},
-//                {0, 0, 0, 0, 0, 0.1}
-//        });
-//
-//        // NIEPEWNOSCI POMIAROWE
-//        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
-//                {0.00001, 0, 0, 0}, // x
-//                {0, 0.00001, 0, 0}, // y
-//                {0, 0, 1, 0}, // azymut
-//                {0, 0, 0, 0.1}  // predkosc katowe
-//        });
-
-//        // 2 --------------------------------------------------------------------------------------
-//        // NIEPEWNOSCI MODELU
-//        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
-//                {0.1, 0, 0, 0, 0, 0},
-//                {0, 0.1, 0, 0, 0, 0},
-//                {0, 0, 0.01, 0, 0, 0},
-//                {0, 0, 0, 0.01, 0, 0},
-//                {0, 0, 0, 0, 10, 0},
-//                {0, 0, 0, 0, 0, 0.1}
-//        });
-//
-//        // NIEPEWNOSCI POMIAROWE
-//        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
-//                {0.00001, 0, 0, 0}, // x
-//                {0, 0.00001, 0, 0}, // y
-//                {0, 0, 0.5, 0}, // azymut
-//                {0, 0, 0, 0.1}  // predkosc katowe
-//        });
-
-//        // 3 -------------------------------------------------------------------------------------- - NAJLEPSZY
-        // NIEPEWNOSCI MODELU
+        // NAJLEPSZE
         RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
                 {0.1, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0.1, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0.1, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0.1, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0.1, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0.1, 0, 0},
-                {0, 0, 0, 0, 0, 0, 10, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0.1}
+                {0, 0, 0.05, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0.05, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0.05, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0.05, 0, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0.5}
         });
 
         // NIEPEWNOSCI POMIAROWE
         RealMatrix R = new Array2DRowRealMatrix(new double[][]{
-                {0.00001, 0, 0, 0, 0, 0}, // x
-                {0, 0.00001, 0, 0, 0, 0}, // y
-                {0, 0, 0.2, 0, 0, 0}, // ax
-                {0, 0, 0, 0.2, 0, 0}, // ay
+                {0.5, 0, 0, 0, 0, 0}, // x
+                {0, 0.5, 0, 0, 0, 0}, // y
+                {0, 0, 0.1, 0, 0, 0}, // ax
+                {0, 0, 0, 0.1, 0, 0}, // ay
                 {0, 0, 0, 0, 0.5, 0}, // azymut
                 {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
         });
 
-//        // 4 --------------------------------------------------------------------------------------
-//        // NIEPEWNOSCI MODELU
+        //        // NIEPEWNOSCI MODELU
 //        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
-//                {0.1, 0, 0, 0, 0, 0},
-//                {0, 0.1, 0, 0, 0, 0},
-//                {0, 0, 0.1, 0, 0, 0},
-//                {0, 0, 0, 0.1, 0, 0},
-//                {0, 0, 0, 0, 10, 0},
-//                {0, 0, 0, 0, 0, 0.1}
+//                {0.001, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0.001, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0.05, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0.05, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0.05, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0.05, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 1, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0.5}
 //        });
 //
 //        // NIEPEWNOSCI POMIAROWE
 //        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
-//                {0.0001, 0, 0, 0}, // x
-//                {0, 0.0001, 0, 0}, // y
-//                {0, 0, 0.5, 0}, // azymut
-//                {0, 0, 0, 0.1}  // predkosc katowe
+//                {0.01, 0, 0, 0, 0, 0}, // x
+//                {0, 0.01, 0, 0, 0, 0}, // y
+//                {0, 0, 0.1, 0, 0, 0}, // ax
+//                {0, 0, 0, 0.1, 0, 0}, // ay
+//                {0, 0, 0, 0, 0.5, 0}, // azymut
+//                {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
+//        });
+
+//        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
+//                {0.001, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0.001, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0.05, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0.05, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0.05, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0.05, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 1, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0.5}
+//        });
+//
+//        // NIEPEWNOSCI POMIAROWE
+//        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
+//                {0.01, 0, 0, 0, 0, 0}, // x
+//                {0, 0.01, 0, 0, 0, 0}, // y
+//                {0, 0, 0.1, 0, 0, 0}, // ax
+//                {0, 0, 0, 0.1, 0, 0}, // ay
+//                {0, 0, 0, 0, 0.5, 0}, // azymut
+//                {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
+//        });
+
+//        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
+//                {0.01, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0.01, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0.01, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0.01, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0.01, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0.01, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 1, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0.5}
+//        });
+//
+//        // NIEPEWNOSCI POMIAROWE
+//        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
+//                {0.1, 0, 0, 0, 0, 0}, // x
+//                {0, 0.1, 0, 0, 0, 0}, // y
+//                {0, 0, 0.01, 0, 0, 0}, // ax
+//                {0, 0, 0, 0.01, 0, 0}, // ay
+//                {0, 0, 0, 0, 0.5, 0}, // azymut
+//                {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
+//        });
+
+        // v3
+//        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
+//                {0.001, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0.001, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0.01, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0.01, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0.01, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0.01, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 2, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 1}
+//        });
+//
+//        // NIEPEWNOSCI POMIAROWE
+//        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
+//                {0.01, 0, 0, 0, 0, 0}, // x
+//                {0, 0.01, 0, 0, 0, 0}, // y
+//                {0, 0, 0.1, 0, 0, 0}, // ax
+//                {0, 0, 0, 0.1, 0, 0}, // ay
+//                {0, 0, 0, 0, 1, 0}, // azymut
+//                {0, 0, 0, 0, 0, 0.5}  // predkosc katowe
 //        });
 
         RealMatrix initialP = new Array2DRowRealMatrix(new double[][]{
@@ -240,19 +273,6 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 1, 0, 0},
                 {0, 0, 0, 0, 0, 0, 1, 0},
                 {0, 0, 0, 0, 0, 0, 0, 1}
-//                {0.0000994011761326715,	0,	0.0000773837107347111,	0,	0,	0},
-//                {0,	0.0000994011761326715,	0,	0.0000773837107347111,	0,	0},
-//                {0.0000773837107347092,	0,	0.0256904651708843,	0,	0,	0},
-//                {0,	0.0000773837107347092,	0,	0.0256904651708843,	0,	0},
-//                {0,	0,	0,	0,	0.366635772248373,	0.00324969912198902},
-//                {0,	0,	0,	0,	0.00324969912198901,	0.0268459638398375}
-//
-//                {0.0000994011761323349,	0,	0.0000773837106674363,	0,	0,	0},
-//                {0,	0.0000994011761323349,	0,	0.0000773837106674363,	0,	0},
-//                {0.0000773837106674384,	0,	0.0256904651573303,	0,	0,	0},
-//                {0,	0.0000773837106674384,	0,	0.0256904651573303,	0,	0},
-//                {0,	0,	0,	0,	0.366635771024806,	0.00324969354031049},
-//                {0,	0,	0,	0,	0.00324969354031049,	0.0268459383772641},
         });
 
 
@@ -261,6 +281,23 @@ public class KalmanFilterAlgorithm {
         DefaultMeasurementModel measurementModel = new DefaultMeasurementModel(H, R);
         kalmanFilter = new KalmanFilter(processModel, measurementModel);
         log.info("Ended kalman filter initialization");
+    }
+
+    public void setGpsLocalizationWithCalibrationHandler(Coordinate newLocalization) {
+        if(gpsLocalizationCalibration.size() < MIN_GPS_CALIBRATION_COUNT) {
+            gpsLocalizationCalibration.add(newLocalization);
+        } else if(gpsLocalization == null && startWaypointToKalmanAlgorithm == null) {
+            gpsLocalizationCalibration.add(newLocalization);
+            List<Coordinate> closePoints = gpsLocalizationCalibration.stream()
+                    .filter(pointA -> gpsLocalizationCalibration.stream()
+                            .allMatch(pointB -> Utils.calculateDistance(pointA, pointB) <= GPS_CALIBRATION_ACCURACY)
+                    )
+                    .collect(Collectors.toList());
+            startWaypointToKalmanAlgorithm = closePoints.get(closePoints.size() - 1);
+            gpsLocalization = new OwnCoordinate(closePoints.get(closePoints.size() - 1), startWaypointToKalmanAlgorithm);
+        } else {
+            gpsLocalization = new OwnCoordinate(newLocalization, startWaypointToKalmanAlgorithm);
+        }
     }
 
     private double designateCurrentCourse() {
@@ -322,7 +359,7 @@ public class KalmanFilterAlgorithm {
         data.add(new String[]{String.valueOf(accelerationX), String.valueOf(accelerationY), String.valueOf(angularSpeed), String.valueOf(sensorCourse),
                 String.valueOf(gpsCourse), String.valueOf(course), String.valueOf(this.currentCourse),
                 expectedCourse.getText(),
-                String.valueOf(gpsLocalization.getLongitude() + ";" + gpsLocalization.getLatitude()),
+                String.valueOf(gpsLocalization.getX() + ";" + gpsLocalization.getY()),
                 String.valueOf(this.currentLocalization.getLongitude() + ";" + this.currentLocalization.getLatitude()),
                 String.valueOf(this.nextWaypoint == null ? "brak" : this.nextWaypoint.getLongitude() + ";" + this.nextWaypoint.getLatitude()),
                 String.valueOf(this.startWaypoint == null ? "brak" : this.startWaypoint.getLongitude() + ";" + this.startWaypoint.getLatitude())});

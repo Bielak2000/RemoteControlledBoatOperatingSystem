@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class AutonomicControlExecute {
 
-    private final static int JOB_EXECUTE_SCHEDULER_MILLISECONDS = 1000;
+    private final static int JOB_EXECUTE_SCHEDULER_MILLISECONDS = 300;
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     BoatModeController boatModeController;
     Connection connection;
@@ -36,6 +36,9 @@ public class AutonomicControlExecute {
 
     public void start() {
         Runnable task = () -> {
+            try {
+
+
             BoatMode currentBoatMode = boatModeController.getBoatMode();
             if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                 kalmanFilterAlgorithm.getLock().lock();
@@ -63,6 +66,9 @@ public class AutonomicControlExecute {
                 } catch (IOException e) {
                     log.error("Error while designating and sending engines power in kalmanFilterExecuteTask: {}", e.getMessage());
                 }
+            }
+            } catch (Exception ex) {
+                System.out.println("errrrrrrrrr: " + ex.getMessage());
             }
         };
         scheduler.scheduleAtFixedRate(task, 2000, JOB_EXECUTE_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);

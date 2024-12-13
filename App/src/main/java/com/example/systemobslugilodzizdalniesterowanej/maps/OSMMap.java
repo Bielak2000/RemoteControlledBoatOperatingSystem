@@ -119,8 +119,10 @@ public class OSMMap {
         Platform.runLater(() -> {
             mapView.addMarker(newMarker);
             generateTrace();
+            if(!foundBoatPosition) {
+                mapView.setCenter(new Coordinate(latitude, longitude));
+            }
             foundBoatPosition = true;
-            mapView.setCenter(new Coordinate(latitude, longitude));
         });
     }
 

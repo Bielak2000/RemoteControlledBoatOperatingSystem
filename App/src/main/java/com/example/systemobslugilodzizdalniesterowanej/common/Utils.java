@@ -39,7 +39,8 @@ public class Utils {
     }
 
     // Stała oznaczająca promień Ziemi w kilometrach
-    private static final double EARTH_RADIUS = 6371.0;
+    private static final double EARTH_RADIUS_KM = 6371.0;
+    public static final double EARTH_RADIUS_M = 6371000;
 
     /**
      * Metoda do obliczania odległości między dwoma współrzędnymi geograficznymi w metrach
@@ -66,7 +67,7 @@ public class Utils {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         // Obliczenie odległości
-        return EARTH_RADIUS * c * 1000;
+        return EARTH_RADIUS_KM * c * 1000;
     }
 
     public static double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {
