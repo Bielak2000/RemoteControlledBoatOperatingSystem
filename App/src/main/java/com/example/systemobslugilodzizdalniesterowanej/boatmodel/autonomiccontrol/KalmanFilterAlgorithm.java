@@ -157,7 +157,7 @@ public class KalmanFilterAlgorithm {
         });
 
         //        // NAJLEPSZE
-                // NIEPEWNOSCI MODELU
+                // NIEPEWNOSCI MODELU, sprobowac zmienic azymut na 2, predkosc katowa na 5
         RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
                 {0.001, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0.001, 0, 0, 0, 0, 0, 0},
@@ -169,7 +169,7 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 0, 0, 0.5}
         });
 
-        // NIEPEWNOSCI POMIAROWE
+        // NIEPEWNOSCI POMIAROWE, sprobowac zmienic azymut na 1, predkosc katowa na 2.5
         RealMatrix R = new Array2DRowRealMatrix(new double[][]{
                 {0.01, 0, 0, 0, 0, 0}, // x
                 {0, 0.01, 0, 0, 0, 0}, // y
