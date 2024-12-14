@@ -16,8 +16,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class AutonomicControlExecute {
 
-    private final static int JOB_EXECUTE_SCHEDULER_MILLISECONDS = 300;
-    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final static int KALMAN_JOB_EXECUTE_SCHEDULER_MILLISECONDS = 300;
+    private final static int AUTONOMIC_CONTROL_JOB_EXECUTE_SCHEDULER_MILLISECONDS = 2000;
+    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     BoatModeController boatModeController;
     Connection connection;
     KalmanFilterAlgorithm kalmanFilterAlgorithm;
@@ -35,10 +36,7 @@ public class AutonomicControlExecute {
     }
 
     public void start() {
-        Runnable task = () -> {
-            try {
-
-
+        Runnable kalmanTask = () -> {
             BoatMode currentBoatMode = boatModeController.getBoatMode();
             if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                 kalmanFilterAlgorithm.getLock().lock();
@@ -57,7 +55,10 @@ public class AutonomicControlExecute {
                 }
                 kalmanFilterAlgorithm.getLock().unlock();
             }
+        };
 
+        Runnable autonomicControlTask = () -> {
+            BoatMode currentBoatMode = boatModeController.getBoatMode();
             if (currentBoatMode == BoatMode.AUTONOMIC_RUNNING) {
                 try {
                     connection.getSendingValuesLock().lock();
@@ -67,11 +68,10 @@ public class AutonomicControlExecute {
                     log.error("Error while designating and sending engines power in kalmanFilterExecuteTask: {}", e.getMessage());
                 }
             }
-            } catch (Exception ex) {
-                System.out.println("errrrrrrrrr: " + ex.getMessage());
-            }
         };
-        scheduler.scheduleAtFixedRate(task, 2000, JOB_EXECUTE_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);
+
+        scheduler.scheduleAtFixedRate(kalmanTask, 2000, KALMAN_JOB_EXECUTE_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);
+        scheduler.scheduleAtFixedRate(autonomicControlTask, 5000, AUTONOMIC_CONTROL_JOB_EXECUTE_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);
     }
 
 }
