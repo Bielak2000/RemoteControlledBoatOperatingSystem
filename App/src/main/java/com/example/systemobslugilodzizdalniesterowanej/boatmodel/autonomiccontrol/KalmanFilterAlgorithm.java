@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class KalmanFilterAlgorithm {
 
     private static double GPS_COURSE_MAX_ACCURACY_DIFF = 30;
-    private static int MIN_GPS_CALIBRATION_COUNT = 0;
+    private static int MIN_GPS_CALIBRATION_COUNT = 3;
     private static int GPS_CALIBRATION_ACCURACY = 10;
 
     private KalmanFilter kalmanFilter;
@@ -116,7 +116,7 @@ public class KalmanFilterAlgorithm {
     public void initializeKalmanFilter() {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Przyspieszenie x", "Przyspieszenie y", "Predkosc katowa", "Kurs z sensora", "Kurs z GPS", "Kurs usredniony", "Kurs z kalmana", "Kurs oczekiwany", "GPS wspol.", "Kalman wspol.", "Punkt docelowy", "Punkt startowy"});
+            data.add(new String[]{"Przyspieszenie x", "Przyspieszenie y", "Predkosc katowa", "Kurs z sensora", "Kurs z GPS", "Kurs usredniony", "Kurs z kalmana", "Kurs oczekiwany", "GPS wspol. (x,y)", "Kalman wspol.", "Punkt docelowy", "Punkt startowy"});
             Utils.saveToCsv(data, "kalman-" + now.format(Utils.formatter) + ".csv");
         } catch (IOException ex) {
             log.error("Error while initialize csv files: {}", ex);
