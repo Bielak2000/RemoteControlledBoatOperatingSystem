@@ -9,7 +9,7 @@
 // ********************************************************************************
 
 #define EARTH_RADIUS 6371.0
-#define MINIMAL_DIFFERENCE_LOCALIZATION 100
+#define MINIMAL_DIFFERENCE_LOCALIZATION 10
 #define INTERVAL_SEND_DATA 300
 #define INTERVAL_ENGINE_POWER 50
 #define INTERVAL_LIGHTING_POWER 500
