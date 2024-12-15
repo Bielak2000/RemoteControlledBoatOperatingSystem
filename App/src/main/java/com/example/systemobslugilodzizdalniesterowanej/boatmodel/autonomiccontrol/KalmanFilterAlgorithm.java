@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 public class KalmanFilterAlgorithm {
 
     private static double GPS_COURSE_MAX_ACCURACY_DIFF = 30;
-    private static int MIN_GPS_CALIBRATION_COUNT = 3;
-    private static int GPS_CALIBRATION_ACCURACY = 10;
+    private static int MIN_GPS_CALIBRATION_COUNT = 1;
+    private static int GPS_CALIBRATION_ACCURACY = 50;
 
     private KalmanFilter kalmanFilter;
     private Label expectedCourse;
@@ -156,8 +156,29 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 0, 0, 1} // ay
         });
 
+//        // CHYBA NAJLEPSZE OPCJA ZE WSZYKITHC DLA KURSU JAK I GPS
+//        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
+//                {0.001, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0.001, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0.05, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0.05, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0.05, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0.05, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 1, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0.1}
+//        });
+//
+//        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
+//                {0.01, 0, 0, 0, 0, 0}, // x
+//                {0, 0.01, 0, 0, 0, 0}, // y
+//                {0, 0, 0.1, 0, 0, 0}, // ax
+//                {0, 0, 0, 0.1, 0, 0}, // ay
+//                {0, 0, 0, 0, 0.1, 0}, // azymut
+//                {0, 0, 0, 0, 0, 0.01}  // predkosc katowe
+//        });
+
         //        // NAJLEPSZE
-                // NIEPEWNOSCI MODELU, sprobowac zmienic azymut na 2, predkosc katowa na 5 lub 2, reszte na 30cm czyli 0.003
+        // NIEPEWNOSCI MODELU, sprobowac zmienic azymut na 2, predkosc katowa na 5 lub 2, reszte na 30cm czyli 0.003
         RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
                 {0.001, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0.001, 0, 0, 0, 0, 0, 0},
@@ -179,7 +200,51 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
         });
 
+        // najlepszy dla kursu chyba
+//        //        // NIEPEWNOSCI MODELU, sprobowac zmienic azymut na 2, predkosc katowa na 5 lub 2, reszte na 30cm czyli 0.003
+//        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
+//                {0.002, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0.002, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0.05, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0.05, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0.05, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0.05, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 1, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0.1}
+//        });
+//
+//        // NIEPEWNOSCI POMIAROWE, sprobowac zmienic azymut na 1, predkosc katowa na 2.5 lub 1, reszte na 30cm czyli 0.03 ale to pozniej, peirwsze azymut i katowa
+//        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
+//                {0.02, 0, 0, 0, 0, 0}, // x
+//                {0, 0.02, 0, 0, 0, 0}, // y
+//                {0, 0, 0.1, 0, 0, 0}, // ax
+//                {0, 0, 0, 0.1, 0, 0}, // ay
+//                {0, 0, 0, 0, 0.1, 0}, // azymut
+//                {0, 0, 0, 0, 0, 0.01}  // predkosc katowe
+//        });
 
+        //        // NAJLEPSZE dla gps
+        // NIEPEWNOSCI MODELU, sprobowac zmienic azymut na 2, predkosc katowa na 5 lub 2, reszte na 30cm czyli 0.003
+//        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
+//                {0.002, 0, 0, 0, 0, 0, 0, 0},
+//                {0, 0.002, 0, 0, 0, 0, 0, 0},
+//                {0, 0, 0.05, 0, 0, 0, 0, 0},
+//                {0, 0, 0, 0.05, 0, 0, 0, 0},
+//                {0, 0, 0, 0, 0.05, 0, 0, 0},
+//                {0, 0, 0, 0, 0, 0.05, 0, 0},
+//                {0, 0, 0, 0, 0, 0, 1, 0},
+//                {0, 0, 0, 0, 0, 0, 0, 0.5}
+//        });
+//
+//        // NIEPEWNOSCI POMIAROWE, sprobowac zmienic azymut na 1, predkosc katowa na 2.5 lub 1, reszte na 30cm czyli 0.03 ale to pozniej, peirwsze azymut i katowa
+//        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
+//                {0.02, 0, 0, 0, 0, 0}, // x
+//                {0, 0.02, 0, 0, 0, 0}, // y
+//                {0, 0, 0.1, 0, 0, 0}, // ax
+//                {0, 0, 0, 0.1, 0, 0}, // ay
+//                {0, 0, 0, 0, 0.5, 0}, // azymut
+//                {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
+//        });
 
 //        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
 //                {0.1, 0, 0, 0, 0, 0, 0, 0},
@@ -266,7 +331,7 @@ public class KalmanFilterAlgorithm {
 //                {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
 //        });
 
-        // v3
+//        // v3
 //        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
 //                {0.001, 0, 0, 0, 0, 0, 0, 0},
 //                {0, 0.001, 0, 0, 0, 0, 0, 0},

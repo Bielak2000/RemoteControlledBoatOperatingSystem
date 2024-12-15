@@ -17,8 +17,9 @@ public class OwnCoordinate {
         double distance = Utils.calculateDistance(startPoint, coordinate);
         double angle = Utils.determineCourseBetweenTwoWaypoints(startPoint, coordinate);
         double transformAngle = (450.0 - angle) % 360.0;
-        this.x = distance * Math.cos(transformAngle);
-        this.y = distance * Math.sin(transformAngle);
+        double transformAngleRadians = Math.toRadians(transformAngle);
+        this.x = distance * Math.cos(transformAngleRadians);
+        this.y = distance * Math.sin(transformAngleRadians);
     }
 
     public Coordinate transformCoordinateToGlobalCoordinateSystem(Coordinate startPoint) {

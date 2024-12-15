@@ -172,7 +172,7 @@ public class OSMMap {
         currentBoatPositionWhileRunningList.add(currentBoatPositionWhileRunning);
         Platform.runLater(() -> {
             mapView.addMarker(currentBoatPositionWhileRunning);
-            mapView.setCenter(new Coordinate(latitude, longitude));
+//            mapView.setCenter(new Coordinate(latitude, longitude));
         });
     }
 
