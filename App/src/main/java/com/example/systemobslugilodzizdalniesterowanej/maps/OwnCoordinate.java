@@ -26,10 +26,10 @@ public class OwnCoordinate {
         // Konwersja szerokości geograficznej z stopni na radiany
         double lat1Rad = Math.toRadians(startPoint.getLatitude());
         // Przesunięcie szerokości geograficznej
-        double deltaLat = this.y / Utils.EARTH_RADIUS_M;
+        double deltaLat = this.x / Utils.EARTH_RADIUS_M;
         double lat2 = startPoint.getLatitude() + Math.toDegrees(deltaLat);
         // Przesunięcie długości geograficznej
-        double deltaLon = this.x / (Utils.EARTH_RADIUS_M * Math.cos(lat1Rad));
+        double deltaLon = this.y / (Utils.EARTH_RADIUS_M * Math.cos(lat1Rad));
         double lon2 = startPoint.getLongitude() + Math.toDegrees(deltaLon);
         return new Coordinate(lat2, lon2);
     }
