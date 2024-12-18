@@ -221,6 +221,7 @@ public class KalmanFilterAlgorithm {
 //                {0, 0, 0, 0, 0, 2}  // predkosc katowe
 //        });
 
+        // NAJLEPSZE OPCJE
                 RealMatrix Q4 = new Array2DRowRealMatrix(new double[][]{
                 {0.01, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0.01, 0, 0, 0, 0, 0, 0},
