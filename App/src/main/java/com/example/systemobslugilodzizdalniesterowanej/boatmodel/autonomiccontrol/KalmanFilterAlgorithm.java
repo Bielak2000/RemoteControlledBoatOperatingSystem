@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class KalmanFilterAlgorithm {
 
     private static double GPS_COURSE_MAX_ACCURACY_DIFF = 30;
-    private static int MIN_GPS_CALIBRATION_COUNT = 1;
+    private static int MIN_GPS_CALIBRATION_COUNT = 5;
     private static int GPS_CALIBRATION_ACCURACY = 50;
 
     private KalmanFilter kalmanFilter;
