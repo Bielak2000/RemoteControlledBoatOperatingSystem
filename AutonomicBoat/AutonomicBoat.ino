@@ -9,7 +9,8 @@
 // ********************************************************************************
 
 #define EARTH_RADIUS 6371.0
-#define MINIMAL_DIFFERENCE_LOCALIZATION 100
+// 30 cm dla 0.01, 100cm dla 0.1
+#define MINIMAL_DIFFERENCE_LOCALIZATION 30
 #define INTERVAL_SEND_DATA 300
 #define INTERVAL_ENGINE_POWER 50
 #define INTERVAL_LIGHTING_POWER 500
@@ -32,8 +33,9 @@
 #define RIGHT_FLAP 9
 #define LIGHTING 8
 
-#define GPS_COURSE_ACCURACY 3
-#define COMPASS_COURSE_ACCURACY 3
+// sprawdzic to czy 1 czy 0.5
+double GPS_COURSE_ACCURACY = 1.0;
+double COMPASS_COURSE_ACCURACY = 1.0;
 
 double linearAccelarationAccuracy = 0.09;
 double angularSpeedAccuarcy = 0.09;

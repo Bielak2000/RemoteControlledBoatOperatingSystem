@@ -39,7 +39,8 @@ public class Utils {
     }
 
     // Stała oznaczająca promień Ziemi w kilometrach
-    private static final double EARTH_RADIUS = 6371.0;
+    private static final double EARTH_RADIUS_KM = 6371.0;
+    public static final double EARTH_RADIUS_M = 6371000;
 
     /**
      * Metoda do obliczania odległości między dwoma współrzędnymi geograficznymi w metrach
@@ -66,7 +67,7 @@ public class Utils {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         // Obliczenie odległości
-        return EARTH_RADIUS * c * 1000;
+        return EARTH_RADIUS_KM * c * 1000;
     }
 
     public static double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {
@@ -81,18 +82,20 @@ public class Utils {
     public static void saveInitValToCsvForNotBasicAndKalmanAlgorithm(String fileName) {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Kurs", "Kurs oczekiwany", "GPS wspol."});
+            data.add(new String[]{"Kurs", "Kurs oczekiwany", "GPS wspol.", "Punkt docelowy", "Punkt startowy"});
             Utils.saveToCsv(data, fileName + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
         }
     }
 
-    public static void saveDesignatedValueToCSVFile(String fileName, Coordinate currentLocalization, Double course, String expectedCourse) {
+    public static void saveDesignatedValueToCSVFile(String fileName, Coordinate currentLocalization, Double course, String expectedCourse, Coordinate nextWaypoint, Coordinate startWaypoint) {
         try {
             List<String[]> data = new ArrayList<>();
             data.add(new String[]{String.valueOf(course), expectedCourse,
-                    String.valueOf(currentLocalization == null ? "null" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude()))});
+                    String.valueOf(currentLocalization == null ? "brak" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude())),
+                    String.valueOf(nextWaypoint == null ? "brak" : (nextWaypoint.getLongitude() + ";" + nextWaypoint.getLatitude())),
+                    String.valueOf(startWaypoint == null ? "brak" : (startWaypoint.getLongitude() + ";" + startWaypoint.getLatitude()))});
             Utils.saveToCsv(data, fileName + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);

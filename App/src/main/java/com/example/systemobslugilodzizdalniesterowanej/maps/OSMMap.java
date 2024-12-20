@@ -42,6 +42,8 @@ public class OSMMap {
     @Getter
     @Setter
     private Double currentCourse = null;
+    @Setter
+    private Coordinate startWaypoint = null;
 
     /**
      * GREEN TAG - waypoint determined by user
@@ -85,10 +87,10 @@ public class OSMMap {
 
     public void generateTrace() {
         if (markerList.size() > 1) {
-            if(boatModeController.getBoatMode() != BoatMode.AUTONOMIC_RUNNING && !coordinateLines.isEmpty()) {
+            if (boatModeController.getBoatMode() != BoatMode.AUTONOMIC_RUNNING && !coordinateLines.isEmpty()) {
                 CoordinateLine coordinateLineToRemove = coordinateLines.get(0);
                 coordinateLines.remove(0);
-                Platform.runLater(()->{
+                Platform.runLater(() -> {
                     mapView.removeCoordinateLine(coordinateLineToRemove);
                 });
             }
@@ -117,8 +119,10 @@ public class OSMMap {
         Platform.runLater(() -> {
             mapView.addMarker(newMarker);
             generateTrace();
+            if(!foundBoatPosition) {
+                mapView.setCenter(new Coordinate(latitude, longitude));
+            }
             foundBoatPosition = true;
-            mapView.setCenter(new Coordinate(latitude, longitude));
         });
     }
 
@@ -168,7 +172,7 @@ public class OSMMap {
         currentBoatPositionWhileRunningList.add(currentBoatPositionWhileRunning);
         Platform.runLater(() -> {
             mapView.addMarker(currentBoatPositionWhileRunning);
-            mapView.setCenter(new Coordinate(latitude, longitude));
+//            mapView.setCenter(new Coordinate(latitude, longitude));
         });
     }
 
@@ -203,10 +207,19 @@ public class OSMMap {
     }
 
     public Coordinate getCurrentBoatPosition() {
-        if(markerList.size() > 0) {
+        if (currentBoatPositionWhileRunning != null && boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING) {
+            return currentBoatPositionWhileRunning.getPosition();
+        }
+        if (markerList.size() > 0) {
             return markerList.get(0).getPosition();
         } else {
             return null;
         }
+    }
+
+    public Coordinate getStartWaypoint() {
+        if (startWaypoint != null) return startWaypoint;
+        else if (markerList.size() > 0) return markerList.get(0).getPosition();
+        else return null;
     }
 }
