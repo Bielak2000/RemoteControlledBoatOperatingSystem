@@ -159,26 +159,6 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
         });
 
-        RealMatrix Q5 = new Array2DRowRealMatrix(new double[][]{
-                {0.0002, 0, 0, 0, 0, 0, 0, 0},
-                {0, 0.0002, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0.0001, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0.0001, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0.0001, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0.0001, 0, 0},
-                {0, 0, 0, 0, 0, 0, 1, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0.5}
-        });
-
-        RealMatrix R5 = new Array2DRowRealMatrix(new double[][]{
-                {0.01, 0, 0, 0, 0, 0}, // x
-                {0, 0.01, 0, 0, 0, 0}, // y
-                {0, 0, 0.02, 0, 0, 0}, // ax
-                {0, 0, 0, 0.02, 0, 0}, // ay
-                {0, 0, 0, 0, 0.5, 0}, // azymut
-                {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
-        });
-
         RealMatrix Q6 = new Array2DRowRealMatrix(new double[][]{
                 {0.0001, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0.0001, 0, 0, 0, 0, 0, 0},

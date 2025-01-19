@@ -96,6 +96,7 @@ public class Connection {
     private LocalDateTime now = LocalDateTime.now();
     private String fileName;
     private Label expectedCourse;
+    private String gpsCoordsForTestingFileName;
 
     public Connection(Engines engines, Lighting lighting, Flaps flaps, Label connectionStatus, Label lightPower, Boolean networkStatus, OSMMap osmMap,
                       Stage stage, BoatModeController boatModeController, AutonomicController autonomicController,
@@ -402,6 +403,9 @@ public class Connection {
             Platform.runLater(() -> {
                 if (!localization[0].startsWith("INV") && !localization[0].equals("") && !localization[0].isEmpty()) {
                     BoatMode currentBoatMode = boatModeController.getBoatMode();
+
+                    Utils.saveGpsCoordsToCSVFileForTesting(gpsCoordsForTestingFileName, new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])));
+
                     if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                         kalmanFilterAlgorithm.getLock().lock();
                         kalmanFilterAlgorithm.setGpsLocalizationWithCalibrationHandler(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])));
@@ -480,6 +484,8 @@ public class Connection {
     }
 
     private void initCSV() {
+        this.gpsCoordsForTestingFileName = "gps-coords-for-testing-" + now.format(Utils.formatter) + ".csv";
+        Utils.saveInitValToCsvForGpsCoordsForTesting(gpsCoordsForTestingFileName);
         if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
             basicCourseAndGpsAlgorithm.saveInitValToCsv();
         } else if (chosenAlgorithm == PositionAlgorithm.GPS_AND_SENSOR) {

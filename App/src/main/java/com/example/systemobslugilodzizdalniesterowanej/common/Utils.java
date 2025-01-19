@@ -102,4 +102,27 @@ public class Utils {
         }
     }
 
+    public static void saveInitValToCsvForGpsCoordsForTesting(String fileName) {
+        try {
+            List<String[]> data = new ArrayList<>();
+            data.add(new String[]{"Dl. geograficzna (longitude)", "Sz. geograficzna (latitude)"});
+            Utils.saveToCsv(data, fileName);
+        } catch (IOException ex) {
+            log.error("Error while initalize csv file: {}", ex);
+        }
+    }
+
+    public static void saveGpsCoordsToCSVFileForTesting(String fileName, Coordinate currentLocalization) {
+        try {
+            List<String[]> data = new ArrayList<>();
+            data.add(new String[]{currentLocalization == null ? "brak" :
+                    String.valueOf(currentLocalization.getLongitude()),
+                    String.valueOf(currentLocalization.getLatitude())
+            });
+            Utils.saveToCsv(data, fileName);
+        } catch (IOException ex) {
+            log.error("Error while initalize csv file: {}", ex);
+        }
+    }
+
 }
