@@ -314,7 +314,7 @@ public class Connection {
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
                     basicCourseAndGpsAlgorithm.setGpsCourseIfCorrectData(Double.parseDouble(array[1]));
                     Double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
-                    basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(osmMap.getCurrentBoatPosition(), designatedCourseFromBasicAlgorithm, osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
+                    basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(designatedCourseFromBasicAlgorithm, osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
                     if (designatedCourseFromBasicAlgorithm != null) {
                         Platform.runLater(() -> {
                             designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
@@ -345,7 +345,7 @@ public class Connection {
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
                     basicCourseAndGpsAlgorithm.setSensorCourseIfCorrectData(Double.parseDouble(array[1]));
                     Double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
-                    basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(osmMap.getCurrentBoatPosition(), designatedCourseFromBasicAlgorithm, osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
+                    basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(designatedCourseFromBasicAlgorithm, osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
                     if (designatedCourseFromBasicAlgorithm != null) {
                         Platform.runLater(() -> {
                             designatedCourse.setText(String.format("%.2f", designatedCourseFromBasicAlgorithm));
@@ -390,6 +390,8 @@ public class Connection {
         }
     }
 
+    // TODO: zrefaktoryzować funckje
+
     /**
      * Funkcja nakladajaca lokalizacje lodki na mape po poprwanym odczycie
      * Jesli lodz jest w trybie autonomicznym to nadpisuje lokalizacje lodki jakie uzyskuje
@@ -408,12 +410,22 @@ public class Connection {
                         kalmanFilterAlgorithm.getLock().unlock();
                     } else {
                         if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {
-                            osmMap.generateTraceFromBoatPosition(Double.parseDouble(localization[0]), Double.parseDouble(localization[1]));
+                            if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
+                                basicCourseAndGpsAlgorithm.setDesignatedPosition(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])));
+                                osmMap.generateTraceFromBoatPosition(basicCourseAndGpsAlgorithm.getDesignatedPosition().getLatitude(), basicCourseAndGpsAlgorithm.getDesignatedPosition().getLongitude());
+                            } else {
+                                osmMap.generateTraceFromBoatPosition(Double.parseDouble(localization[0]), Double.parseDouble(localization[1]));
+                            }
                         } else {
-                            osmMap.setCurrentBoatPositionWhileRunning(Double.parseDouble(localization[0]), Double.parseDouble(localization[1]));
+                            if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
+                                basicCourseAndGpsAlgorithm.setDesignatedPosition(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])));
+                                osmMap.setCurrentBoatPositionWhileRunning(basicCourseAndGpsAlgorithm.getDesignatedPosition().getLatitude(), basicCourseAndGpsAlgorithm.getDesignatedPosition().getLongitude());
+                            } else {
+                                osmMap.setCurrentBoatPositionWhileRunning(Double.parseDouble(localization[0]), Double.parseDouble(localization[1]));
+                            }
                         }
                         if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
-                            basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), null, osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
+                            basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(null, osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
                         } else {
                             Utils.saveDesignatedValueToCSVFile(fileName, new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1])), osmMap.getCurrentCourse(), expectedCourse.getText(), osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
                         }
