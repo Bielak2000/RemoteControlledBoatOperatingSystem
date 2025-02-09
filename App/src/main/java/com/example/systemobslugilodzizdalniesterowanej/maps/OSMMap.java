@@ -45,8 +45,8 @@ public class OSMMap {
     private Double currentCourse = null;
     @Setter
     private Coordinate startWaypoint = null;
-//    public Coordinate
 
+    // TODO: ustawic odpowiednie coordianty po zebraniu wynikow
     @Getter
     private Coordinate startTestingCoordinate = new Coordinate(50.0650887, 19.9245136);
     private List<Coordinate> testingCoordinates = new ArrayList<>() {

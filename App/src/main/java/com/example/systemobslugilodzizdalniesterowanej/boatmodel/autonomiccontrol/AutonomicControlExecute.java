@@ -40,7 +40,7 @@ public class AutonomicControlExecute {
         this.positionAlgorithm = positionAlgorithm;
 
         testingCsvFileName = "last-testing-" + now.format(Utils.formatter);
-        Utils.saveInitDesignatedValueToCSVFile(testingCsvFileName);
+        Utils.saveInitDesignatedValueToCSVFileWhileTesting(testingCsvFileName);
     }
 
     public void start() {

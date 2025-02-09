@@ -103,7 +103,7 @@ public class Utils {
         }
     }
 
-    public static void saveInitDesignatedValueToCSVFile(String fileName) {
+    public static void saveInitDesignatedValueToCSVFileWhileTesting(String fileName) {
         try {
             List<String[]> data = new ArrayList<>();
             data.add(new String[]{"Pkt. startowy", "Pkt. docelowy", "Pkt. aktualny", "Błąd [m]", "Kurs oczekiwany", "Kurs aktualny"});

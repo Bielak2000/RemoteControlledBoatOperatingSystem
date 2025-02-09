@@ -220,8 +220,8 @@ public class SystemController implements Initializable {
     @FXML
     void changeMode(ActionEvent event) throws IOException {
         if (modeChooser.isSelected()) {
-//            if (osmMap.getFoundBoatPosition()) {
-            if (true) {
+            if (osmMap.getFoundBoatPosition()) {
+//            if (true) {
                 keyboardHandler.stopBoat();
                 executorService.execute(new Runnable() {
                     @Override
