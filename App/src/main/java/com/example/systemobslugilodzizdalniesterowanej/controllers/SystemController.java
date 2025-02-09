@@ -80,7 +80,8 @@ public class SystemController implements Initializable {
             throw new RuntimeException(e);
         }
         if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
-            this.kalmanFilterAlgorithm = new KalmanFilterAlgorithm(expectedCourse);
+//            this.kalmanFilterAlgorithm = new KalmanFilterAlgorithm(expectedCourse);
+            this.kalmanFilterAlgorithm = new KalmanFilterAlgorithm(expectedCourse, osmMap.getStartTestingCoordinate());
             this.kalmanFilterAlgorithm.initializeKalmanFilter();
         }
         this.autonomicController = new AutonomicController(osmMap);
@@ -219,8 +220,8 @@ public class SystemController implements Initializable {
     @FXML
     void changeMode(ActionEvent event) throws IOException {
         if (modeChooser.isSelected()) {
-            if (osmMap.getFoundBoatPosition()) {
-//            if (true) {
+//            if (osmMap.getFoundBoatPosition()) {
+            if (true) {
                 keyboardHandler.stopBoat();
                 executorService.execute(new Runnable() {
                     @Override

@@ -1,5 +1,6 @@
 package com.example.systemobslugilodzizdalniesterowanej.common;
 
+import com.example.systemobslugilodzizdalniesterowanej.maps.OwnCoordinate;
 import com.sothawo.mapjfx.Coordinate;
 import lombok.extern.slf4j.Slf4j;
 
@@ -100,6 +101,47 @@ public class Utils {
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
         }
+    }
+
+    public static void saveInitDesignatedValueToCSVFile(String fileName) {
+        try {
+            List<String[]> data = new ArrayList<>();
+            data.add(new String[]{"Pkt. startowy", "Pkt. docelowy", "Pkt. aktualny", "Błąd [m]", "Kurs oczekiwany", "Kurs aktualny"});
+            Utils.saveToCsv(data, fileName + ".csv");
+        } catch (IOException ex) {
+            log.error("Error while initalize csv file: {}", ex);
+        }
+    }
+
+    public static void saveDesignatedValueToCSVFileWhileTesting(OwnCoordinate startPoint, OwnCoordinate destinationPoint, OwnCoordinate currentPoint,
+                                                                String expectedCourse, String currentCourse, String fileName) throws IOException {
+        Double distance = distanceFromLine(startPoint, destinationPoint, currentPoint);
+        ;
+        List<String[]> data = new ArrayList<>();
+        data.add(new String[]{
+                String.valueOf(startPoint == null ? "brak" : startPoint.getX() + ";" + startPoint.getY()),
+                String.valueOf(destinationPoint == null ? "brak" : destinationPoint.getX() + ";" + destinationPoint.getY()),
+                String.valueOf(currentPoint == null ? "brak" : currentPoint.getX() + ";" + currentPoint.getY()),
+                String.valueOf(distance == null ? "brak" : String.format("%.2f", distance)),
+                String.valueOf(expectedCourse == null ? "brak" : expectedCourse),
+                String.valueOf(currentCourse == null ? "brak" : currentCourse)
+        });
+        Utils.saveToCsv(data, fileName + ".csv");
+    }
+
+    /**
+     * @param startPoint
+     * @param destinationPoint
+     * @param currentPoint
+     * @return odleglosc w metrach
+     */
+    private static Double distanceFromLine(OwnCoordinate startPoint, OwnCoordinate destinationPoint, OwnCoordinate currentPoint) {
+        if (startPoint != null && destinationPoint != null && currentPoint != null) {
+            double A = destinationPoint.getY() - startPoint.getY();
+            double B = startPoint.getX() - destinationPoint.getX();
+            double C = destinationPoint.getX() * startPoint.getY() - startPoint.getX() * destinationPoint.getY();
+            return Math.abs(A * currentPoint.getX() + B * currentPoint.getY() + C) / Math.sqrt(A * A + B * B);
+        } else return null;
     }
 
 }

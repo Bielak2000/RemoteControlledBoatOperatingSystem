@@ -14,7 +14,7 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.calcu
 @Slf4j
 public class AutonomicController {
 
-    private static int DISTANCE_ACCURACY_METERS = 2;
+    private static int DISTANCE_ACCURACY_METERS = 1;
     private static double MIN_DISTANCE_FOR_LINEAR_SPEED_METERS = 1.5;
     private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 20.0;
     private static double MIN_LINEAR_SPEED_PERCENTAGE = 10.0;
@@ -51,9 +51,12 @@ public class AutonomicController {
     }
 
     public LinearAndAngularSpeed designateEnginesPower() {
-        if(osmMap.getNextWaypointOnTheRoad() == null) {
+        if (osmMap.getNextWaypointOnTheRoad() == null) {
             osmMap.setNextWaypointOnTheRoad(osmMap.getDesignatedWaypoints().get(osmMap.getWaypointIndex()).getPosition());
-            osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());
+// TODO: tylko do testow, zamiast brac pozycje lodzi to bieremy pierwszy punkt z listy
+            //            osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());
+            osmMap.setStartWaypoint(osmMap.getStartTestingCoordinate());
+
         }
         double distance = calculateDistance(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
         log.info("Distance to next waypoint: {}", distance);
@@ -63,7 +66,9 @@ public class AutonomicController {
             List<Marker> markerList = osmMap.getDesignatedWaypoints();
             if (osmMap.getWaypointIndex() < markerList.size()) {
                 osmMap.setNextWaypointOnTheRoad(markerList.get(osmMap.getWaypointIndex()).getPosition());
-                osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());
+                // TODO: tylko do testow, zamiast brac pozycje lodzi to bieremy pierwszy punkt z listy
+//                osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());
+                osmMap.setStartWaypoint(markerList.get(osmMap.getWaypointIndex() - 1).getPosition());
                 return determinateLinearAndAngularSpeed(distance);
             } else {
                 osmMap.setStartWaypoint(null);
@@ -116,7 +121,7 @@ public class AutonomicController {
     private double getAngularSpeed(double expectedCourse, double currentCourse) {
         double courseDifference = expectedCourse - currentCourse;
         double angularSpeed = (courseDifference / 360.0) * 80;
-        if(Math.abs(courseDifference) < 180 ) {
+        if (Math.abs(courseDifference) < 180) {
             angularSpeed = -1 * angularSpeed;
         }
         return angularSpeed;

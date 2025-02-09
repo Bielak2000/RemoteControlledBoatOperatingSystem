@@ -38,12 +38,26 @@ public class OSMMap {
     @Setter
     @Getter
     private Coordinate nextWaypointOnTheRoad = null;
+    @Getter
     Label expectedCourse;
     @Getter
     @Setter
     private Double currentCourse = null;
     @Setter
     private Coordinate startWaypoint = null;
+//    public Coordinate
+
+    @Getter
+    private Coordinate startTestingCoordinate = new Coordinate(50.0650887, 19.9245136);
+    private List<Coordinate> testingCoordinates = new ArrayList<>() {
+        {
+            add(new Coordinate(50.0650887, 19.9245136));
+            add(new Coordinate(50.0650887, 19.9244236));
+            add(new Coordinate(50.0650887, 19.9243336));
+            add(new Coordinate(50.0650887, 19.9242436));
+            add(new Coordinate(50.0650887, 19.9241536));
+        }
+    };
 
     /**
      * GREEN TAG - waypoint determined by user
@@ -73,10 +87,12 @@ public class OSMMap {
         mapView.addEventHandler(MapViewEvent.MAP_RIGHTCLICKED, event -> {
             if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC) {
                 event.consume();
-                Marker newMarker = Marker.createProvided(Marker.Provided.GREEN).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true);
-                markerList.add(newMarker);
-                mapView.addMarker(newMarker);
-                generateTrace();
+                testingCoordinates.forEach(coordinate -> {
+                    Marker newMarker = Marker.createProvided(Marker.Provided.GREEN).setPosition(coordinate).setVisible(true);
+                    markerList.add(newMarker);
+                    mapView.addMarker(newMarker);
+                    generateTrace();
+                });
             }
         });
     }
@@ -119,7 +135,7 @@ public class OSMMap {
         Platform.runLater(() -> {
             mapView.addMarker(newMarker);
             generateTrace();
-            if(!foundBoatPosition) {
+            if (!foundBoatPosition) {
                 mapView.setCenter(new Coordinate(latitude, longitude));
             }
             foundBoatPosition = true;

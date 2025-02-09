@@ -31,6 +31,7 @@ public class KalmanFilterAlgorithm {
     private static int GPS_CALIBRATION_ACCURACY = 50;
 
     private KalmanFilter kalmanFilter;
+    @Getter
     private Label expectedCourse;
 
     private boolean foundGpsCourse = false;
@@ -39,10 +40,12 @@ public class KalmanFilterAlgorithm {
 
     private List<Coordinate> gpsLocalizationCalibration = new ArrayList<>();
     private OwnCoordinate gpsLocalization = null;
+    @Getter
     private Coordinate startWaypointToKalmanAlgorithm = null;
 
     @Getter
     private Coordinate nextWaypoint = null;
+    @Getter
     private Coordinate startWaypoint = null;
     private double accelerationX = 0.0;
     private double accelerationY = 0.0;
@@ -54,6 +57,7 @@ public class KalmanFilterAlgorithm {
     private double oldAccelerationY = -100.0;
     private double oldAngularSpeed = -100.0;
     private LocalDateTime now = LocalDateTime.now();
+    public OwnCoordinate estimatedCoordinate = null;
 
     @Getter
     private Double currentCourse = null;
@@ -65,6 +69,12 @@ public class KalmanFilterAlgorithm {
 
     public KalmanFilterAlgorithm(Label expectedCourse) {
         this.expectedCourse = expectedCourse;
+    }
+
+    public KalmanFilterAlgorithm(Label expectedCourse, Coordinate startCoordForTesting) {
+        this.expectedCourse = expectedCourse;
+        this.gpsLocalization = new OwnCoordinate(0, 0);
+        this.startWaypointToKalmanAlgorithm = startCoordForTesting;
     }
 
     public boolean designateCurrentCourseAndLocalization() {
@@ -89,7 +99,7 @@ public class KalmanFilterAlgorithm {
             showCovarianceMatrix(kalmanFilter.getErrorCovarianceMatrix());
             double[] estimatedData = kalmanFilter.getStateEstimation();
             this.currentCourse = estimatedData[6];
-            OwnCoordinate estimatedCoordinate = new OwnCoordinate(estimatedData[1], estimatedData[0]);
+            this.estimatedCoordinate = new OwnCoordinate(estimatedData[1], estimatedData[0]);
             this.currentLocalization = estimatedCoordinate.transformCoordinateToGlobalCoordinateSystem(startWaypointToKalmanAlgorithm);
             setOldValue();
             try {
@@ -223,20 +233,21 @@ public class KalmanFilterAlgorithm {
     }
 
     public void setGpsLocalizationWithCalibrationHandler(Coordinate newLocalization) {
-        if (gpsLocalizationCalibration.size() < MIN_GPS_CALIBRATION_COUNT) {
-            gpsLocalizationCalibration.add(newLocalization);
-        } else if (gpsLocalization == null && startWaypointToKalmanAlgorithm == null) {
-            gpsLocalizationCalibration.add(newLocalization);
-            List<Coordinate> closePoints = gpsLocalizationCalibration.stream()
-                    .filter(pointA -> gpsLocalizationCalibration.stream()
-                            .allMatch(pointB -> Utils.calculateDistance(pointA, pointB) <= GPS_CALIBRATION_ACCURACY)
-                    )
-                    .collect(Collectors.toList());
-            startWaypointToKalmanAlgorithm = closePoints.get(closePoints.size() - 1);
-            gpsLocalization = new OwnCoordinate(closePoints.get(closePoints.size() - 1), startWaypointToKalmanAlgorithm);
-        } else {
+//        if (gpsLocalizationCalibration.size() < MIN_GPS_CALIBRATION_COUNT) {
+//            gpsLocalizationCalibration.add(newLocalization);
+//        } else
+//        if (gpsLocalization == null && startWaypointToKalmanAlgorithm == null) {
+//            gpsLocalizationCalibration.add(newLocalization);
+//            List<Coordinate> closePoints = gpsLocalizationCalibration.stream()
+//                    .filter(pointA -> gpsLocalizationCalibration.stream()
+//                            .allMatch(pointB -> Utils.calculateDistance(pointA, pointB) <= GPS_CALIBRATION_ACCURACY)
+//                    )
+//                    .collect(Collectors.toList());
+//            startWaypointToKalmanAlgorithm = closePoints.get(closePoints.size() - 1);
+//            gpsLocalization = new OwnCoordinate(closePoints.get(closePoints.size() - 1), startWaypointToKalmanAlgorithm);
+//        } else {
             gpsLocalization = new OwnCoordinate(newLocalization, startWaypointToKalmanAlgorithm);
-        }
+//        }
     }
 
     private double designateCurrentCourse() {
