@@ -38,23 +38,21 @@ public class AutonomicControlExecute {
     public void start() {
         Runnable kalmanTask = () -> {
             BoatMode currentBoatMode = boatModeController.getBoatMode();
-            if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
-                kalmanFilterAlgorithm.getLock().lock();
-                boolean correctResult = false;
-                correctResult = kalmanFilterAlgorithm.designateCurrentCourseAndLocalization();
-                if (correctResult) {
-                    Platform.runLater(() -> {
-                        designatedCourse.setText(String.format("%.2f", kalmanFilterAlgorithm.getCurrentCourse()));
-                    });
-                    osmMap.setCurrentCourse(kalmanFilterAlgorithm.getCurrentCourse());
-                    if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {
-                        osmMap.generateTraceFromBoatPosition(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
-                    } else if (currentBoatMode != BoatMode.AUTONOMIC_STARTING) {
-                        osmMap.setCurrentBoatPositionWhileRunning(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
-                    }
+            kalmanFilterAlgorithm.getLock().lock();
+            boolean correctResult = false;
+            correctResult = kalmanFilterAlgorithm.designateCurrentCourseAndLocalization();
+            if (correctResult) {
+                Platform.runLater(() -> {
+                    designatedCourse.setText(String.format("%.2f", kalmanFilterAlgorithm.getCurrentCourse()));
+                });
+                osmMap.setCurrentCourse(kalmanFilterAlgorithm.getCurrentCourse());
+                if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {
+                    osmMap.generateTraceFromBoatPosition(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
+                } else if (currentBoatMode != BoatMode.AUTONOMIC_STARTING) {
+                    osmMap.setCurrentBoatPositionWhileRunning(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
                 }
-                kalmanFilterAlgorithm.getLock().unlock();
             }
+            kalmanFilterAlgorithm.getLock().unlock();
         };
 
         Runnable autonomicControlTask = () -> {
@@ -70,7 +68,9 @@ public class AutonomicControlExecute {
             }
         };
 
-        scheduler.scheduleAtFixedRate(kalmanTask, 2000, KALMAN_JOB_EXECUTE_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);
+        if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
+            scheduler.scheduleAtFixedRate(kalmanTask, 2000, KALMAN_JOB_EXECUTE_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);
+        }
         scheduler.scheduleAtFixedRate(autonomicControlTask, 5000, AUTONOMIC_CONTROL_JOB_EXECUTE_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);
     }
 

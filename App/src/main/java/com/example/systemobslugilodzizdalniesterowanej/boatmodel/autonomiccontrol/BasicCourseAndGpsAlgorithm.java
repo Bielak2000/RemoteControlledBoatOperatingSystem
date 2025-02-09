@@ -9,9 +9,12 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Podstawowy algorytm wyznaczania aktualnego kursu łodzi
+ * Podstawowy algorytm wyznaczania aktualnego kursu łodzi i pomiarów z GPS
+ * <p>
+ * KURS
  * <p>
  * Jeśli
  * - to pierwsza dana dla danego czujnika to przypisuję ją do kursu z danego czujnika,
@@ -19,12 +22,18 @@ import java.util.List;
  * - dodatkowo dla odczytow z GPS bierzemy pod uwagę dopiero gdy dostaniemy 4 pomiar
  * <p>
  * Sam algorytm wyznacza kurs jako srednia z pomiarow z obu czujnikow oraz ostatniego pomiaru
+ * <p>
+ * GPS
+ * Zapisuje MIN_GPS_CALIBRATION_COUNT poczatkowych pozycji. Po osiagneiciu liczby MIN_GPS_CALIBRATION_COUNT wyznacza najnowsza niedobiegajaca od innych
+ * Nastepnie jesli nie odbiega od innych (GPS_POSITION_MAX_ACCURACY_DIFF_METERS) to zapisuje ja jako aktualna
  */
 @Slf4j
 public class BasicCourseAndGpsAlgorithm {
 
     private static double GPS_COURSE_MAX_ACCURACY_DIFF = 45;
     private static double SENSOR_COURSE_MAX_ACCURACY_DIFF = 45;
+    private static double GPS_POSITION_MAX_ACCURACY_DIFF_METERS = 3;
+    private static int MIN_GPS_CALIBRATION_COUNT = 5;
     private boolean foundGpsCourse = false;
     private Double gpsCourse = null;
     private int gpsCourseIndex = 0;
@@ -32,9 +41,31 @@ public class BasicCourseAndGpsAlgorithm {
     private Double recentDesignatedCourse = null;
     private LocalDateTime now = LocalDateTime.now();
     private Label expectedCourse;
+    private Coordinate designatedPosition;
+    private Coordinate lastGpsReading;
+    private List<Coordinate> gpsLocalizationCalibration = new ArrayList<>();
 
     public BasicCourseAndGpsAlgorithm(Label expectedCourse) {
         this.expectedCourse = expectedCourse;
+    }
+
+    public void setDesignatedPosition(Coordinate newPosition) {
+        this.lastGpsReading = newPosition;
+        if (designatedPosition == null) {
+            if (gpsLocalizationCalibration.size() < MIN_GPS_CALIBRATION_COUNT) {
+                gpsLocalizationCalibration.add(newPosition);
+            } else {
+                gpsLocalizationCalibration.add(newPosition);
+                List<Coordinate> closePoints = gpsLocalizationCalibration.stream()
+                        .filter(pointA -> gpsLocalizationCalibration.stream()
+                                .allMatch(pointB -> Utils.calculateDistance(pointA, pointB) <= GPS_POSITION_MAX_ACCURACY_DIFF_METERS)
+                        )
+                        .collect(Collectors.toList());
+                this.designatedPosition = closePoints.get(closePoints.size() - 1);
+            }
+        } else if (Utils.calculateDistance(designatedPosition, newPosition) < GPS_POSITION_MAX_ACCURACY_DIFF_METERS) {
+            this.designatedPosition = newPosition;
+        }
     }
 
     public void setGpsCourseIfCorrectData(Double newGpsCourse) {
@@ -91,27 +122,32 @@ public class BasicCourseAndGpsAlgorithm {
     public void saveInitValToCsv() {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Kurs GPS", "Kurs sensor", "Wyzonaczny kurs", "Kurs oczekiwany", "GPS wspol.", "Punkt docelowy", "Punkt startowy"});
+            data.add(new String[]{"Kurs GPS", "Kurs sensor", "Wyzonaczny kurs", "Kurs oczekiwany", "GPS wspol.", "Punkt wyznaczony", "Punkt docelowy", "Punkt startowy"});
             Utils.saveToCsv(data, "basic-" + now.format(Utils.formatter) + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
         }
     }
 
-    public void saveDesignatedValueToCSVFile(Coordinate currentLocalization, Double course, Coordinate nextWaypoint, Coordinate startWaypoint) {
+    public void saveDesignatedValueToCSVFile(Double course, Coordinate nextWaypoint, Coordinate startWaypoint) {
         try {
             List<String[]> data = new ArrayList<>();
             if (course == null) {
                 course = recentDesignatedCourse;
             }
             data.add(new String[]{String.valueOf(gpsCourse), String.valueOf(sensorCourse), String.valueOf(course), expectedCourse.getText(),
-                    String.valueOf(currentLocalization == null ? "brak" : (currentLocalization.getLongitude() + ";" + currentLocalization.getLatitude())),
+                    String.valueOf(this.lastGpsReading == null ? "brak" : (this.lastGpsReading.getLongitude() + ";" + this.lastGpsReading.getLatitude())),
+                    String.valueOf(this.designatedPosition == null ? "brak" : (this.designatedPosition.getLongitude() + ";" + this.designatedPosition.getLatitude())),
                     String.valueOf(nextWaypoint == null ? "brak" : (nextWaypoint.getLongitude() + ";" + nextWaypoint.getLatitude())),
                     String.valueOf(startWaypoint == null ? "brak" : startWaypoint.getLongitude() + ";" + startWaypoint.getLatitude())});
             Utils.saveToCsv(data, "basic-" + now.format(Utils.formatter) + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
         }
+    }
+
+    public Coordinate getDesignatedPosition() {
+        return designatedPosition == null ? lastGpsReading : designatedPosition;
     }
 
 }
