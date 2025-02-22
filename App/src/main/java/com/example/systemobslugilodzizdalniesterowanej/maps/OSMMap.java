@@ -48,14 +48,13 @@ public class OSMMap {
 
     // TODO: ustawic odpowiednie coordianty po zebraniu wynikow
     @Getter
-    private Coordinate startTestingCoordinate = new Coordinate(50.0650887, 19.9245136);
+    private Coordinate startTestingCoordinate = new Coordinate(50.69124369668608, 22.58794746307401);
     private List<Coordinate> testingCoordinates = new ArrayList<>() {
         {
-            add(new Coordinate(50.0650887, 19.9245136));
-            add(new Coordinate(50.0650887, 19.9244236));
-            add(new Coordinate(50.0650887, 19.9243336));
-            add(new Coordinate(50.0650887, 19.9242436));
-            add(new Coordinate(50.0650887, 19.9241536));
+            add(new Coordinate(50.69131164763291, 22.5880064967717));
+            add(new Coordinate(50.691287864812715, 22.58816213106563));
+            add(new Coordinate(50.691240299136176, 22.58814603096626));
+            add(new Coordinate(50.69124369668608, 22.58794746307401));
         }
     };
 
