@@ -14,6 +14,7 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.calcu
 @Slf4j
 public class AutonomicController {
 
+    private static double MAX_PERCENTAGE_ENGINE_POWER = 50;
     private static int DISTANCE_ACCURACY_METERS = 1;
     private static double MIN_DISTANCE_FOR_LINEAR_SPEED_METERS = 1.5;
     private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 20.0;
@@ -112,16 +113,16 @@ public class AutonomicController {
         if (distanceBetweenCurrentAndNextPositions <= MIN_DISTANCE_FOR_LINEAR_SPEED_METERS) {
             return MIN_LINEAR_SPEED_PERCENTAGE;
         } else if (distanceBetweenCurrentAndNextPositions >= MAX_DISTANCE_FOR_LINEAR_SPEED_METERS) {
-            return 80.0;
+            return MAX_PERCENTAGE_ENGINE_POWER;
         } else {
-            return (distanceBetweenCurrentAndNextPositions / (MAX_DISTANCE_FOR_LINEAR_SPEED_METERS - MIN_LINEAR_SPEED_PERCENTAGE)) * 80;
+            return (distanceBetweenCurrentAndNextPositions / (MAX_DISTANCE_FOR_LINEAR_SPEED_METERS - MIN_LINEAR_SPEED_PERCENTAGE)) * MAX_PERCENTAGE_ENGINE_POWER;
         }
     }
 
     private double getAngularSpeed(double expectedCourse, double currentCourse) {
         double courseDifference = expectedCourse - currentCourse;
-        double angularSpeed = (courseDifference / 360.0) * 80;
-        if (Math.abs(courseDifference) < 180) {
+        double angularSpeed = (courseDifference / 360.0) * MAX_PERCENTAGE_ENGINE_POWER;
+        if(Math.abs(courseDifference) < 180 ) {
             angularSpeed = -1 * angularSpeed;
         }
         return angularSpeed;
