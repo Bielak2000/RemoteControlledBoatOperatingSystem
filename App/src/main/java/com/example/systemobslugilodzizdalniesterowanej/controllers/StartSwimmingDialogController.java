@@ -27,7 +27,7 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_
 @Slf4j
 public class StartSwimmingDialogController {
     ExecutorService executor = Executors.newFixedThreadPool(2);
-    private static int MAX_STARTING_BOAT_TIME_SECONDS = 10;
+    private static int MAX_STARTING_BOAT_TIME_SECONDS = 5;
     private final static String BOAT_RUNNING_SWIMMING_INFORMATION = "Łódka porszua się po wyznaczonych punktach. Nie wyłączaj aplikacji i nie wykonuj żadnych czynności, czekaj na informację z łodzi o uzyskaniu docelowej pozycji. Możesz zastopować łódź przyciskiem STOP.";
     Stage stage;
     BoatModeController boatModeController;

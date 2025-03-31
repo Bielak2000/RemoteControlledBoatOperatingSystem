@@ -16,11 +16,43 @@ public class OwnCoordinate {
     public OwnCoordinate(Coordinate coordinate, Coordinate startPoint) {
         double distance = Utils.calculateDistance(startPoint, coordinate);
         double angle = Utils.determineCourseBetweenTwoWaypoints(startPoint, coordinate);
+//        double transformAngle = angle % 360.0;
         double transformAngle = (450.0 - angle) % 360.0;
         double transformAngleRadians = Math.toRadians(transformAngle);
         this.x = distance * Math.cos(transformAngleRadians);
         this.y = distance * Math.sin(transformAngleRadians);
     }
+
+//    public OwnCoordinate(Coordinate coordinate, C
+//    oordinate startPoint) {
+//        double distance = Utils.calculateDistance(startPoint, coordinate);
+//        double angle = Utils.determineCourseBetweenTwoWaypoints(startPoint, coordinate);
+////        double transformAngle = angle % 360.0;
+//        double transformAngle = (450.0 - angle) % 360.0;
+//        double transformAngleRadians = Math.toRadians(transformAngle);
+//        this.x = distance * Math.cos(transformAngleRadians);
+//        this.y = (-1) * distance * Math.sin(transformAngleRadians);
+//    }
+
+//    public OwnCoordinate(Coordinate coordinate, Coordinate startPoint) {
+//        double distance = Utils.calculateDistance(startPoint, coordinate);
+//        double angle = Utils.determineCourseBetweenTwoWaypoints(startPoint, coordinate);
+//        double transformAngle = angle % 360.0;
+////        double transformAngle = (450.0 - angle) % 360.0;
+//        double transformAngleRadians = Math.toRadians(transformAngle);
+//        this.x = distance * Math.cos(transformAngleRadians);
+//        this.y = distance * Math.sin(transformAngleRadians);
+//    }
+
+//    public OwnCoordinate(Coordinate coordinate, Coordinate startPoint) {
+//        double distance = Utils.calculateDistance(startPoint, coordinate);
+//        double angle = Utils.determineCourseBetweenTwoWaypoints(startPoint, coordinate);
+//        double transformAngle = angle % 360.0;
+////        double transformAngle = (450.0 - angle) % 360.0;
+//        double transformAngleRadians = Math.toRadians(transformAngle);
+//        this.x = distance * Math.cos(transformAngleRadians);
+//        this.y = (-1) * distance * Math.sin(transformAngleRadians);
+//    }
 
     public Coordinate transformCoordinateToGlobalCoordinateSystem(Coordinate startPoint) {
         // Konwersja szerokości geograficznej z stopni na radiany

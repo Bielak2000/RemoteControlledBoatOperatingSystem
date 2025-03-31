@@ -91,7 +91,7 @@ public class AutonomicControlExecute {
                     this.kalmanFilterAlgorithm.estimatedCoordinate,
                     this.kalmanFilterAlgorithm.getExpectedCourse().getText(),
                     String.valueOf(this.kalmanFilterAlgorithm.getCurrentCourse()),
-                    this.testingCsvFileName
+                    this.testingCsvFileName, true
             );
         } else {
             Utils.saveDesignatedValueToCSVFileWhileTesting(
@@ -100,7 +100,7 @@ public class AutonomicControlExecute {
                     new OwnCoordinate(this.osmMap.getCurrentBoatPosition(), this.osmMap.getStartTestingCoordinate()),
                     this.osmMap.getExpectedCourse().getText(),
                     String.valueOf(this.osmMap.getCurrentCourse()),
-                    this.testingCsvFileName
+                    this.testingCsvFileName, false
             );
         }
     }

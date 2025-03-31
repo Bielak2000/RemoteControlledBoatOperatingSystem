@@ -15,7 +15,7 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.calcu
 public class AutonomicController {
 
     private static double MAX_PERCENTAGE_ENGINE_POWER = 50;
-    private static int DISTANCE_ACCURACY_METERS = 1;
+    private static int DISTANCE_ACCURACY_METERS = 3;
     private static double MIN_DISTANCE_FOR_LINEAR_SPEED_METERS = 1.5;
     private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 20.0;
     private static double MIN_LINEAR_SPEED_PERCENTAGE = 10.0;

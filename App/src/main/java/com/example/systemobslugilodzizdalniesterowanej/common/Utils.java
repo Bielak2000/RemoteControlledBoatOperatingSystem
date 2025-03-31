@@ -114,19 +114,33 @@ public class Utils {
     }
 
     public static void saveDesignatedValueToCSVFileWhileTesting(OwnCoordinate startPoint, OwnCoordinate destinationPoint, OwnCoordinate currentPoint,
-                                                                String expectedCourse, String currentCourse, String fileName) throws IOException {
-        Double distance = distanceFromLine(startPoint, destinationPoint, currentPoint);
-        ;
-        List<String[]> data = new ArrayList<>();
-        data.add(new String[]{
-                String.valueOf(startPoint == null ? "brak" : startPoint.getX() + ";" + startPoint.getY()),
-                String.valueOf(destinationPoint == null ? "brak" : destinationPoint.getX() + ";" + destinationPoint.getY()),
-                String.valueOf(currentPoint == null ? "brak" : currentPoint.getX() + ";" + currentPoint.getY()),
-                String.valueOf(distance == null ? "brak" : String.format("%.2f", distance)),
-                String.valueOf(expectedCourse == null ? "brak" : expectedCourse),
-                String.valueOf(currentCourse == null ? "brak" : currentCourse)
-        });
-        Utils.saveToCsv(data, fileName + ".csv");
+                                                                String expectedCourse, String currentCourse, String fileName, boolean reeversed) throws IOException {
+        if (reeversed) {
+            Double distance = distanceFromLine(startPoint, destinationPoint, currentPoint, reeversed);
+            List<String[]> data = new ArrayList<>();
+            data.add(new String[]{
+                    String.valueOf(startPoint == null ? "brak" : startPoint.getX() + ";" + startPoint.getY()),
+                    String.valueOf(destinationPoint == null ? "brak" : destinationPoint.getX() + ";" + destinationPoint.getY()),
+                    String.valueOf(currentPoint == null ? "brak" : currentPoint.getY() + ";" + currentPoint.getX()),
+                    String.valueOf(distance == null ? "brak" : String.format("%.2f", distance)),
+                    String.valueOf(expectedCourse == null ? "brak" : expectedCourse),
+                    String.valueOf(currentCourse == null ? "brak" : currentCourse)
+            });
+            Utils.saveToCsv(data, fileName + ".csv");
+        } else {
+            Double distance = distanceFromLine(startPoint, destinationPoint, currentPoint, reeversed);
+            List<String[]> data = new ArrayList<>();
+            data.add(new String[]{
+                    String.valueOf(startPoint == null ? "brak" : startPoint.getX() + ";" + startPoint.getY()),
+                    String.valueOf(destinationPoint == null ? "brak" : destinationPoint.getX() + ";" + destinationPoint.getY()),
+                    String.valueOf(currentPoint == null ? "brak" : currentPoint.getX() + ";" + currentPoint.getY()),
+                    String.valueOf(distance == null ? "brak" : String.format("%.2f", distance)),
+                    String.valueOf(expectedCourse == null ? "brak" : expectedCourse),
+                    String.valueOf(currentCourse == null ? "brak" : currentCourse)
+            });
+            Utils.saveToCsv(data, fileName + ".csv");
+        }
+
     }
 
     /**
@@ -135,12 +149,17 @@ public class Utils {
      * @param currentPoint
      * @return odleglosc w metrach
      */
-    private static Double distanceFromLine(OwnCoordinate startPoint, OwnCoordinate destinationPoint, OwnCoordinate currentPoint) {
+    private static Double distanceFromLine(OwnCoordinate startPoint, OwnCoordinate destinationPoint, OwnCoordinate currentPoint,boolean reversed) {
         if (startPoint != null && destinationPoint != null && currentPoint != null) {
             double A = destinationPoint.getY() - startPoint.getY();
             double B = startPoint.getX() - destinationPoint.getX();
             double C = destinationPoint.getX() * startPoint.getY() - startPoint.getX() * destinationPoint.getY();
-            return Math.abs(A * currentPoint.getX() + B * currentPoint.getY() + C) / Math.sqrt(A * A + B * B);
+            if(reversed) {
+                return Math.abs(A * currentPoint.getY() + B * currentPoint.getX() + C) / Math.sqrt(A * A + B * B);
+            } else {
+                return Math.abs(A * currentPoint.getX() + B * currentPoint.getY() + C) / Math.sqrt(A * A + B * B);
+            }
+
         } else return null;
     }
 
