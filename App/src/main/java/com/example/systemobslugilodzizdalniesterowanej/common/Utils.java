@@ -86,12 +86,10 @@ public class Utils {
         double longDiff = Math.toRadians(secondCoordinate.getLongitude() - firstCoordinate.getLongitude());
         double y = Math.sin(longDiff) * Math.cos(latitude2);
         double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
-        double courseX = Math.toDegrees(Math.atan2(y, x)) + 360;
-
-        // Kurs względem osi Y: dodajemy 90° do kursu względem osi X
-        double courseY = (courseX + 90) % 360;
-
-        return courseY;
+        return Math.toDegrees(Math.atan2(y, x)) + 360;
+//        double courseY = (courseX + 90) % 360;
+//        double courseY = (courseX - 90) % 360;
+//        return courseY;
     }
 
     public static void saveInitValToCsvForNotBasicAndKalmanAlgorithm(String fileName) {

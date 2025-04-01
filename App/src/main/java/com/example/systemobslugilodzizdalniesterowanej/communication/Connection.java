@@ -305,7 +305,9 @@ public class Connection {
                 break;
             case FROM_BOAT_GPS_COURSE_MESSAGE:
                 log.info("Received course from GPS");
-                Double xe = ((Double.parseDouble(array[1]) + 90) % 360);
+//                Double xe = ((Double.parseDouble(array[1]) + 90) % 360);
+//                Double xe = ((Double.parseDouble(array[1]) - 90) % 360);
+                Double xe = ((Double.parseDouble(array[1])));
                 Platform.runLater(() -> {
                     this.gpsCourse.setText(xe.toString());
                 });
