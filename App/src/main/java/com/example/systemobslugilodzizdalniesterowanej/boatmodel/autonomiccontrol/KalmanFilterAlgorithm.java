@@ -101,7 +101,7 @@ public class KalmanFilterAlgorithm {
                     angularSpeed * 57.2958       // predkosc katowa
             });
             try{
-                kalmanFilter.correct(measurementVector);
+                kalmanFilter.correct(measurementVectorX);
             } catch (Exception e) {
                 log.error("Error while kalman filter executing: {}", e.getMessage());
             }
@@ -282,29 +282,29 @@ public class KalmanFilterAlgorithm {
 
         // od Q1, Q2, Q4, ..., Q14
         ArrayRealVector initialState = new ArrayRealVector(new double[]{0, 0, 0, 0, 0, 0, 0, 0});
-        DefaultProcessModel processModel = new DefaultProcessModel(A, B, Q1, initialState, initialP);
-        DefaultMeasurementModel measurementModel = new DefaultMeasurementModel(H, R1);
+        DefaultProcessModel processModel = new DefaultProcessModel(A, B, QX1, initialState, initialP);
+        DefaultMeasurementModel measurementModel = new DefaultMeasurementModel(HX, RX1);
         kalmanFilter = new KalmanFilter(processModel, measurementModel);
         log.info("Ended kalman filter initialization");
     }
 
     // sprawdzic z i bez kalibracji
     public void setGpsLocalizationWithCalibrationHandler(Coordinate newLocalization) {
-        if (gpsLocalizationCalibration.size() < MIN_GPS_CALIBRATION_COUNT) {
-            gpsLocalizationCalibration.add(newLocalization);
-        } else
-        if (gpsLocalization == null && startWaypointToKalmanAlgorithm == null) {
-            gpsLocalizationCalibration.add(newLocalization);
-            List<Coordinate> closePoints = gpsLocalizationCalibration.stream()
-                    .filter(pointA -> gpsLocalizationCalibration.stream()
-                            .allMatch(pointB -> Utils.calculateDistance(pointA, pointB) <= GPS_CALIBRATION_ACCURACY)
-                    )
-                    .collect(Collectors.toList());
+//        if (gpsLocalizationCalibration.size() < MIN_GPS_CALIBRATION_COUNT) {
+//            gpsLocalizationCalibration.add(newLocalization);
+//        } else
+//        if (gpsLocalization == null && startWaypointToKalmanAlgorithm == null) {
+//            gpsLocalizationCalibration.add(newLocalization);
+//            List<Coordinate> closePoints = gpsLocalizationCalibration.stream()
+//                    .filter(pointA -> gpsLocalizationCalibration.stream()
+//                            .allMatch(pointB -> Utils.calculateDistance(pointA, pointB) <= GPS_CALIBRATION_ACCURACY)
+//                    )
+//                    .collect(Collectors.toList());
 //            startWaypointToKalmanAlgorithm = closePoints.get(closePoints.size() - 1);
-            gpsLocalization = new OwnCoordinate(closePoints.get(closePoints.size() - 1), startWaypointToKalmanAlgorithm);
-        } else {
+//            gpsLocalization = new OwnCoordinate(closePoints.get(closePoints.size() - 1), startWaypointToKalmanAlgorithm);
+//        } else {
             gpsLocalization = new OwnCoordinate(newLocalization, startWaypointToKalmanAlgorithm);
-        }
+//        }
     }
 
     private double designateCurrentCourse() {

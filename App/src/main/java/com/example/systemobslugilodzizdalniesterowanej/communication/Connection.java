@@ -305,15 +305,16 @@ public class Connection {
                 break;
             case FROM_BOAT_GPS_COURSE_MESSAGE:
                 log.info("Received course from GPS");
+                Double xe = ((Double.parseDouble(array[1]) + 90) % 360);
                 Platform.runLater(() -> {
-                    this.gpsCourse.setText(array[1]);
+                    this.gpsCourse.setText(xe.toString());
                 });
                 sendingValuesLock.lock();
                 if (chosenAlgorithm == PositionAlgorithm.ONLY_GPS) {
-                    osmMap.setCurrentCourse(Double.parseDouble(array[1]));
+                    osmMap.setCurrentCourse(xe);
                     Utils.saveDesignatedValueToCSVFile(fileName, osmMap.getCurrentBoatPosition(), osmMap.getCurrentCourse(), expectedCourse.getText(), osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
                 } else if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
-                    basicCourseAndGpsAlgorithm.setGpsCourseIfCorrectData(Double.parseDouble(array[1]));
+                    basicCourseAndGpsAlgorithm.setGpsCourseIfCorrectData(xe);
                     Double designatedCourseFromBasicAlgorithm = basicCourseAndGpsAlgorithm.designateCurrentCourse();
                     basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(designatedCourseFromBasicAlgorithm, osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
                     if (designatedCourseFromBasicAlgorithm != null) {
@@ -324,7 +325,7 @@ public class Connection {
                     }
                 } else if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     kalmanFilterAlgorithm.getLock().lock();
-                    double gpsCourse = Double.parseDouble(array[1]);
+                    double gpsCourse = xe;
                     kalmanFilterAlgorithm.setGpsCourse(gpsCourse);
                     if (gpsCourse != 0) {
                         kalmanFilterAlgorithm.setFoundGpsCourse(true);
