@@ -84,6 +84,7 @@ public class Connection {
 
     // TODO: do testow
     private Label gpsCourse;
+    @Getter
     private Label sensorCourse;
     private Label designatedCourse;
 

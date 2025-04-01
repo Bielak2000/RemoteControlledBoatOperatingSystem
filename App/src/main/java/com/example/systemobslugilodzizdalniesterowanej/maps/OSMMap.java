@@ -208,7 +208,7 @@ public class OSMMap {
     }
 
     public void setExpectedCourse(Coordinate firstCoordinate, Coordinate secondCoordinate) {
-        this.expectedCourse.setText(String.valueOf(Utils.determineCourseBetweenTwoWaypoints(firstCoordinate, secondCoordinate)));
+        this.expectedCourse.setText(String.valueOf(Utils.determineCourseBetweenTwoWaypointsForYAxis(firstCoordinate, secondCoordinate)));
     }
 
     public void setExpectedCourse(String expectedCourse) {

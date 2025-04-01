@@ -36,6 +36,7 @@ public class KalmanFilterAlgorithm {
 
     private boolean foundGpsCourse = false;
     private Double gpsCourse = null;
+    @Getter
     private Double sensorCourse = null;
 
     private List<Coordinate> gpsLocalizationCalibration = new ArrayList<>();
@@ -107,6 +108,7 @@ public class KalmanFilterAlgorithm {
 //            showCovarianceMatrix(kalmanFilter.getErrorCovarianceMatrix());
             double[] estimatedData = kalmanFilter.getStateEstimation();
             this.currentCourse = estimatedData[6];
+            // sprawdzic dla osi y, ale zamienic kolejnosc esimtaeted
             this.estimatedCoordinate = new OwnCoordinate(estimatedData[1], estimatedData[0]);
             this.currentLocalization = estimatedCoordinate.transformCoordinateToGlobalCoordinateSystem(startWaypointToKalmanAlgorithm);
             setOldValue();
@@ -170,8 +172,28 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 0, 0, 1} // ay
         });
 
-        // NAJLEPSZE OPCJE - nr 4
-        RealMatrix Q = new Array2DRowRealMatrix(new double[][]{
+        // ustaiwenia domyslne z grudnia
+        RealMatrix Q1 = new Array2DRowRealMatrix(new double[][]{
+                {0.01, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0.01, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0.05, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0.05, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0.05, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0.05, 0, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0.5}
+        });
+
+        RealMatrix R1 = new Array2DRowRealMatrix(new double[][]{
+                {0.1, 0, 0, 0, 0, 0}, // x
+                {0, 0.1, 0, 0, 0, 0}, // y
+                {0, 0, 0.1, 0, 0, 0}, // ax
+                {0, 0, 0, 0.1, 0, 0}, // ay
+                {0, 0, 0, 0, 0.5, 0}, // azymut
+                {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
+        });
+
+        RealMatrix Q2 = new Array2DRowRealMatrix(new double[][]{
                 {0.01, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0.01, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0.5, 0, 0, 0, 0, 0},
@@ -182,7 +204,7 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 0, 0, 0.5}
         });
 
-        RealMatrix R = new Array2DRowRealMatrix(new double[][]{
+        RealMatrix R2 = new Array2DRowRealMatrix(new double[][]{
                 {0.1, 0, 0, 0, 0, 0}, // x
                 {0, 0.1, 0, 0, 0, 0}, // y
                 {0, 0, 0.5, 0, 0, 0}, // ax
@@ -191,7 +213,7 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 0.1}  // predkosc katowe
         });
 
-        RealMatrix Q1 = new Array2DRowRealMatrix(new double[][]{
+        RealMatrix Q3 = new Array2DRowRealMatrix(new double[][]{
                 {0.1, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0.1, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0.5, 0, 0, 0, 0, 0},
@@ -202,7 +224,7 @@ public class KalmanFilterAlgorithm {
                 {0, 0, 0, 0, 0, 0, 0, 0.5}
         });
 
-        RealMatrix R1 = new Array2DRowRealMatrix(new double[][]{
+        RealMatrix R3 = new Array2DRowRealMatrix(new double[][]{
                 {0.1, 0, 0, 0, 0, 0}, // x
                 {0, 0.1, 0, 0, 0, 0}, // y
                 {0, 0, 0.5, 0, 0, 0}, // ax
@@ -266,22 +288,23 @@ public class KalmanFilterAlgorithm {
         log.info("Ended kalman filter initialization");
     }
 
+    // sprawdzic z i bez kalibracji
     public void setGpsLocalizationWithCalibrationHandler(Coordinate newLocalization) {
-//        if (gpsLocalizationCalibration.size() < MIN_GPS_CALIBRATION_COUNT) {
-//            gpsLocalizationCalibration.add(newLocalization);
-//        } else
-//        if (gpsLocalization == null && startWaypointToKalmanAlgorithm == null) {
-//            gpsLocalizationCalibration.add(newLocalization);
-//            List<Coordinate> closePoints = gpsLocalizationCalibration.stream()
-//                    .filter(pointA -> gpsLocalizationCalibration.stream()
-//                            .allMatch(pointB -> Utils.calculateDistance(pointA, pointB) <= GPS_CALIBRATION_ACCURACY)
-//                    )
-//                    .collect(Collectors.toList());
+        if (gpsLocalizationCalibration.size() < MIN_GPS_CALIBRATION_COUNT) {
+            gpsLocalizationCalibration.add(newLocalization);
+        } else
+        if (gpsLocalization == null && startWaypointToKalmanAlgorithm == null) {
+            gpsLocalizationCalibration.add(newLocalization);
+            List<Coordinate> closePoints = gpsLocalizationCalibration.stream()
+                    .filter(pointA -> gpsLocalizationCalibration.stream()
+                            .allMatch(pointB -> Utils.calculateDistance(pointA, pointB) <= GPS_CALIBRATION_ACCURACY)
+                    )
+                    .collect(Collectors.toList());
 //            startWaypointToKalmanAlgorithm = closePoints.get(closePoints.size() - 1);
-//            gpsLocalization = new OwnCoordinate(closePoints.get(closePoints.size() - 1), startWaypointToKalmanAlgorithm);
-//        } else {
+            gpsLocalization = new OwnCoordinate(closePoints.get(closePoints.size() - 1), startWaypointToKalmanAlgorithm);
+        } else {
             gpsLocalization = new OwnCoordinate(newLocalization, startWaypointToKalmanAlgorithm);
-//        }
+        }
     }
 
     private double designateCurrentCourse() {

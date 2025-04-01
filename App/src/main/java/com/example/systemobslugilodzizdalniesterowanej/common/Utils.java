@@ -71,13 +71,22 @@ public class Utils {
         return EARTH_RADIUS_KM * c * 1000;
     }
 
-    public static double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {
+    public static double determineCourseBetweenTwoWaypointsForXAxis(Coordinate firstCoordinate, Coordinate secondCoordinate) {
         double latitude1 = Math.toRadians(firstCoordinate.getLatitude());
         double latitude2 = Math.toRadians(secondCoordinate.getLatitude());
         double longDiff = Math.toRadians(secondCoordinate.getLongitude() - firstCoordinate.getLongitude());
         double y = Math.sin(longDiff) * Math.cos(latitude2);
         double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
         return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
+    }
+
+    public static double determineCourseBetweenTwoWaypointsForYAxis(Coordinate firstCoordinate, Coordinate secondCoordinate) {
+        double latitude1 = Math.toRadians(firstCoordinate.getLatitude());
+        double latitude2 = Math.toRadians(secondCoordinate.getLatitude());
+        double longDiff = Math.toRadians(secondCoordinate.getLongitude() - firstCoordinate.getLongitude());
+        double y = Math.sin(longDiff) * Math.cos(latitude2);
+        double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
+        return (360 - (Math.toDegrees(Math.atan2(y, x)) + 360) % 360) % 360;
     }
 
     public static void saveInitValToCsvForNotBasicAndKalmanAlgorithm(String fileName) {
@@ -106,7 +115,7 @@ public class Utils {
     public static void saveInitDesignatedValueToCSVFileWhileTesting(String fileName) {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Pkt. startowy", "Pkt. docelowy", "Pkt. aktualny", "Błąd [m]", "Kurs oczekiwany", "Kurs aktualny"});
+            data.add(new String[]{"Pkt. startowy", "Pkt. docelowy", "Pkt. aktualny", "Błąd [m]", "Kurs oczekiwany", "Kurs z sensora", "Kurs aktualny"});
             Utils.saveToCsv(data, fileName + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
@@ -114,7 +123,7 @@ public class Utils {
     }
 
     public static void saveDesignatedValueToCSVFileWhileTesting(OwnCoordinate startPoint, OwnCoordinate destinationPoint, OwnCoordinate currentPoint,
-                                                                String expectedCourse, String currentCourse, String fileName, boolean reeversed) throws IOException {
+                                                                String expectedCourse, String currentCourse, String sensorCourse, String fileName, boolean reeversed) throws IOException {
         if (reeversed) {
             Double distance = distanceFromLine(startPoint, destinationPoint, currentPoint, reeversed);
             List<String[]> data = new ArrayList<>();
@@ -124,6 +133,7 @@ public class Utils {
                     String.valueOf(currentPoint == null ? "brak" : currentPoint.getY() + ";" + currentPoint.getX()),
                     String.valueOf(distance == null ? "brak" : String.format("%.2f", distance)),
                     String.valueOf(expectedCourse == null ? "brak" : expectedCourse),
+                    String.valueOf(expectedCourse == null ? "brak" : sensorCourse),
                     String.valueOf(currentCourse == null ? "brak" : currentCourse)
             });
             Utils.saveToCsv(data, fileName + ".csv");
@@ -136,6 +146,7 @@ public class Utils {
                     String.valueOf(currentPoint == null ? "brak" : currentPoint.getX() + ";" + currentPoint.getY()),
                     String.valueOf(distance == null ? "brak" : String.format("%.2f", distance)),
                     String.valueOf(expectedCourse == null ? "brak" : expectedCourse),
+                    String.valueOf(expectedCourse == null ? "brak" : sensorCourse),
                     String.valueOf(currentCourse == null ? "brak" : currentCourse)
             });
             Utils.saveToCsv(data, fileName + ".csv");
