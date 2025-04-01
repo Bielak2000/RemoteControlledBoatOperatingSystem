@@ -51,7 +51,8 @@ public class OSMMap {
     private Coordinate startTestingCoordinate = new Coordinate(50.0907413333333, 19.8585904);
     private List<Coordinate> testingCoordinates = new ArrayList<>() {
         {
-            add(new Coordinate(50.090883, 19.8586688571429));
+//            add(new Coordinate(50.090883, 19.8586688571429));
+            add(new Coordinate(50.0908444210526, 19.8586748));
             add(new Coordinate(50.0908159, 19.8588576));
             add(new Coordinate(50.0906854, 19.8588181818182));
             add(startTestingCoordinate);
