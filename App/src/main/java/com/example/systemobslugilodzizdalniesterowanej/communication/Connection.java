@@ -210,7 +210,7 @@ public class Connection {
 
     public void designateAndSendEnginesPowerByAutonomicController() throws IOException {
         LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
-        if (chosenAlgorithm.equals(PositionAlgorithm.KALMAN_FILTER)) {
+        if (chosenAlgorithm.equals(PositionAlgorithm.KALMAN_FILTER) && osmMap.getStartWaypoint() != null && osmMap.getNextWaypointOnTheRoad() != null) {
             kalmanFilterAlgorithm.setStartWaypoint(osmMap.getStartWaypoint());
             kalmanFilterAlgorithm.setNextWaypoint(osmMap.getNextWaypointOnTheRoad());
         }
@@ -297,8 +297,8 @@ public class Connection {
                 boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
                 modeChooser.setSelected(false);
                 if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
-                    kalmanFilterAlgorithm.setStartWaypoint(null);
-                    kalmanFilterAlgorithm.setNextWaypoint(null);
+//                    kalmanFilterAlgorithm.setStartWaypoint(null);
+//                    kalmanFilterAlgorithm.setNextWaypoint(null);
                     kalmanFilterAlgorithm.getLock().unlock();
                 }
                 sendingValuesLock.unlock();
