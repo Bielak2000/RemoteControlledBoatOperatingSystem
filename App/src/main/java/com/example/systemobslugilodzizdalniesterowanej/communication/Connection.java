@@ -230,9 +230,11 @@ public class Connection {
 
     public void sendStopSwimmingInfo() {
         try {
+            this.sendingValuesLock.lock();
             String sentInfo = FINISH_SWIMMING_BY_WAYPOINTS;
             serialPort.writeString(sentInfo);
             log.info("Sent message: {}", sentInfo);
+            this.sendingValuesLock.unlock();
         } catch (SerialPortException e) {
             log.error("Error while sending stop swimming info: {}", e.getMessage());
         }

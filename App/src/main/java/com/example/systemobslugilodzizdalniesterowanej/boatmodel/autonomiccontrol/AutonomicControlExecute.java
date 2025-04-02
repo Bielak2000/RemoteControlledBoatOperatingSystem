@@ -86,7 +86,7 @@ public class AutonomicControlExecute {
 
     private void saveDataToCSVFileWhileTesting() throws IOException {
         Double expectedCourseByPoints = null;
-        if(osmMap.getDesignatedWaypoints().size() >= 0) {
+        if (osmMap.getDesignatedWaypoints().size() >= 0) {
             Coordinate first = osmMap.getWaypointIndex() == 0 ? osmMap.getStartTestingCoordinate() : osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex());
             Coordinate second = osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex());
             expectedCourseByPoints = Utils.determineCourseBetweenTwoWaypointsForYAxis(first, second);
@@ -101,7 +101,7 @@ public class AutonomicControlExecute {
                     String.valueOf(connection.getSensorCourse().getText()),
                     this.testingCsvFileName, true, expectedCourseByPoints
             );
-        } else {
+        } else if (this.osmMap.getStartWaypoint() != null && this.osmMap.getNextWaypointOnTheRoad() != null) {
             Utils.saveDesignatedValueToCSVFileWhileTesting(
                     new OwnCoordinate(this.osmMap.getStartWaypoint(), this.osmMap.getStartTestingCoordinate()),
                     new OwnCoordinate(this.osmMap.getNextWaypointOnTheRoad(), this.osmMap.getStartTestingCoordinate()),
