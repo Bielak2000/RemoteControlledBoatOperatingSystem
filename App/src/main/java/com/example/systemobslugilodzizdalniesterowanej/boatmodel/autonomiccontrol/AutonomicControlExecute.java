@@ -6,6 +6,7 @@ import com.example.systemobslugilodzizdalniesterowanej.common.Utils;
 import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OwnCoordinate;
+import com.sothawo.mapjfx.Coordinate;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +85,12 @@ public class AutonomicControlExecute {
     }
 
     private void saveDataToCSVFileWhileTesting() throws IOException {
+        Double expectedCourseByPoints = null;
+        if(osmMap.getDesignatedWaypoints().size() >= 0) {
+            Coordinate first = osmMap.getWaypointIndex() == 0 ? osmMap.getStartTestingCoordinate() : osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex());
+            Coordinate second = osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex());
+            expectedCourseByPoints = Utils.determineCourseBetweenTwoWaypointsForYAxis(first, second);
+        }
         if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
             Utils.saveDesignatedValueToCSVFileWhileTesting(
                     new OwnCoordinate(this.kalmanFilterAlgorithm.getStartWaypoint(), this.kalmanFilterAlgorithm.getStartWaypointToKalmanAlgorithm()),
@@ -92,7 +99,7 @@ public class AutonomicControlExecute {
                     this.kalmanFilterAlgorithm.getExpectedCourse().getText(),
                     String.valueOf(this.kalmanFilterAlgorithm.getCurrentCourse()),
                     String.valueOf(connection.getSensorCourse().getText()),
-                    this.testingCsvFileName, true
+                    this.testingCsvFileName, true, expectedCourseByPoints
             );
         } else {
             Utils.saveDesignatedValueToCSVFileWhileTesting(
@@ -102,7 +109,7 @@ public class AutonomicControlExecute {
                     this.osmMap.getExpectedCourse().getText(),
                     String.valueOf(this.osmMap.getCurrentCourse()),
                     String.valueOf(connection.getSensorCourse().getText()),
-                    this.testingCsvFileName, false
+                    this.testingCsvFileName, false, expectedCourseByPoints
             );
         }
     }

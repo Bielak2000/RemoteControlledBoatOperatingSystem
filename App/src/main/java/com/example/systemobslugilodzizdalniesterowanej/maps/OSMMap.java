@@ -50,6 +50,7 @@ public class OSMMap {
     @Getter
     private Coordinate startTestingCoordinate = new Coordinate(50.0907413333333, 19.8585904);
 
+    @Getter
     private List<Coordinate> testingCoordinates = new ArrayList<>() {
         {
 //            add(new Coordinate(50.090883, 19.8586688571429));
