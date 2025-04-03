@@ -364,7 +364,8 @@ public class Connection {
                     kalmanFilterAlgorithm.getLock().unlock();
                 }
 
-                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_STARTING && !autonomicController.isStopRotating()) {
+                if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_STARTING && !autonomicController.isStopRotating()
+                        && chosenAlgorithm != PositionAlgorithm.ONLY_GPS) {
                     autonomicController.incrementCourseCount();
                     if (autonomicController.getCourseCount() > MAX_COURSE_COUNT_IN_AUTONOMIC_STARTING_MODE) {
                         if (Math.abs(autonomicController.getCourseOnRotateStart() - Double.valueOf(array[1])) <= COURSE_ACCURACY) {
