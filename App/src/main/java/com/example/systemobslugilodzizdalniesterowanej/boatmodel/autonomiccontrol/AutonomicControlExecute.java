@@ -86,9 +86,9 @@ public class AutonomicControlExecute {
 
     private void saveDataToCSVFileWhileTesting() throws IOException {
         Double expectedCourseByPoints = null;
-        if (osmMap.getDesignatedWaypoints().size() >= 0 && (osmMap.getWaypointIndex()+1) < osmMap.getTestingCoordinates().size()) {
-            Coordinate first = osmMap.getWaypointIndex() == 0 ? osmMap.getStartTestingCoordinate() : osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex());
-            Coordinate second = osmMap.getWaypointIndex() == 0 ? osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex()) : osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex()+1);
+        if (osmMap.getDesignatedWaypoints().size() >= 0) {
+            Coordinate first = osmMap.getWaypointIndex() == 0 ? osmMap.getStartTestingCoordinate() : osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex() - 1);
+            Coordinate second = osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex());
             expectedCourseByPoints = Utils.determineCourseBetweenTwoWaypointsForYAxis(first, second);
         }
         if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
