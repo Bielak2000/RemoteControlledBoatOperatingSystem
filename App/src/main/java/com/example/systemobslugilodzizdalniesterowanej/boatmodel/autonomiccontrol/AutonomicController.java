@@ -39,6 +39,8 @@ public class AutonomicController {
     @Setter
     @Getter
     private boolean manuallyFinishSwimming = true;
+    @Getter
+    private boolean archiveLastWaypoint = false;
 
     public AutonomicController(OSMMap osmMap) {
         this.osmMap = osmMap;
@@ -75,6 +77,7 @@ public class AutonomicController {
             } else {
                 osmMap.setStartWaypoint(null);
                 osmMap.setNextWaypointOnTheRoad(null);
+                archiveLastWaypoint = true;
                 return null;
             }
         } else {

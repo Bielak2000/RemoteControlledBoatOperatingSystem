@@ -209,22 +209,24 @@ public class Connection {
     }
 
     public void designateAndSendEnginesPowerByAutonomicController() throws IOException {
-        LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
-        if (chosenAlgorithm.equals(PositionAlgorithm.KALMAN_FILTER) && osmMap.getStartWaypoint() != null && osmMap.getNextWaypointOnTheRoad() != null) {
-            kalmanFilterAlgorithm.setStartWaypoint(osmMap.getStartWaypoint());
-            kalmanFilterAlgorithm.setNextWaypoint(osmMap.getNextWaypointOnTheRoad());
-        }
-        if (linearAndAngularSpeed != null) {
-            if (linearAndAngularSpeed.equals(oldLinearAndAngularSpeed)) {
-                log.info("Designated new linear and angular speed but not changed ...");
-            } else {
-                sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
-                oldLinearAndAngularSpeed = linearAndAngularSpeed;
+        if (!autonomicController.isArchiveLastWaypoint()) {
+            LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
+            if (chosenAlgorithm.equals(PositionAlgorithm.KALMAN_FILTER) && osmMap.getStartWaypoint() != null && osmMap.getNextWaypointOnTheRoad() != null) {
+                kalmanFilterAlgorithm.setStartWaypoint(osmMap.getStartWaypoint());
+                kalmanFilterAlgorithm.setNextWaypoint(osmMap.getNextWaypointOnTheRoad());
             }
-        } else {
-            privateSetProgressDialogController("Koniec trasy", "Łódź osiągneła cel, zatrzymywanie łodzi ...");
-            autonomicController.setManuallyFinishSwimming(false);
-            sendStopSwimmingInfo();
+            if (linearAndAngularSpeed != null) {
+                if (linearAndAngularSpeed.equals(oldLinearAndAngularSpeed)) {
+                    log.info("Designated new linear and angular speed but not changed ...");
+                } else {
+                    sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
+                    oldLinearAndAngularSpeed = linearAndAngularSpeed;
+                }
+            } else {
+                privateSetProgressDialogController("Koniec trasy", "Łódź osiągneła cel, zatrzymywanie łodzi ...");
+                autonomicController.setManuallyFinishSwimming(false);
+                sendStopSwimmingInfo();
+            }
         }
     }
 
