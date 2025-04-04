@@ -83,7 +83,7 @@ public class StartSwimmingDialogController {
             stage1.show();
             root.requestFocus();
             executor.submit(() -> {
-                if (chosenAlgorithm != PositionAlgorithm.ONLY_GPS) {
+                if (chosenAlgorithm != PositionAlgorithm.ONLY_GPS && false) {
                     LinearAndAngularSpeed linearAndAngularSpeed;
                     linearAndAngularSpeed = autonomicController.designateRightEnginesPowerOnStart();
                     try {

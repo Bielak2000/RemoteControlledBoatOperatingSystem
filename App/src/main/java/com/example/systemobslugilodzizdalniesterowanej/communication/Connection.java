@@ -367,7 +367,7 @@ public class Connection {
                 }
 
                 if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_STARTING && !autonomicController.isStopRotating()
-                        && chosenAlgorithm != PositionAlgorithm.ONLY_GPS) {
+                        && chosenAlgorithm != PositionAlgorithm.ONLY_GPS && false) {
                     autonomicController.incrementCourseCount();
                     if (autonomicController.getCourseCount() > MAX_COURSE_COUNT_IN_AUTONOMIC_STARTING_MODE) {
                         if (Math.abs(autonomicController.getCourseOnRotateStart() - Double.valueOf(array[1])) <= COURSE_ACCURACY) {
@@ -386,7 +386,7 @@ public class Connection {
                             kalmanFilterAlgorithm.getLock().lock();
                             kalmanFilterAlgorithm.setAccelerationX(Double.parseDouble(linearAccelerationAndAngularSpeed[0]));
                             kalmanFilterAlgorithm.setAccelerationY(Double.parseDouble(linearAccelerationAndAngularSpeed[1]));
-                            kalmanFilterAlgorithm.setAngularSpeed(Double.parseDouble(linearAccelerationAndAngularSpeed[2]));
+                            kalmanFilterAlgorithm.setAngularSpeed(Double.parseDouble(linearAccelerationAndAngularSpeed[2]) * (-1));
                             kalmanFilterAlgorithm.getLock().unlock();
                         } catch (NumberFormatException ex) {
                             log.error("Wrong linearAccelerationAndAngularSpeed values ...");
