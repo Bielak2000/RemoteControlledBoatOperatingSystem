@@ -48,18 +48,18 @@ public class OSMMap {
 
     // TODO: ustawic odpowiednie coordianty po zebraniu wynikow
     @Getter
-    private Coordinate startTestingCoordinate = new Coordinate(50.090715125, 19.8585824444444);
+    private Coordinate startTestingCoordinate = new Coordinate(50.090721, 19.8585595);
 
     @Getter
     private List<Coordinate> testingCoordinates = new ArrayList<>() {
         {
 //            add(new Coordinate(50.090883, 19.8586688571429));
-            add(new Coordinate(50.09082,19.858632));
+            add(new Coordinate(50.090862, 19.858646));
 //            add(new Coordinate(50.090836, 19.858681));
 
-            add(new Coordinate(50.090786, 19.858814));
+            add(new Coordinate(50.090815, 19.858858));
 //            add(new Coordinate(50.0908199, 19.85888925)); - oddalony blizej lasu jak co
-            add(new Coordinate(50.090679, 19.858776));
+            add(new Coordinate(50.090701, 19.858802));
             add(startTestingCoordinate);
         }
     };
