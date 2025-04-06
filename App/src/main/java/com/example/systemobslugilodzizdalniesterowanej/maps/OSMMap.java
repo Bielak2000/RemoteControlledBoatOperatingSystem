@@ -46,20 +46,40 @@ public class OSMMap {
     @Setter
     private Coordinate startWaypoint = null;
 
+//    // TODO: ustawic odpowiednie coordianty po zebraniu wynikow
+//    @Getter
+//    private Coordinate startTestingCoordinate = new Coordinate(50.090721, 19.8585595);
+//
+//    @Getter
+//    private List<Coordinate> testingCoordinates = new ArrayList<>() {
+//        {
+////            add(new Coordinate(50.090883, 19.8586688571429));
+//            add(new Coordinate(50.090862, 19.858646));
+////            add(new Coordinate(50.090836, 19.858681));
+//
+//            add(new Coordinate(50.090815, 19.858858));
+////            add(new Coordinate(50.0908199, 19.85888925)); - oddalony blizej lasu jak co
+//            add(new Coordinate(50.090701, 19.858802));
+//            add(startTestingCoordinate);
+//        }
+//    };
+
     // TODO: ustawic odpowiednie coordianty po zebraniu wynikow
     @Getter
-    private Coordinate startTestingCoordinate = new Coordinate(50.090721, 19.8585595);
+    private Coordinate startTestingCoordinate = new Coordinate(50.09074, 19.858576);
 
     @Getter
     private List<Coordinate> testingCoordinates = new ArrayList<>() {
         {
-//            add(new Coordinate(50.090883, 19.8586688571429));
-            add(new Coordinate(50.090862, 19.858646));
-//            add(new Coordinate(50.090836, 19.858681));
-
-            add(new Coordinate(50.090815, 19.858858));
-//            add(new Coordinate(50.0908199, 19.85888925)); - oddalony blizej lasu jak co
-            add(new Coordinate(50.090701, 19.858802));
+            add(new Coordinate(50.090775, 19.858675));
+            add(new Coordinate(50.09086, 19.85865));
+            add(new Coordinate(50.090893, 19.858755));
+            add(new Coordinate(50.090865, 19.858816));
+            add(new Coordinate(50.090805, 19.858839));
+            add(new Coordinate(50.090778, 19.858789));
+            add(new Coordinate(50.090755, 19.858829));
+            add(new Coordinate(50.090736, 19.858748));
+            add(new Coordinate(50.090672, 19.858782));
             add(startTestingCoordinate);
         }
     };

@@ -56,7 +56,7 @@ public class StartSwimmingDialogController {
 
     @FXML
     void swimming(ActionEvent event) throws IOException, InterruptedException {
-        if (osmMap.getDesignatedWaypoints().size() > 5) {
+        if (osmMap.getDesignatedWaypoints().size() > 15) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Błędne dane");
             alert.setHeaderText("Wybrałeś zbyt dużo punktów, możesz wybrać maksymalnie 5 waypointów.");
