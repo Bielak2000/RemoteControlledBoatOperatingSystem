@@ -46,25 +46,46 @@ public class OSMMap {
     @Setter
     private Coordinate startWaypoint = null;
 
-//    // TODO: ustawic odpowiednie coordianty po zebraniu wynikow
+//    TODO: 29-30.03 - DZWOLA
 //    @Getter
-//    private Coordinate startTestingCoordinate = new Coordinate(50.090721, 19.8585595);
+//    private Coordinate startTestingCoordinate = new Coordinate(50.6924563333333, 22.5879335);
+//    private List<Coordinate> testingCoordinates = new ArrayList<>() {
+//        {
+//          add(new Coordinate(50.6925085454545, 22.5877821666667));
+//          add(new Coordinate(50.6926097142857, 22.5878681428571));
+//          add(new Coordinate(50.6925688, 22.588001));
+//          add(startTestingCoordinate);
+//        }
+//    };
+
+
+//    TODO: 03.04 - KRK
+//    @Getter
+//    private Coordinate startTestingCoordinate = new Coordinate(50.090715125, 19.8585824444444);
 //
 //    @Getter
 //    private List<Coordinate> testingCoordinates = new ArrayList<>() {
 //        {
-////            add(new Coordinate(50.090883, 19.8586688571429));
-//            add(new Coordinate(50.090862, 19.858646));
-////            add(new Coordinate(50.090836, 19.858681));
+//            add(new Coordinate(50.09082,19.858632));
+//            add(new Coordinate(50.090786, 19.858814));
+//            add(new Coordinate(50.090679, 19.858776));
+//            add(startTestingCoordinate);
+//        }
+
+//    TODO: 04.04 - KRK
+//@Getter
+//private Coordinate startTestingCoordinate = new Coordinate(50.090721, 19.8585595);
 //
+//    @Getter
+//    private List<Coordinate> testingCoordinates = new ArrayList<>() {
+//        {
+//            add(new Coordinate(50.090862, 19.858646));
 //            add(new Coordinate(50.090815, 19.858858));
-////            add(new Coordinate(50.0908199, 19.85888925)); - oddalony blizej lasu jak co
 //            add(new Coordinate(50.090701, 19.858802));
 //            add(startTestingCoordinate);
 //        }
-//    };
 
-    // TODO: ustawic odpowiednie coordianty po zebraniu wynikow
+//  TODO: 05.04 - KRK
     @Getter
     private Coordinate startTestingCoordinate = new Coordinate(50.09074, 19.858576);
 
@@ -83,6 +104,26 @@ public class OSMMap {
             add(startTestingCoordinate);
         }
     };
+
+//    TODO: 06-04 wieczorem - KRK
+//    @Getter
+//    private Coordinate startTestingCoordinate = new Coordinate(50.09076, 19.858646);
+//
+//    @Getter
+//    private List<Coordinate> testingCoordinates = new ArrayList<>() {
+//        {
+//            add(new Coordinate(50.090812,19.858711));
+//            add(new Coordinate(50.090891, 19.858676));
+//            add(new Coordinate(50.090901, 19.858805));
+//            add(new Coordinate(50.090904, 19.858894));
+//            add(new Coordinate(50.090807, 19.858941));
+//            add(new Coordinate(50.090798, 19.858882));
+//            add(new Coordinate(50.090751, 19.85889));
+//            add(new Coordinate(50.090736, 19.858812));
+//            add(new Coordinate(50.090683, 19.858788));
+//            add(startTestingCoordinate);
+//        }
+//    };
 
     /**
      * GREEN TAG - waypoint determined by user

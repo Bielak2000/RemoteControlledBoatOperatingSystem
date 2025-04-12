@@ -95,26 +95,21 @@ public class KalmanFilterAlgorithm {
             ArrayRealVector measurementVectorX = new ArrayRealVector(new double[]{
                     gpsLocalization.getX(),      // x
                     gpsLocalization.getY(),      // y
-//                    accelerationX,               // ax
-//                    accelerationY,               // ay
                     course,                      // azymut
                     angularSpeed * 57.2958       // predkosc katowa
             });
             try{
-                kalmanFilter.correct(measurementVectorX);
+                kalmanFilter.correct(measurementVector);
             } catch (Exception e) {
                 log.error("Error while kalman filter executing: {}", e.getMessage());
             }
-//            showCovarianceMatrix(kalmanFilter.getErrorCovarianceMatrix());
             double[] estimatedData = kalmanFilter.getStateEstimation();
             this.currentCourse = estimatedData[6];
-            // sprawdzic dla osi y, ale zamienic kolejnosc esimtaeted
             this.estimatedCoordinate = new OwnCoordinate(estimatedData[1], estimatedData[0]);
             this.currentLocalization = estimatedCoordinate.transformCoordinateToGlobalCoordinateSystem(startWaypointToKalmanAlgorithm);
             setOldValue();
             try {
                 saveDesignatedValueToCSVFile(course);
-//                saveCovarianceMatrixToCSVFile(kalmanFilter.getErrorCovarianceMatrix());
             } catch (IOException ex) {
                 log.error("Error while initialize csv files: {}", ex);
             }
@@ -166,13 +161,12 @@ public class KalmanFilterAlgorithm {
         RealMatrix HX = new Array2DRowRealMatrix(new double[][]{
                 {1, 0, 0, 0, 0, 0, 0, 0}, // x
                 {0, 1, 0, 0, 0, 0, 0, 0}, // y
-//                {0, 0, 0, 0, 1, 0, 0, 0}, // ax
-//                {0, 0, 0, 0, 0, 1, 0, 0}, // ay
                 {0, 0, 0, 0, 0, 0, 1, 0}, // ax
                 {0, 0, 0, 0, 0, 0, 0, 1} // ay
         });
 
-        // ustaiwenia domyslne z grudnia
+        // WSZYSTKIE I NAJLEPSZE WYNIKI DLA Q1, R1 i QX1, RX1
+
         RealMatrix Q1 = new Array2DRowRealMatrix(new double[][]{
                 {0.01, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0.01, 0, 0, 0, 0, 0, 0},
@@ -282,8 +276,8 @@ public class KalmanFilterAlgorithm {
 
         // od Q1, Q2, Q4, ..., Q14
         ArrayRealVector initialState = new ArrayRealVector(new double[]{0, 0, 0, 0, 0, 0, 0, 0});
-        DefaultProcessModel processModel = new DefaultProcessModel(A, B, QX1, initialState, initialP);
-        DefaultMeasurementModel measurementModel = new DefaultMeasurementModel(HX, RX1);
+        DefaultProcessModel processModel = new DefaultProcessModel(A, B, Q1, initialState, initialP);
+        DefaultMeasurementModel measurementModel = new DefaultMeasurementModel(H, R1);
         kalmanFilter = new KalmanFilter(processModel, measurementModel);
         log.info("Ended kalman filter initialization");
     }
