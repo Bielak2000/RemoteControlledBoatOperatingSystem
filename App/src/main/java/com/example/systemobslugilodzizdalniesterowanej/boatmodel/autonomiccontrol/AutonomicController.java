@@ -15,7 +15,7 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.calcu
 public class AutonomicController {
 
     private static double MAX_PERCENTAGE_ENGINE_POWER = 50;
-    private static int DISTANCE_ACCURACY_METERS = 2;
+    private static double DISTANCE_ACCURACY_METERS = 1.5;
     private static double MIN_DISTANCE_FOR_LINEAR_SPEED_METERS = 1.5;
     private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 20.0;
     private static double MIN_LINEAR_SPEED_PERCENTAGE = 10.0;
@@ -38,6 +38,9 @@ public class AutonomicController {
     @Setter
     @Getter
     private boolean manuallyFinishSwimming = true;
+    @Getter
+    @Setter
+    private boolean archiveLastWaypoint = false;
 
     public AutonomicController(OSMMap osmMap) {
         this.osmMap = osmMap;
@@ -52,9 +55,10 @@ public class AutonomicController {
     }
 
     public LinearAndAngularSpeed designateEnginesPower() {
-        if(osmMap.getNextWaypointOnTheRoad() == null) {
+        if (osmMap.getNextWaypointOnTheRoad() == null || osmMap.getFirstStartWaypointToCSV() == null) {
             osmMap.setNextWaypointOnTheRoad(osmMap.getDesignatedWaypoints().get(osmMap.getWaypointIndex()).getPosition());
             osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());
+            osmMap.setFirstStartWaypointToCSV(osmMap.getCurrentBoatPosition());
         }
         double distance = calculateDistance(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
         log.info("Distance to next waypoint: {}", distance);
@@ -69,6 +73,8 @@ public class AutonomicController {
             } else {
                 osmMap.setStartWaypoint(null);
                 osmMap.setNextWaypointOnTheRoad(null);
+                osmMap.setFirstStartWaypointToCSV(null);
+                archiveLastWaypoint = true;
                 return null;
             }
         } else {
@@ -117,7 +123,7 @@ public class AutonomicController {
     private double getAngularSpeed(double expectedCourse, double currentCourse) {
         double courseDifference = expectedCourse - currentCourse;
         double angularSpeed = (courseDifference / 360.0) * MAX_PERCENTAGE_ENGINE_POWER;
-        if(Math.abs(courseDifference) < 180 ) {
+        if (Math.abs(courseDifference) < 180) {
             angularSpeed = -1 * angularSpeed;
         }
         return angularSpeed;

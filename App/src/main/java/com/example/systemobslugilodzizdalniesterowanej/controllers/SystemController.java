@@ -255,7 +255,7 @@ public class SystemController implements Initializable {
 //        if (true) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "start-swimming-dialog.fxml"));
             Stage mainStage = new Stage();
-            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(mainStage, boatModeController, connection, osmMap, autonomicController, runningBoatInformation);
+            StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(chosenAlgorithm, mainStage, boatModeController, connection, osmMap, autonomicController, runningBoatInformation);
             fxmlLoader.setController(startSwimmingDialogController);
             Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
