@@ -39,6 +39,7 @@ public class AutonomicController {
     @Getter
     private boolean manuallyFinishSwimming = true;
     @Getter
+    @Setter
     private boolean archiveLastWaypoint = false;
 
     public AutonomicController(OSMMap osmMap) {

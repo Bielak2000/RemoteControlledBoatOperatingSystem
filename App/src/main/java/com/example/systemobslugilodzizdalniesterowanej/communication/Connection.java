@@ -300,10 +300,12 @@ public class Connection {
                 osmMap.setNextWaypointOnTheRoad(null);
                 osmMap.setStartWaypoint(null);
                 osmMap.setWaypointIndex(0);
+                autonomicController.setArchiveLastWaypoint(false);
                 boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
                 modeChooser.setSelected(false);
                 if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
-//                    kalmanFilterAlgorithm.setNextWaypoint(null);
+                    kalmanFilterAlgorithm.setNextWaypoint(null);
+                    kalmanFilterAlgorithm.setNextWaypoint(null);
                     kalmanFilterAlgorithm.getLock().unlock();
                 }
                 sendingValuesLock.unlock();
