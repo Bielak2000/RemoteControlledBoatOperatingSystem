@@ -304,7 +304,7 @@ public class Connection {
                 boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
                 modeChooser.setSelected(false);
                 if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
-                    kalmanFilterAlgorithm.setNextWaypoint(null);
+                    kalmanFilterAlgorithm.setStartWaypoint(null);
                     kalmanFilterAlgorithm.setNextWaypoint(null);
                     kalmanFilterAlgorithm.getLock().unlock();
                 }
