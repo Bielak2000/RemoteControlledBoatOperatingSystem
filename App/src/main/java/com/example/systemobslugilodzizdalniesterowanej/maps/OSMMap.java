@@ -85,25 +85,25 @@ public class OSMMap {
 //            add(startTestingCoordinate);
 //        }
 
-//  TODO: 05.04 - KRK
-    @Getter
-    private Coordinate startTestingCoordinate = new Coordinate(50.09074, 19.858576);
-
-    @Getter
-    private List<Coordinate> testingCoordinates = new ArrayList<>() {
-        {
-            add(new Coordinate(50.090775, 19.858675));
-            add(new Coordinate(50.09086, 19.85865));
-            add(new Coordinate(50.090893, 19.858755));
-            add(new Coordinate(50.090865, 19.858816));
-            add(new Coordinate(50.090805, 19.858839));
-            add(new Coordinate(50.090778, 19.858789));
-            add(new Coordinate(50.090755, 19.858829));
-            add(new Coordinate(50.090736, 19.858748));
-            add(new Coordinate(50.090672, 19.858782));
-            add(startTestingCoordinate);
-        }
-    };
+////  TODO: 05.04 - KRK
+//    @Getter
+//    private Coordinate startTestingCoordinate = new Coordinate(50.09074, 19.858576);
+//
+//    @Getter
+//    private List<Coordinate> testingCoordinates = new ArrayList<>() {
+//        {
+//            add(new Coordinate(50.090775, 19.858675));
+//            add(new Coordinate(50.09086, 19.85865));
+//            add(new Coordinate(50.090893, 19.858755));
+//            add(new Coordinate(50.090865, 19.858816));
+//            add(new Coordinate(50.090805, 19.858839));
+//            add(new Coordinate(50.090778, 19.858789));
+//            add(new Coordinate(50.090755, 19.858829));
+//            add(new Coordinate(50.090736, 19.858748));
+//            add(new Coordinate(50.090672, 19.858782));
+//            add(startTestingCoordinate);
+//        }
+//    };
 
 //    TODO: 06-04 wieczorem - KRK
 //    @Getter
@@ -153,12 +153,10 @@ public class OSMMap {
         mapView.addEventHandler(MapViewEvent.MAP_RIGHTCLICKED, event -> {
             if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC) {
                 event.consume();
-                testingCoordinates.forEach(coordinate -> {
-                    Marker newMarker = Marker.createProvided(Marker.Provided.GREEN).setPosition(coordinate).setVisible(true);
-                    markerList.add(newMarker);
-                    mapView.addMarker(newMarker);
-                    generateTrace();
-                });
+                Marker newMarker = Marker.createProvided(Marker.Provided.GREEN).setPosition(new Coordinate(event.getCoordinate().getLatitude(), event.getCoordinate().getLongitude())).setVisible(true);
+                markerList.add(newMarker);
+                mapView.addMarker(newMarker);
+                generateTrace();
             }
         });
     }

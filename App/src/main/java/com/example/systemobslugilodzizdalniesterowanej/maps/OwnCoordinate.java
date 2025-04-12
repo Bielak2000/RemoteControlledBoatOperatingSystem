@@ -34,6 +34,12 @@ public class OwnCoordinate {
         return new Coordinate(lat2, lon2);
     }
 
+    public static double calculateDistanceBetweenTwoPoints(OwnCoordinate ownCoordinate1, OwnCoordinate ownCoordinate2) {
+        double dx = ownCoordinate2.getX() - ownCoordinate1.getX();
+        double dy = ownCoordinate2.getY() - ownCoordinate1.getY();
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

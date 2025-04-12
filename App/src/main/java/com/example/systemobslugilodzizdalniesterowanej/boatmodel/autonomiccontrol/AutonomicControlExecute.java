@@ -85,12 +85,6 @@ public class AutonomicControlExecute {
     }
 
     private void saveDataToCSVFileWhileTesting() throws IOException {
-        Double expectedCourseByPoints = null;
-        if (osmMap.getDesignatedWaypoints().size() >= 0) {
-            Coordinate first = osmMap.getWaypointIndex() == 0 ? osmMap.getStartTestingCoordinate() : osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex() - 1);
-            Coordinate second = osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex());
-            expectedCourseByPoints = Utils.determineCourseBetweenTwoWaypoints(first, second);
-        }
         if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER && this.kalmanFilterAlgorithm.getStartWaypoint() != null
                 && this.kalmanFilterAlgorithm.getNextWaypoint() != null) {
             Utils.saveDesignatedValueToCSVFileWhileTesting(
@@ -100,7 +94,7 @@ public class AutonomicControlExecute {
                     this.kalmanFilterAlgorithm.getExpectedCourse().getText(),
                     String.valueOf(this.kalmanFilterAlgorithm.getCurrentCourse()),
                     String.valueOf(connection.getSensorCourse().getText()),
-                    this.testingCsvFileName, true, expectedCourseByPoints
+                    this.testingCsvFileName, true
             );
         } else if (this.osmMap.getStartWaypoint() != null && this.osmMap.getNextWaypointOnTheRoad() != null) {
             Utils.saveDesignatedValueToCSVFileWhileTesting(
@@ -110,7 +104,7 @@ public class AutonomicControlExecute {
                     this.osmMap.getExpectedCourse().getText(),
                     String.valueOf(this.osmMap.getCurrentCourse()),
                     String.valueOf(connection.getSensorCourse().getText()),
-                    this.testingCsvFileName, false, expectedCourseByPoints
+                    this.testingCsvFileName, false
             );
         }
     }

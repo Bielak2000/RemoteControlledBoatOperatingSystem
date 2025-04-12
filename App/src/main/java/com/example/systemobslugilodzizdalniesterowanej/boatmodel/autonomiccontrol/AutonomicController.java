@@ -57,10 +57,7 @@ public class AutonomicController {
     public LinearAndAngularSpeed designateEnginesPower() {
         if (osmMap.getNextWaypointOnTheRoad() == null) {
             osmMap.setNextWaypointOnTheRoad(osmMap.getDesignatedWaypoints().get(osmMap.getWaypointIndex()).getPosition());
-// TODO: tylko do testow, zamiast brac pozycje lodzi to bieremy punkt startowy
-            //            osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());
-            osmMap.setStartWaypoint(osmMap.getStartTestingCoordinate());
-
+            osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());
         }
         double distance = calculateDistance(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
         log.info("Distance to next waypoint: {}", distance);
@@ -70,9 +67,7 @@ public class AutonomicController {
             List<Marker> markerList = osmMap.getDesignatedWaypoints();
             if (osmMap.getWaypointIndex() < markerList.size()) {
                 osmMap.setNextWaypointOnTheRoad(markerList.get(osmMap.getWaypointIndex()).getPosition());
-                // TODO: tylko do testow, zamiast brac pozycje lodzi to bieremy poprzedni punkt z listy
-//                osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());
-                osmMap.setStartWaypoint(markerList.get(osmMap.getWaypointIndex() - 1).getPosition());
+                osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());
                 return determinateLinearAndAngularSpeed(distance);
             } else {
                 osmMap.setStartWaypoint(null);
@@ -126,7 +121,7 @@ public class AutonomicController {
     private double getAngularSpeed(double expectedCourse, double currentCourse) {
         double courseDifference = expectedCourse - currentCourse;
         double angularSpeed = (courseDifference / 360.0) * MAX_PERCENTAGE_ENGINE_POWER;
-        if(Math.abs(courseDifference) < 180 ) {
+        if (Math.abs(courseDifference) < 180) {
             angularSpeed = -1 * angularSpeed;
         }
         return angularSpeed;

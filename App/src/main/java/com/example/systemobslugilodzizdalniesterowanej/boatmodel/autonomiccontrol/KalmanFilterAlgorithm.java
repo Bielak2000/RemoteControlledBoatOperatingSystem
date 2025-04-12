@@ -72,12 +72,6 @@ public class KalmanFilterAlgorithm {
         this.expectedCourse = expectedCourse;
     }
 
-    public KalmanFilterAlgorithm(Label expectedCourse, Coordinate startCoordForTesting) {
-        this.expectedCourse = expectedCourse;
-        this.gpsLocalization = new OwnCoordinate(0, 0);
-        this.startWaypointToKalmanAlgorithm = startCoordForTesting;
-    }
-
     public boolean designateCurrentCourseAndLocalization() {
         if (checkValidData()) {
             double course = designateCurrentCourse();
@@ -294,9 +288,12 @@ public class KalmanFilterAlgorithm {
                     )
                     .collect(Collectors.toList());
             startWaypointToKalmanAlgorithm = closePoints.get(closePoints.size() - 1);
-            gpsLocalization = new OwnCoordinate(closePoints.get(closePoints.size() - 1), startWaypointToKalmanAlgorithm);
+            gpsLocalization = new OwnCoordinate(0, 0);
         } else {
-            gpsLocalization = new OwnCoordinate(newLocalization, startWaypointToKalmanAlgorithm);
+            OwnCoordinate newPoint = new OwnCoordinate(newLocalization, startWaypointToKalmanAlgorithm);
+            if (gpsLocalization == null || OwnCoordinate.calculateDistanceBetweenTwoPoints(newPoint, gpsLocalization) < 15) {
+                gpsLocalization = newPoint;
+            }
         }
     }
 

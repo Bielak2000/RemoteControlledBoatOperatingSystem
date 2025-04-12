@@ -114,8 +114,7 @@ public class Utils {
     }
 
     public static void saveDesignatedValueToCSVFileWhileTesting(OwnCoordinate startPoint, OwnCoordinate destinationPoint, OwnCoordinate currentPoint,
-                                                                String expectedCourse, String currentCourse, String sensorCourse, String fileName, boolean reeversed,
-                                                                Double expectedCourseStart) throws IOException {
+                                                                String expectedCourse, String currentCourse, String sensorCourse, String fileName, boolean reeversed) throws IOException {
         Double distance = distanceFromLine(startPoint, destinationPoint, currentPoint, reeversed);
         double x, y;
         if (reeversed) {
@@ -133,7 +132,6 @@ public class Utils {
                 String.valueOf(currentPoint == null ? "brak" : x + ";" + y),
                 String.valueOf(distance == null ? "brak" : String.format("%.2f", distance)),
                 String.valueOf(expectedCourse == null ? "brak" : expectedCourse),
-                String.valueOf(expectedCourseStart == null ? "brak" : expectedCourseStart),
                 String.valueOf(expectedCourse == null ? "brak" : sensorCourse),
                 String.valueOf(currentCourse == null ? "brak" : currentCourse)
         });

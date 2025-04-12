@@ -415,34 +415,31 @@ public class Connection {
             Platform.runLater(() -> {
                 if (!localization[0].startsWith("INV") && !localization[0].equals("") && !localization[0].isEmpty()) {
                     Coordinate newCoordinate = new Coordinate(Double.parseDouble(localization[0]), Double.parseDouble(localization[1]));
-                    if (chosenAlgorithm != PositionAlgorithm.KALMAN_FILTER ||
-                            (osmMap.getFoundBoatPosition() && Utils.calculateDistance(newCoordinate, osmMap.getCurrentBoatPosition()) < 15)) {
-                        BoatMode currentBoatMode = boatModeController.getBoatMode();
-                        if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
-                            kalmanFilterAlgorithm.getLock().lock();
-                            kalmanFilterAlgorithm.setGpsLocalizationWithCalibrationHandler(newCoordinate);
-                            kalmanFilterAlgorithm.getLock().unlock();
-                        } else {
-                            if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {
-                                if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
-                                    basicCourseAndGpsAlgorithm.setDesignatedPosition(newCoordinate);
-                                    osmMap.generateTraceFromBoatPosition(basicCourseAndGpsAlgorithm.getDesignatedPosition().getLatitude(), basicCourseAndGpsAlgorithm.getDesignatedPosition().getLongitude());
-                                } else {
-                                    osmMap.generateTraceFromBoatPosition(Double.parseDouble(localization[0]), Double.parseDouble(localization[1]));
-                                }
-                            } else {
-                                if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
-                                    basicCourseAndGpsAlgorithm.setDesignatedPosition(newCoordinate);
-                                    osmMap.setCurrentBoatPositionWhileRunning(basicCourseAndGpsAlgorithm.getDesignatedPosition());
-                                } else {
-                                    osmMap.setCurrentBoatPositionWhileRunning(newCoordinate);
-                                }
-                            }
+                    BoatMode currentBoatMode = boatModeController.getBoatMode();
+                    if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
+                        kalmanFilterAlgorithm.getLock().lock();
+                        kalmanFilterAlgorithm.setGpsLocalizationWithCalibrationHandler(newCoordinate);
+                        kalmanFilterAlgorithm.getLock().unlock();
+                    } else {
+                        if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {
                             if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
-                                basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(null, osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
+                                basicCourseAndGpsAlgorithm.setDesignatedPosition(newCoordinate);
+                                osmMap.generateTraceFromBoatPosition(basicCourseAndGpsAlgorithm.getDesignatedPosition().getLatitude(), basicCourseAndGpsAlgorithm.getDesignatedPosition().getLongitude());
                             } else {
-                                Utils.saveDesignatedValueToCSVFile(fileName, newCoordinate, osmMap.getCurrentCourse(), expectedCourse.getText(), osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
+                                osmMap.generateTraceFromBoatPosition(Double.parseDouble(localization[0]), Double.parseDouble(localization[1]));
                             }
+                        } else {
+                            if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
+                                basicCourseAndGpsAlgorithm.setDesignatedPosition(newCoordinate);
+                                osmMap.setCurrentBoatPositionWhileRunning(basicCourseAndGpsAlgorithm.getDesignatedPosition());
+                            } else {
+                                osmMap.setCurrentBoatPositionWhileRunning(newCoordinate);
+                            }
+                        }
+                        if (chosenAlgorithm == PositionAlgorithm.BASIC_ALGORITHM) {
+                            basicCourseAndGpsAlgorithm.saveDesignatedValueToCSVFile(null, osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
+                        } else {
+                            Utils.saveDesignatedValueToCSVFile(fileName, newCoordinate, osmMap.getCurrentCourse(), expectedCourse.getText(), osmMap.getNextWaypointOnTheRoad(), osmMap.getStartWaypoint());
                         }
                     }
                 }

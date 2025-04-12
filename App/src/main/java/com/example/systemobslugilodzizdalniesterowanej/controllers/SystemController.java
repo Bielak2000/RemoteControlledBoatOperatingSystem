@@ -80,8 +80,7 @@ public class SystemController implements Initializable {
             throw new RuntimeException(e);
         }
         if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
-//            this.kalmanFilterAlgorithm = new KalmanFilterAlgorithm(expectedCourse);
-            this.kalmanFilterAlgorithm = new KalmanFilterAlgorithm(expectedCourse, osmMap.getStartTestingCoordinate());
+            this.kalmanFilterAlgorithm = new KalmanFilterAlgorithm(expectedCourse);
             this.kalmanFilterAlgorithm.initializeKalmanFilter();
         }
         this.autonomicController = new AutonomicController(osmMap);
