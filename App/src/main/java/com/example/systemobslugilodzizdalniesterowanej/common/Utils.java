@@ -106,7 +106,7 @@ public class Utils {
     public static void saveInitDesignatedValueToCSVFileWhileTesting(String fileName) {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Pkt. startowy", "Pkt. docelowy", "Pkt. aktualny", "Błąd [m]", "Kurs oczekiwany", "Kurs oczekiwany wzg. punktow", "Kurs z sensora", "Kurs aktualny"});
+            data.add(new String[]{"Pkt. startowy", "Pkt. docelowy", "Pkt. aktualny", "Błąd [m]", "Kurs oczekiwany", "Kurs z sensora", "Kurs aktualny"});
             Utils.saveToCsv(data, fileName + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
