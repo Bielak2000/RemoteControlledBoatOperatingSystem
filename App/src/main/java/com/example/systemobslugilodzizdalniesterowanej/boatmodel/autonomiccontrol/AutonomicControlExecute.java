@@ -6,6 +6,7 @@ import com.example.systemobslugilodzizdalniesterowanej.common.Utils;
 import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OwnCoordinate;
+import com.sothawo.mapjfx.Coordinate;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +58,7 @@ public class AutonomicControlExecute {
                 if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {
                     osmMap.generateTraceFromBoatPosition(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
                 } else if (currentBoatMode != BoatMode.AUTONOMIC_STARTING) {
-                    osmMap.setCurrentBoatPositionWhileRunning(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
+                    osmMap.setCurrentBoatPositionWhileRunning(kalmanFilterAlgorithm.getCurrentLocalization());
                 }
             }
             kalmanFilterAlgorithm.getLock().unlock();
@@ -84,23 +85,32 @@ public class AutonomicControlExecute {
     }
 
     private void saveDataToCSVFileWhileTesting() throws IOException {
-        if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
+        Double expectedCourseByPoints = null;
+        if (osmMap.getDesignatedWaypoints().size() >= 0) {
+            Coordinate first = osmMap.getWaypointIndex() == 0 ? osmMap.getStartTestingCoordinate() : osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex() - 1);
+            Coordinate second = osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex());
+            expectedCourseByPoints = Utils.determineCourseBetweenTwoWaypoints(first, second);
+        }
+        if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER && this.kalmanFilterAlgorithm.getStartWaypoint() != null
+                && this.kalmanFilterAlgorithm.getNextWaypoint() != null) {
             Utils.saveDesignatedValueToCSVFileWhileTesting(
                     new OwnCoordinate(this.kalmanFilterAlgorithm.getStartWaypoint(), this.kalmanFilterAlgorithm.getStartWaypointToKalmanAlgorithm()),
                     new OwnCoordinate(this.kalmanFilterAlgorithm.getNextWaypoint(), this.kalmanFilterAlgorithm.getStartWaypointToKalmanAlgorithm()),
                     this.kalmanFilterAlgorithm.estimatedCoordinate,
                     this.kalmanFilterAlgorithm.getExpectedCourse().getText(),
                     String.valueOf(this.kalmanFilterAlgorithm.getCurrentCourse()),
-                    this.testingCsvFileName
+                    String.valueOf(connection.getSensorCourse().getText()),
+                    this.testingCsvFileName, true, expectedCourseByPoints
             );
-        } else {
+        } else if (this.osmMap.getStartWaypoint() != null && this.osmMap.getNextWaypointOnTheRoad() != null) {
             Utils.saveDesignatedValueToCSVFileWhileTesting(
                     new OwnCoordinate(this.osmMap.getStartWaypoint(), this.osmMap.getStartTestingCoordinate()),
                     new OwnCoordinate(this.osmMap.getNextWaypointOnTheRoad(), this.osmMap.getStartTestingCoordinate()),
                     new OwnCoordinate(this.osmMap.getCurrentBoatPosition(), this.osmMap.getStartTestingCoordinate()),
                     this.osmMap.getExpectedCourse().getText(),
                     String.valueOf(this.osmMap.getCurrentCourse()),
-                    this.testingCsvFileName
+                    String.valueOf(connection.getSensorCourse().getText()),
+                    this.testingCsvFileName, false, expectedCourseByPoints
             );
         }
     }

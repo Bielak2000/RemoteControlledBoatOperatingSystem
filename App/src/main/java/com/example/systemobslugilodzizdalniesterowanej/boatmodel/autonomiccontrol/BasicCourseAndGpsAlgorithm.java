@@ -61,7 +61,7 @@ public class BasicCourseAndGpsAlgorithm {
                                 .allMatch(pointB -> Utils.calculateDistance(pointA, pointB) <= GPS_POSITION_MAX_ACCURACY_DIFF_METERS)
                         )
                         .collect(Collectors.toList());
-                this.designatedPosition = closePoints.get(closePoints.size() - 1);
+                this.designatedPosition = closePoints.size() == 0 ? newPosition : closePoints.get(closePoints.size() - 1);
             }
         } else if (Utils.calculateDistance(designatedPosition, newPosition) < GPS_POSITION_MAX_ACCURACY_DIFF_METERS) {
             this.designatedPosition = newPosition;

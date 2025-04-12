@@ -15,7 +15,7 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.calcu
 public class AutonomicController {
 
     private static double MAX_PERCENTAGE_ENGINE_POWER = 50;
-    private static int DISTANCE_ACCURACY_METERS = 1;
+    private static double DISTANCE_ACCURACY_METERS = 1.5;
     private static double MIN_DISTANCE_FOR_LINEAR_SPEED_METERS = 1.5;
     private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 20.0;
     private static double MIN_LINEAR_SPEED_PERCENTAGE = 10.0;
@@ -38,6 +38,9 @@ public class AutonomicController {
     @Setter
     @Getter
     private boolean manuallyFinishSwimming = true;
+    @Getter
+    @Setter
+    private boolean archiveLastWaypoint = false;
 
     public AutonomicController(OSMMap osmMap) {
         this.osmMap = osmMap;
@@ -74,6 +77,7 @@ public class AutonomicController {
             } else {
                 osmMap.setStartWaypoint(null);
                 osmMap.setNextWaypointOnTheRoad(null);
+                archiveLastWaypoint = true;
                 return null;
             }
         } else {

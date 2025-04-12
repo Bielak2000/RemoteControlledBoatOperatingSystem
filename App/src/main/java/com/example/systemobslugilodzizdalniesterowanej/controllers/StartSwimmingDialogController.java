@@ -4,6 +4,7 @@ import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.LinearAndAngularSpeed;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.PositionAlgorithm;
 import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
 import javafx.application.Platform;
@@ -27,7 +28,8 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_
 @Slf4j
 public class StartSwimmingDialogController {
     ExecutorService executor = Executors.newFixedThreadPool(2);
-    private static int MAX_STARTING_BOAT_TIME_SECONDS = 10;
+    // TODO: pamietac zeby to cofnac
+    private static int MAX_STARTING_BOAT_TIME_SECONDS = 5;
     private final static String BOAT_RUNNING_SWIMMING_INFORMATION = "Łódka porszua się po wyznaczonych punktach. Nie wyłączaj aplikacji i nie wykonuj żadnych czynności, czekaj na informację z łodzi o uzyskaniu docelowej pozycji. Możesz zastopować łódź przyciskiem STOP.";
     Stage stage;
     BoatModeController boatModeController;
@@ -35,14 +37,16 @@ public class StartSwimmingDialogController {
     Connection connection;
     OSMMap osmMap;
     private Label runningBoatInformation;
+    private PositionAlgorithm chosenAlgorithm;
 
-    public StartSwimmingDialogController(Stage stage, BoatModeController boatModeController, Connection connection, OSMMap osmMap, AutonomicController autonomicController, Label runningBoatInformation) {
+    public StartSwimmingDialogController(PositionAlgorithm chosenAlgorithm, Stage stage, BoatModeController boatModeController, Connection connection, OSMMap osmMap, AutonomicController autonomicController, Label runningBoatInformation) {
         this.stage = stage;
         this.boatModeController = boatModeController;
         this.connection = connection;
         this.osmMap = osmMap;
         this.autonomicController = autonomicController;
         this.runningBoatInformation = runningBoatInformation;
+        this.chosenAlgorithm = chosenAlgorithm;
     }
 
     @FXML
@@ -80,18 +84,20 @@ public class StartSwimmingDialogController {
             stage1.show();
             root.requestFocus();
             executor.submit(() -> {
-                LinearAndAngularSpeed linearAndAngularSpeed;
-                linearAndAngularSpeed = autonomicController.designateRightEnginesPowerOnStart();
-                try {
-                    startAndStopRotating(linearAndAngularSpeed);
-                } catch (InterruptedException e) {
-                    log.error("Error while startAndStopRotatnig: {}", e.getMessage());
-                }
-                linearAndAngularSpeed = autonomicController.designateLeftEnginesPowerOnStart();
-                try {
-                    startAndStopRotating(linearAndAngularSpeed);
-                } catch (InterruptedException e) {
-                    log.error("Error while startAndStopRotatnig: {}", e.getMessage());
+                if (chosenAlgorithm != PositionAlgorithm.ONLY_GPS) {
+                    LinearAndAngularSpeed linearAndAngularSpeed;
+                    linearAndAngularSpeed = autonomicController.designateRightEnginesPowerOnStart();
+                    try {
+                        startAndStopRotating(linearAndAngularSpeed);
+                    } catch (InterruptedException e) {
+                        log.error("Error while startAndStopRotatnig: {}", e.getMessage());
+                    }
+                    linearAndAngularSpeed = autonomicController.designateLeftEnginesPowerOnStart();
+                    try {
+                        startAndStopRotating(linearAndAngularSpeed);
+                    } catch (InterruptedException e) {
+                        log.error("Error while startAndStopRotatnig: {}", e.getMessage());
+                    }
                 }
                 Platform.runLater(() -> {
                     runningBoatInformation.setVisible(true);

@@ -106,7 +106,7 @@ public class Utils {
     public static void saveInitDesignatedValueToCSVFileWhileTesting(String fileName) {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Pkt. startowy", "Pkt. docelowy", "Pkt. aktualny", "Błąd [m]", "Kurs oczekiwany", "Kurs aktualny"});
+            data.add(new String[]{"Pkt. startowy", "Pkt. docelowy", "Pkt. aktualny", "Błąd [m]", "Kurs oczekiwany", "Kurs oczekiwany wzg. punktow", "Kurs z sensora", "Kurs aktualny"});
             Utils.saveToCsv(data, fileName + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
@@ -114,16 +114,27 @@ public class Utils {
     }
 
     public static void saveDesignatedValueToCSVFileWhileTesting(OwnCoordinate startPoint, OwnCoordinate destinationPoint, OwnCoordinate currentPoint,
-                                                                String expectedCourse, String currentCourse, String fileName) throws IOException {
-        Double distance = distanceFromLine(startPoint, destinationPoint, currentPoint);
-        ;
+                                                                String expectedCourse, String currentCourse, String sensorCourse, String fileName, boolean reeversed,
+                                                                Double expectedCourseStart) throws IOException {
+        Double distance = distanceFromLine(startPoint, destinationPoint, currentPoint, reeversed);
+        double x, y;
+        if (reeversed) {
+            x = currentPoint.getY();
+            y = currentPoint.getX();
+
+        } else {
+            x = currentPoint.getX();
+            y = currentPoint.getY();
+        }
         List<String[]> data = new ArrayList<>();
         data.add(new String[]{
                 String.valueOf(startPoint == null ? "brak" : startPoint.getX() + ";" + startPoint.getY()),
                 String.valueOf(destinationPoint == null ? "brak" : destinationPoint.getX() + ";" + destinationPoint.getY()),
-                String.valueOf(currentPoint == null ? "brak" : currentPoint.getX() + ";" + currentPoint.getY()),
+                String.valueOf(currentPoint == null ? "brak" : x + ";" + y),
                 String.valueOf(distance == null ? "brak" : String.format("%.2f", distance)),
                 String.valueOf(expectedCourse == null ? "brak" : expectedCourse),
+                String.valueOf(expectedCourseStart == null ? "brak" : expectedCourseStart),
+                String.valueOf(expectedCourse == null ? "brak" : sensorCourse),
                 String.valueOf(currentCourse == null ? "brak" : currentCourse)
         });
         Utils.saveToCsv(data, fileName + ".csv");
@@ -135,12 +146,17 @@ public class Utils {
      * @param currentPoint
      * @return odleglosc w metrach
      */
-    private static Double distanceFromLine(OwnCoordinate startPoint, OwnCoordinate destinationPoint, OwnCoordinate currentPoint) {
+    private static Double distanceFromLine(OwnCoordinate startPoint, OwnCoordinate destinationPoint, OwnCoordinate currentPoint, boolean reversed) {
         if (startPoint != null && destinationPoint != null && currentPoint != null) {
             double A = destinationPoint.getY() - startPoint.getY();
             double B = startPoint.getX() - destinationPoint.getX();
             double C = destinationPoint.getX() * startPoint.getY() - startPoint.getX() * destinationPoint.getY();
-            return Math.abs(A * currentPoint.getX() + B * currentPoint.getY() + C) / Math.sqrt(A * A + B * B);
+            if (reversed) {
+                return Math.abs(A * currentPoint.getY() + B * currentPoint.getX() + C) / Math.sqrt(A * A + B * B);
+            } else {
+                return Math.abs(A * currentPoint.getX() + B * currentPoint.getY() + C) / Math.sqrt(A * A + B * B);
+            }
+
         } else return null;
     }
 
