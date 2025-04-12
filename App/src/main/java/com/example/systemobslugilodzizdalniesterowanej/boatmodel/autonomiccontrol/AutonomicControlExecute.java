@@ -98,9 +98,9 @@ public class AutonomicControlExecute {
             );
         } else if (this.osmMap.getStartWaypoint() != null && this.osmMap.getNextWaypointOnTheRoad() != null) {
             Utils.saveDesignatedValueToCSVFileWhileTesting(
-                    new OwnCoordinate(this.osmMap.getStartWaypoint(), this.osmMap.getStartTestingCoordinate()),
-                    new OwnCoordinate(this.osmMap.getNextWaypointOnTheRoad(), this.osmMap.getStartTestingCoordinate()),
-                    new OwnCoordinate(this.osmMap.getCurrentBoatPosition(), this.osmMap.getStartTestingCoordinate()),
+                    new OwnCoordinate(this.osmMap.getStartWaypoint(), this.osmMap.getFirstStartWaypointToCSV()),
+                    new OwnCoordinate(this.osmMap.getNextWaypointOnTheRoad(), this.osmMap.getFirstStartWaypointToCSV()),
+                    new OwnCoordinate(this.osmMap.getCurrentBoatPosition(), this.osmMap.getFirstStartWaypointToCSV()),
                     this.osmMap.getExpectedCourse().getText(),
                     String.valueOf(this.osmMap.getCurrentCourse()),
                     String.valueOf(connection.getSensorCourse().getText()),

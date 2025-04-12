@@ -55,9 +55,10 @@ public class AutonomicController {
     }
 
     public LinearAndAngularSpeed designateEnginesPower() {
-        if (osmMap.getNextWaypointOnTheRoad() == null) {
+        if (osmMap.getNextWaypointOnTheRoad() == null || osmMap.getFirstStartWaypointToCSV() == null) {
             osmMap.setNextWaypointOnTheRoad(osmMap.getDesignatedWaypoints().get(osmMap.getWaypointIndex()).getPosition());
             osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());
+            osmMap.setFirstStartWaypointToCSV(osmMap.getCurrentBoatPosition());
         }
         double distance = calculateDistance(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
         log.info("Distance to next waypoint: {}", distance);
@@ -72,6 +73,7 @@ public class AutonomicController {
             } else {
                 osmMap.setStartWaypoint(null);
                 osmMap.setNextWaypointOnTheRoad(null);
+                osmMap.setFirstStartWaypointToCSV(null);
                 archiveLastWaypoint = true;
                 return null;
             }

@@ -45,6 +45,9 @@ public class OSMMap {
     private Double currentCourse = null;
     @Setter
     private Coordinate startWaypoint = null;
+    @Setter
+    @Getter
+    private Coordinate firstStartWaypointToCSV = null;
 
 //    TODO: 29-30.03 - DZWOLA
 //    @Getter
