@@ -98,7 +98,7 @@ public class KalmanFilterAlgorithm {
                     course,                      // azymut
                     angularSpeed * 57.2958       // predkosc katowa
             });
-            try{
+            try {
                 kalmanFilter.correct(measurementVector);
             } catch (Exception e) {
                 log.error("Error while kalman filter executing: {}", e.getMessage());
@@ -282,23 +282,22 @@ public class KalmanFilterAlgorithm {
         log.info("Ended kalman filter initialization");
     }
 
-    // sprawdzic z i bez kalibracji
+    // TODO: sprawdzic z i bez kalibracji - na testach to nie dzialalo, odkomentowalem, powinno byc z tym tylko na poczatku niech lapie kilka polozen
     public void setGpsLocalizationWithCalibrationHandler(Coordinate newLocalization) {
-//        if (gpsLocalizationCalibration.size() < MIN_GPS_CALIBRATION_COUNT) {
-//            gpsLocalizationCalibration.add(newLocalization);
-//        } else
-//        if (gpsLocalization == null && startWaypointToKalmanAlgorithm == null) {
-//            gpsLocalizationCalibration.add(newLocalization);
-//            List<Coordinate> closePoints = gpsLocalizationCalibration.stream()
-//                    .filter(pointA -> gpsLocalizationCalibration.stream()
-//                            .allMatch(pointB -> Utils.calculateDistance(pointA, pointB) <= GPS_CALIBRATION_ACCURACY)
-//                    )
-//                    .collect(Collectors.toList());
-//            startWaypointToKalmanAlgorithm = closePoints.get(closePoints.size() - 1);
-//            gpsLocalization = new OwnCoordinate(closePoints.get(closePoints.size() - 1), startWaypointToKalmanAlgorithm);
-//        } else {
+        if (gpsLocalizationCalibration.size() < MIN_GPS_CALIBRATION_COUNT) {
+            gpsLocalizationCalibration.add(newLocalization);
+        } else if (gpsLocalization == null && startWaypointToKalmanAlgorithm == null) {
+            gpsLocalizationCalibration.add(newLocalization);
+            List<Coordinate> closePoints = gpsLocalizationCalibration.stream()
+                    .filter(pointA -> gpsLocalizationCalibration.stream()
+                            .allMatch(pointB -> Utils.calculateDistance(pointA, pointB) <= GPS_CALIBRATION_ACCURACY)
+                    )
+                    .collect(Collectors.toList());
+            startWaypointToKalmanAlgorithm = closePoints.get(closePoints.size() - 1);
+            gpsLocalization = new OwnCoordinate(closePoints.get(closePoints.size() - 1), startWaypointToKalmanAlgorithm);
+        } else {
             gpsLocalization = new OwnCoordinate(newLocalization, startWaypointToKalmanAlgorithm);
-//        }
+        }
     }
 
     private double designateCurrentCourse() {

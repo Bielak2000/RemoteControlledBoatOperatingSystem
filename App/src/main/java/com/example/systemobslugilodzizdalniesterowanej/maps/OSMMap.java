@@ -244,13 +244,13 @@ public class OSMMap {
         return markerList.subList(1, markerList.size());
     }
 
-    public void setCurrentBoatPositionWhileRunning(double latitude, double longitude) {
+    public void setCurrentBoatPositionWhileRunning(Coordinate coordinate) {
         if (currentBoatPositionWhileRunning != null) {
 //            Platform.runLater(() -> {
 //                mapView.removeMarker(currentBoatPositionWhileRunning);
 //            });
         }
-        currentBoatPositionWhileRunning = Marker.createProvided(Marker.Provided.RED).setPosition(new Coordinate(latitude, longitude)).setVisible(true);
+        currentBoatPositionWhileRunning = Marker.createProvided(Marker.Provided.RED).setPosition(coordinate).setVisible(true);
         currentBoatPositionWhileRunningList.add(currentBoatPositionWhileRunning);
         Platform.runLater(() -> {
             mapView.addMarker(currentBoatPositionWhileRunning);
@@ -275,7 +275,7 @@ public class OSMMap {
     }
 
     public void setExpectedCourse(Coordinate firstCoordinate, Coordinate secondCoordinate) {
-        this.expectedCourse.setText(String.valueOf(Utils.determineCourseBetweenTwoWaypointsForYAxis(firstCoordinate, secondCoordinate)));
+        this.expectedCourse.setText(String.valueOf(Utils.determineCourseBetweenTwoWaypoints(firstCoordinate, secondCoordinate)));
     }
 
     public void setExpectedCourse(String expectedCourse) {

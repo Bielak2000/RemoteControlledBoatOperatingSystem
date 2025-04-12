@@ -15,8 +15,7 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.calcu
 public class AutonomicController {
 
     private static double MAX_PERCENTAGE_ENGINE_POWER = 50;
-    // TODO - posprawdzac
-    private static double DISTANCE_ACCURACY_METERS = 2.5;
+    private static double DISTANCE_ACCURACY_METERS = 1.5;
     private static double MIN_DISTANCE_FOR_LINEAR_SPEED_METERS = 1.5;
     private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 20.0;
     private static double MIN_LINEAR_SPEED_PERCENTAGE = 10.0;
@@ -97,7 +96,7 @@ public class AutonomicController {
     }
 
     private LinearAndAngularSpeed determinateLinearAndAngularSpeed(double distance) {
-        double newCourse = Utils.determineCourseBetweenTwoWaypointsForYAxis(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
+        double newCourse = Utils.determineCourseBetweenTwoWaypoints(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
         osmMap.setExpectedCourse(String.format("%.2f", newCourse));
         double linearSpeed = getLinearSpeed(distance);
         double angularSpeed = getAngularSpeed(newCourse, osmMap.getCurrentCourse());

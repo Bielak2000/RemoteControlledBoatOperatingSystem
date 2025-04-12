@@ -58,7 +58,7 @@ public class AutonomicControlExecute {
                 if (currentBoatMode != BoatMode.AUTONOMIC_STARTING && currentBoatMode != BoatMode.AUTONOMIC_RUNNING) {
                     osmMap.generateTraceFromBoatPosition(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
                 } else if (currentBoatMode != BoatMode.AUTONOMIC_STARTING) {
-                    osmMap.setCurrentBoatPositionWhileRunning(kalmanFilterAlgorithm.getCurrentLocalization().getLatitude(), kalmanFilterAlgorithm.getCurrentLocalization().getLongitude());
+                    osmMap.setCurrentBoatPositionWhileRunning(kalmanFilterAlgorithm.getCurrentLocalization());
                 }
             }
             kalmanFilterAlgorithm.getLock().unlock();
@@ -89,9 +89,10 @@ public class AutonomicControlExecute {
         if (osmMap.getDesignatedWaypoints().size() >= 0) {
             Coordinate first = osmMap.getWaypointIndex() == 0 ? osmMap.getStartTestingCoordinate() : osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex() - 1);
             Coordinate second = osmMap.getTestingCoordinates().get(osmMap.getWaypointIndex());
-            expectedCourseByPoints = Utils.determineCourseBetweenTwoWaypointsForYAxis(first, second);
+            expectedCourseByPoints = Utils.determineCourseBetweenTwoWaypoints(first, second);
         }
-        if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
+        if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER && this.kalmanFilterAlgorithm.getStartWaypoint() != null
+                && this.kalmanFilterAlgorithm.getNextWaypoint() != null) {
             Utils.saveDesignatedValueToCSVFileWhileTesting(
                     new OwnCoordinate(this.kalmanFilterAlgorithm.getStartWaypoint(), this.kalmanFilterAlgorithm.getStartWaypointToKalmanAlgorithm()),
                     new OwnCoordinate(this.kalmanFilterAlgorithm.getNextWaypoint(), this.kalmanFilterAlgorithm.getStartWaypointToKalmanAlgorithm()),
