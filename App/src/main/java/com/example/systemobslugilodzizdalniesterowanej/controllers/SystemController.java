@@ -244,7 +244,9 @@ public class SystemController implements Initializable {
         } else {
             ProgressDialogController progressDialogController = manuallyStopSwimmingProgressDialog();
             connection.setProgressDialogController(progressDialogController);
+            connection.sendingValuesLock();
             connection.sendStopSwimmingInfo();
+            connection.sendingValuesUnlock();
         }
         modeChooser.getScene().getRoot().requestFocus();
     }
@@ -273,7 +275,9 @@ public class SystemController implements Initializable {
     void stopSwimming(ActionEvent event) throws IOException {
         ProgressDialogController progressDialogController = manuallyStopSwimmingProgressDialog();
         connection.setProgressDialogController(progressDialogController);
+        connection.sendingValuesLock();
         connection.sendStopSwimmingInfo();
+        connection.sendingValuesUnlock();
         changeBoatMode(BoatMode.KEYBOARD_CONTROL);
         modeChooser.setSelected(false);
     }

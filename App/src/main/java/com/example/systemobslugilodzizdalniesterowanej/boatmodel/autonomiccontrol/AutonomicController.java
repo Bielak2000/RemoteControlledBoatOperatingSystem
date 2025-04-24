@@ -3,6 +3,7 @@ package com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontr
 import com.example.systemobslugilodzizdalniesterowanej.common.Utils;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
 import com.sothawo.mapjfx.Marker;
+import javafx.application.Platform;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -71,10 +72,12 @@ public class AutonomicController {
                 osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());
                 return determinateLinearAndAngularSpeed(distance);
             } else {
-                osmMap.setStartWaypoint(null);
-                osmMap.setNextWaypointOnTheRoad(null);
-                osmMap.setFirstStartWaypointToCSV(null);
-                archiveLastWaypoint = true;
+                Platform.runLater(()->{
+                    osmMap.setStartWaypoint(null);
+                    osmMap.setNextWaypointOnTheRoad(null);
+                    osmMap.setFirstStartWaypointToCSV(null);
+                    archiveLastWaypoint = true;
+                });
                 return null;
             }
         } else {

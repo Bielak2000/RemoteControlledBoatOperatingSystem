@@ -68,6 +68,18 @@ public class KalmanFilterAlgorithm {
     @Getter
     private Lock lock = new ReentrantLock();
 
+    public void kalmanLocked() {
+        log.info("Kalman locking");
+        lock.lock();
+        log.info("Kalman locked");
+    }
+
+    public void kalmanUnlocked() {
+        log.info("Kalman unlocking");
+        lock.unlock();
+        log.info("Kalman unlocked");
+    }
+
     public KalmanFilterAlgorithm(Label expectedCourse) {
         this.expectedCourse = expectedCourse;
     }
@@ -287,7 +299,7 @@ public class KalmanFilterAlgorithm {
                             .allMatch(pointB -> Utils.calculateDistance(pointA, pointB) <= GPS_CALIBRATION_ACCURACY)
                     )
                     .collect(Collectors.toList());
-            startWaypointToKalmanAlgorithm = closePoints.get(closePoints.size() - 1);
+            startWaypointToKalmanAlgorithm = closePoints.size() != 0 ? closePoints.get(closePoints.size() - 1) : newLocalization;
             gpsLocalization = new OwnCoordinate(0, 0);
         } else {
             OwnCoordinate newPoint = new OwnCoordinate(newLocalization, startWaypointToKalmanAlgorithm);

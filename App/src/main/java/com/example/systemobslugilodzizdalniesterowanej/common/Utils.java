@@ -106,7 +106,7 @@ public class Utils {
     public static void saveInitDesignatedValueToCSVFileWhileTesting(String fileName) {
         try {
             List<String[]> data = new ArrayList<>();
-            data.add(new String[]{"Pkt. startowy", "Pkt. docelowy", "Pkt. aktualny", "Błąd [m]", "Kurs oczekiwany", "Kurs z sensora", "Kurs aktualny"});
+            data.add(new String[]{"Pkt. startowy", "Pkt. docelowy", "Pkt. aktualny", "Błąd [m]", "Kurs oczekiwany", "Kurs z sensora", "Kurs aktualny", "Odl. Nast. Wayp."});
             Utils.saveToCsv(data, fileName + ".csv");
         } catch (IOException ex) {
             log.error("Error while initalize csv file: {}", ex);
@@ -114,7 +114,8 @@ public class Utils {
     }
 
     public static void saveDesignatedValueToCSVFileWhileTesting(OwnCoordinate startPoint, OwnCoordinate destinationPoint, OwnCoordinate currentPoint,
-                                                                String expectedCourse, String currentCourse, String sensorCourse, String fileName, boolean reeversed) throws IOException {
+                                                                String expectedCourse, String currentCourse, String sensorCourse, String fileName, boolean reeversed,
+                                                                Double distanceToTheNextWaypoint) throws IOException {
         Double distance = distanceFromLine(startPoint, destinationPoint, currentPoint, reeversed);
         double x, y;
         if (reeversed) {
@@ -133,7 +134,8 @@ public class Utils {
                 String.valueOf(distance == null ? "brak" : String.format("%.2f", distance)),
                 String.valueOf(expectedCourse == null ? "brak" : expectedCourse),
                 String.valueOf(expectedCourse == null ? "brak" : sensorCourse),
-                String.valueOf(currentCourse == null ? "brak" : currentCourse)
+                String.valueOf(currentCourse == null ? "brak" : currentCourse),
+                String.valueOf(distanceToTheNextWaypoint == null ? "brak" : distanceToTheNextWaypoint)
         });
         Utils.saveToCsv(data, fileName + ".csv");
     }
