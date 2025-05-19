@@ -635,8 +635,18 @@ void setEnginePowerAutonomicMode(){
         currentEngineSpeeds[i]=0;
         newDataForKeyboardHandler[i]=0;
       } else if (newEnginesSpeed[i] - currentEngineSpeeds[i] > 0) {
+        // if (i == 1 && (newEnginesSpeed[i] - currentEngineSpeeds[i]) > 1) {
+          // currentEngineSpeeds[i]=currentEngineSpeeds[i]+2;
+        // } else {
+          // currentEngineSpeeds[i]=currentEngineSpeeds[i]+1;
+        // }
         currentEngineSpeeds[i]=currentEngineSpeeds[i]+1;
       } else if(newEnginesSpeed[i] - currentEngineSpeeds[i] < 0) {
+        // if (i == 0 && (newEnginesSpeed[i] - currentEngineSpeeds[i]) < -1) {
+          // currentEngineSpeeds[i]=currentEngineSpeeds[i]-2;
+        // } else {
+          // currentEngineSpeeds[i]=currentEngineSpeeds[i]-1;
+        // }
         currentEngineSpeeds[i]=currentEngineSpeeds[i]-1;
       } else {
         newDataForKeyboardHandler[i]=0;

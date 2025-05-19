@@ -14,6 +14,9 @@ import java.util.List;
 @Slf4j
 public class Utils {
 
+    public static double MAX_LINEAR_SPEED_PERCENTAGE = 80;
+    public static double MIN_LINEAR_SPEED_PERCENTAGE = 20.0;
+
     public static String FXML_RESOURCES_PATH = "/com/example/systemobslugilodzizdalniesterowanej/";
     public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss");
 

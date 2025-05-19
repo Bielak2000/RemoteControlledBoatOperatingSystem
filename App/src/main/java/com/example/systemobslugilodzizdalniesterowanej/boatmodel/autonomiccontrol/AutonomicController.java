@@ -15,11 +15,9 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.calcu
 @Slf4j
 public class AutonomicController {
 
-    private static double MAX_PERCENTAGE_ENGINE_POWER = 70;
     private static double DISTANCE_ACCURACY_METERS = 1.5;
     private static double MIN_DISTANCE_FOR_LINEAR_SPEED_METERS = 2.5;
-    private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 15.0;
-    private static double MIN_LINEAR_SPEED_PERCENTAGE = 20.0;
+    private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 25.0;
 
 
     private OSMMap osmMap;
@@ -114,23 +112,43 @@ public class AutonomicController {
      * @param distanceBetweenCurrentAndNextPositions
      * @return
      */
-    private double getLinearSpeed(double distanceBetweenCurrentAndNextPositions) {
+    public double getLinearSpeed(double distanceBetweenCurrentAndNextPositions) {
         if (distanceBetweenCurrentAndNextPositions <= MIN_DISTANCE_FOR_LINEAR_SPEED_METERS) {
-            return MIN_LINEAR_SPEED_PERCENTAGE;
+            return Utils.MIN_LINEAR_SPEED_PERCENTAGE;
         } else if (distanceBetweenCurrentAndNextPositions >= MAX_DISTANCE_FOR_LINEAR_SPEED_METERS) {
-            return MAX_PERCENTAGE_ENGINE_POWER;
+            return Utils.MAX_LINEAR_SPEED_PERCENTAGE;
         } else {
-            return (distanceBetweenCurrentAndNextPositions / (MAX_DISTANCE_FOR_LINEAR_SPEED_METERS - MIN_LINEAR_SPEED_PERCENTAGE)) * MAX_PERCENTAGE_ENGINE_POWER;
+            return (distanceBetweenCurrentAndNextPositions / (MAX_DISTANCE_FOR_LINEAR_SPEED_METERS - MIN_DISTANCE_FOR_LINEAR_SPEED_METERS)) * Utils.MAX_LINEAR_SPEED_PERCENTAGE;
         }
     }
 
-    private double getAngularSpeed(double expectedCourse, double currentCourse) {
-        double courseDifference = expectedCourse - currentCourse;
-        double angularSpeed = (courseDifference / 360.0) * MAX_PERCENTAGE_ENGINE_POWER;
-        if (Math.abs(courseDifference) < 180) {
-            angularSpeed = -1 * angularSpeed;
-        }
-        return angularSpeed;
+//    public double getAngularSpeed(double expectedCourse, double currentCourse) {
+//        double courseDifference = Math.abs(expectedCourse - currentCourse);
+//        double angularSpeed = (courseDifference / 360.0) * Utils.MAX_LINEAR_SPEED_PERCENTAGE;
+//
+//        if (courseDifference <= 180) {
+//            if (currentCourse <= expectedCourse) {
+//                return angularSpeed;
+//            } else {
+//                return -1 * angularSpeed;
+//            }
+//        } else {
+//            if (currentCourse <= expectedCourse) {
+//                return -1 * angularSpeed;
+//            } else {
+//                return angularSpeed;
+//            }
+//        }
+//    }
+
+    public int getAngularSpeed(double expectedCourse, double currentCourse) {
+        // Różnica kąta (zakres -180 do +180)
+        double courseDifference = (expectedCourse - currentCourse + 540) % 360 - 180;
+        // Ustal znak: >0 prawo, <0 lewo
+        int direction = courseDifference > 0 ? 1 : -1;
+        double angle = Math.abs(courseDifference);
+        int angularSpeed = (int) Math.round((angle / 180.0) * Utils.MAX_LINEAR_SPEED_PERCENTAGE);
+        return direction * angularSpeed;
     }
 
 }
