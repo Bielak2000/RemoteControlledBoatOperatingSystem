@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class AutonomicControlExecute {
 
     private final static int KALMAN_JOB_EXECUTE_SCHEDULER_MILLISECONDS = 300;
-    private final static int AUTONOMIC_CONTROL_JOB_EXECUTE_SCHEDULER_MILLISECONDS = 2000;
+    private final static int AUTONOMIC_CONTROL_JOB_EXECUTE_SCHEDULER_MILLISECONDS = 1500;
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     BoatModeController boatModeController;
     Connection connection;

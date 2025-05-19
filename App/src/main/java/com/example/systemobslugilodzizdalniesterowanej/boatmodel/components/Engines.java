@@ -17,7 +17,7 @@ public class Engines {
     }
 
     public void movingForward() {
-        motorLeft = 80;
+        motorLeft = 50;
         motorRight = -80;
     }
 

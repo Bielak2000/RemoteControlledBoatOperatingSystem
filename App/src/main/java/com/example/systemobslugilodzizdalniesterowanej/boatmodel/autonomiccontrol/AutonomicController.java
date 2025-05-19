@@ -15,11 +15,11 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.calcu
 @Slf4j
 public class AutonomicController {
 
-    private static double MAX_PERCENTAGE_ENGINE_POWER = 50;
+    private static double MAX_PERCENTAGE_ENGINE_POWER = 70;
     private static double DISTANCE_ACCURACY_METERS = 1.5;
-    private static double MIN_DISTANCE_FOR_LINEAR_SPEED_METERS = 1.5;
-    private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 20.0;
-    private static double MIN_LINEAR_SPEED_PERCENTAGE = 10.0;
+    private static double MIN_DISTANCE_FOR_LINEAR_SPEED_METERS = 2.5;
+    private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 15.0;
+    private static double MIN_LINEAR_SPEED_PERCENTAGE = 20.0;
 
 
     private OSMMap osmMap;
@@ -101,6 +101,7 @@ public class AutonomicController {
         osmMap.setExpectedCourse(String.format("%.2f", newCourse));
         double linearSpeed = getLinearSpeed(distance);
         double angularSpeed = getAngularSpeed(newCourse, osmMap.getCurrentCourse());
+        log.info("ANGULAR: " + angularSpeed);
         return new LinearAndAngularSpeed(angularSpeed, linearSpeed);
     }
 

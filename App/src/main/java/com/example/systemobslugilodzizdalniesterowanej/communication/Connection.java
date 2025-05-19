@@ -43,7 +43,7 @@ import static jssc.SerialPort.MASK_RXCHAR;
 @Slf4j
 public class Connection {
 
-    private final static int MAX_COURSE_COUNT_IN_AUTONOMIC_STARTING_MODE = 5;
+    private final static int MAX_COURSE_COUNT_IN_AUTONOMIC_STARTING_MODE = 10;
     private final static int COURSE_ACCURACY = 10;
 
     // MESSAGE TO BOAT
