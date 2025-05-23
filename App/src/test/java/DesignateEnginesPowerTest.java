@@ -97,6 +97,30 @@ public class DesignateEnginesPowerTest {
         assertTrue(Math.abs(Math.abs(engines.getMotorLeft() / mapLeftEngineCoefficient()) - Math.abs(engines.getMotorRight())) < 3);
     }
 
+    @Test
+    public void returnEnginesPowerGoRight() {
+        // given
+        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(50.0, 0.0);
+        // when
+        engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
+        // then
+        assertTrue(engines.getMotorLeft() > 0.0);
+        assertTrue(engines.getMotorRight() > 0.0);
+        assertTrue(Math.abs(Math.abs(engines.getMotorLeft() / mapLeftEngineCoefficient()) - Math.abs(engines.getMotorRight())) < 3);
+    }
+
+    @Test
+    public void returnEnginesPowerGoLeft() {
+        // given
+        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(-50.0, 0.0);
+        // when
+        engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
+        // then
+        assertTrue(engines.getMotorLeft() < 0.0);
+        assertTrue(engines.getMotorRight() < 0.0);
+        assertTrue(Math.abs(Math.abs(engines.getMotorLeft() / mapLeftEngineCoefficient()) - Math.abs(engines.getMotorRight())) < 3);
+    }
+
     private double mapLeftEngineCoefficient() {
         return 50.0 / Utils.MAX_LINEAR_SPEED_PERCENTAGE;
     }
