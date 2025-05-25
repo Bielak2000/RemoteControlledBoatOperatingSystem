@@ -276,7 +276,7 @@ public class OSMMap {
     }
 
     public void setExpectedCourse(Coordinate firstCoordinate, Coordinate secondCoordinate) {
-        this.expectedCourse.setText(String.valueOf(Utils.determineCourseBetweenTwoWaypointsForAutonomicController(firstCoordinate, secondCoordinate)));
+        this.expectedCourse.setText(String.valueOf((Utils.determineCourseBetweenTwoWaypoints(firstCoordinate, secondCoordinate) + 270) % 360));
     }
 
     public void setExpectedCourse(String expectedCourse) {

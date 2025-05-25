@@ -55,24 +55,24 @@ public class Utils {
      */
     public static double calculateDistance(Coordinate c1, Coordinate c2) {
         if (c1 != null && c2 != null) {
-        // Konwersja stopni na radiany
-        double lat1Rad = Math.toRadians(c1.getLatitude());
-        double lon1Rad = Math.toRadians(c1.getLongitude());
-        double lat2Rad = Math.toRadians(c2.getLatitude());
-        double lon2Rad = Math.toRadians(c2.getLongitude());
+            // Konwersja stopni na radiany
+            double lat1Rad = Math.toRadians(c1.getLatitude());
+            double lon1Rad = Math.toRadians(c1.getLongitude());
+            double lat2Rad = Math.toRadians(c2.getLatitude());
+            double lon2Rad = Math.toRadians(c2.getLongitude());
 
-        // Różnica szerokości i długości geograficznej w radianach
-        double dLat = lat2Rad - lat1Rad;
-        double dLon = lon2Rad - lon1Rad;
+            // Różnica szerokości i długości geograficznej w radianach
+            double dLat = lat2Rad - lat1Rad;
+            double dLon = lon2Rad - lon1Rad;
 
-        // Obliczenie odległości za pomocą formuły Haversine
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            // Obliczenie odległości za pomocą formuły Haversine
+            double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+                            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        // Obliczenie odległości
-        return EARTH_RADIUS_KM * c * 1000;
+            // Obliczenie odległości
+            return EARTH_RADIUS_KM * c * 1000;
         } else {
             return 0.0;
         }
@@ -85,12 +85,7 @@ public class Utils {
         double longDiff = Math.toRadians(secondCoordinate.getLongitude() - firstCoordinate.getLongitude());
         double y = Math.sin(longDiff) * Math.cos(latitude2);
         double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
-        return  (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
-    }
-
-    // zmienia o jedną oś w lewo, wykorzystywana do wyznaczania kursu między dwoma punktami
-    public static double determineCourseBetweenTwoWaypointsForAutonomicController(Coordinate firstCoordinate, Coordinate secondCoordinate) {
-        return (determineCourseBetweenTwoWaypoints(firstCoordinate, secondCoordinate) - 90 + 360) % 360;
+        return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
     }
 
     public static void saveInitValToCsvForNotBasicAndKalmanAlgorithm(String fileName) {
