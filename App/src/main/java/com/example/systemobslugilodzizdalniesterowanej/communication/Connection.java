@@ -293,9 +293,9 @@ public class Connection {
                         showInformationDialog("Przerwano pływanie łodzi", BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION, 500);
                     } else {
                         showInformationDialog("Łódka osiągneła punkt docelowy", BOAT_FINISHED_SWIMMING_INFORMATION, 700);
+                        autonomicController.setManuallyFinishSwimming(true);
                     }
                 });
-                autonomicController.setManuallyFinishSwimming(true);
                 boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
                 engines.setTemp(false);
                 autonomicController.setArchiveLastWaypoint(false);
