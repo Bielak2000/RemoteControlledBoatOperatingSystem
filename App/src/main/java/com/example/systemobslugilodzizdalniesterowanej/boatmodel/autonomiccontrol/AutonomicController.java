@@ -122,29 +122,10 @@ public class AutonomicController {
         }
     }
 
-//    public double getAngularSpeed(double expectedCourse, double currentCourse) {
-//        double courseDifference = Math.abs(expectedCourse - currentCourse);
-//        double angularSpeed = (courseDifference / 360.0) * Utils.MAX_LINEAR_SPEED_PERCENTAGE;
-//
-//        if (courseDifference <= 180) {
-//            if (currentCourse <= expectedCourse) {
-//                return angularSpeed;
-//            } else {
-//                return -1 * angularSpeed;
-//            }
-//        } else {
-//            if (currentCourse <= expectedCourse) {
-//                return -1 * angularSpeed;
-//            } else {
-//                return angularSpeed;
-//            }
-//        }
-//    }
-
     public int getAngularSpeed(double expectedCourse, double currentCourse) {
         // Różnica kąta (zakres -180 do +180)
         double courseDifference = (expectedCourse - currentCourse + 540) % 360 - 180;
-        // Ustal znak: >0 prawo, <0 lewo
+        // >0 prawo, <0 lewo
         int direction = courseDifference > 0 ? 1 : -1;
         double angle = Math.abs(courseDifference);
         int angularSpeed = (int) Math.round((angle / 180.0) * Utils.MAX_LINEAR_SPEED_PERCENTAGE);
