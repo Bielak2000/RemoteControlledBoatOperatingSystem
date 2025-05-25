@@ -17,7 +17,7 @@ public class AutonomicController {
 
     private static double DISTANCE_ACCURACY_METERS = 1.5;
     private static double MIN_DISTANCE_FOR_LINEAR_SPEED_METERS = 2.5;
-    private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 25.0;
+    private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 15.0;
 
 
     private OSMMap osmMap;
@@ -50,7 +50,7 @@ public class AutonomicController {
     }
 
     public LinearAndAngularSpeed designateLeftEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(-50.0, 0.0);
+        return new LinearAndAngularSpeed(-80.0, 0.0);
     }
 
     public LinearAndAngularSpeed designateEnginesPower() {

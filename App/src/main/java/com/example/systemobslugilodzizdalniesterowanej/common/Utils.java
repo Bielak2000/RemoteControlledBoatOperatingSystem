@@ -15,7 +15,7 @@ import java.util.List;
 public class Utils {
 
     public static double MAX_LINEAR_SPEED_PERCENTAGE = 80;
-    public static double MIN_LINEAR_SPEED_PERCENTAGE = 20.0;
+    public static double MIN_LINEAR_SPEED_PERCENTAGE = 30.0;
 
     public static String FXML_RESOURCES_PATH = "/com/example/systemobslugilodzizdalniesterowanej/";
     public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss");
@@ -54,6 +54,7 @@ public class Utils {
      * @return Odległość w metrach
      */
     public static double calculateDistance(Coordinate c1, Coordinate c2) {
+        if (c1 != null && c2 != null) {
         // Konwersja stopni na radiany
         double lat1Rad = Math.toRadians(c1.getLatitude());
         double lon1Rad = Math.toRadians(c1.getLongitude());
@@ -72,15 +73,22 @@ public class Utils {
 
         // Obliczenie odległości
         return EARTH_RADIUS_KM * c * 1000;
+        } else {
+            return 0.0;
+        }
     }
 
-    public static double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {
+    public static double determineCourseBetweenTwoWaypointsForLocalization(Coordinate firstCoordinate, Coordinate secondCoordinate) {
         double latitude1 = Math.toRadians(firstCoordinate.getLatitude());
         double latitude2 = Math.toRadians(secondCoordinate.getLatitude());
         double longDiff = Math.toRadians(secondCoordinate.getLongitude() - firstCoordinate.getLongitude());
         double y = Math.sin(longDiff) * Math.cos(latitude2);
         double x = Math.cos(latitude1) * Math.sin(latitude2) - Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longDiff);
-        return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
+        return  (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
+    }
+
+    public static double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {
+        return (determineCourseBetweenTwoWaypointsForLocalization(firstCoordinate, secondCoordinate) - 90 + 360) % 360;
     }
 
     public static void saveInitValToCsvForNotBasicAndKalmanAlgorithm(String fileName) {

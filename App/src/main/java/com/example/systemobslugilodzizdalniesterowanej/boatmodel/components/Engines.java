@@ -7,7 +7,7 @@ public class Engines {
 
     private static int MAX_LEFT_ENGINE_PERCENTAGE_POWER = 50;
     private static int MAX_RIGHT_ENGINE_PERCENTAGE_POWER = 80;
-    private static double ANGULAR_FACTORY = 0.5;
+    private static double ANGULAR_FACTORY = 0.7;
 
     private int motorLeft;
     private int motorRight;
@@ -63,8 +63,13 @@ public class Engines {
     public void setEnginesPowerByAngularAndLinearSpeed(LinearAndAngularSpeed linearAndAngularSpeed) {
         if (linearAndAngularSpeed.getLinearSpeed() == 0) {
             if (linearAndAngularSpeed.getAngularSpeed() != 0) {
-                this.motorLeft = mapLeftEngineValue(Math.round((linearAndAngularSpeed.getAngularSpeed()) / 2));
-                this.motorRight = -1 * ((int) Math.round(-(linearAndAngularSpeed.getAngularSpeed()) / 2));
+//                if (linearAndAngularSpeed.getAngularSpeed() == -80) {
+//                    this.motorLeft = -32;//mapLeftEngineValue(Math.round((linearAndAngularSpeed.getAngularSpeed()) / 2));
+//                    this.motorRight = -50;//-1 * ((int) Math.round(-(linearAndAngularSpeed.getAngularSpeed()) / 2));
+//                } else {
+                    this.motorLeft = mapLeftEngineValue(Math.round((linearAndAngularSpeed.getAngularSpeed()) / 2));
+                    this.motorRight = -1 * ((int) Math.round(-(linearAndAngularSpeed.getAngularSpeed()) / 2));
+//                }
             } else {
                 this.motorLeft = 0;
                 this.motorRight = 0;

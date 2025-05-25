@@ -15,7 +15,7 @@ public class OwnCoordinate {
 
     public OwnCoordinate(Coordinate coordinate, Coordinate startPoint) {
         double distance = Utils.calculateDistance(startPoint, coordinate);
-        double angle = Utils.determineCourseBetweenTwoWaypoints(startPoint, coordinate);
+        double angle = Utils.determineCourseBetweenTwoWaypointsForLocalization(startPoint, coordinate);
         double transformAngle = (450.0 - angle) % 360.0;
         double transformAngleRadians = Math.toRadians(transformAngle);
         this.x = distance * Math.cos(transformAngleRadians);

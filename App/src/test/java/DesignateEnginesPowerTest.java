@@ -112,7 +112,7 @@ public class DesignateEnginesPowerTest {
     @Test
     public void returnEnginesPowerGoLeft() {
         // given
-        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(-50.0, 0.0);
+        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(-80.0, 0.0);
         // when
         engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
         // then
