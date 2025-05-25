@@ -78,7 +78,8 @@ public class Utils {
         }
     }
 
-    public static double determineCourseBetweenTwoWaypointsForLocalization(Coordinate firstCoordinate, Coordinate secondCoordinate) {
+    // wykrzystywana do zmainu ukladu na lokalny
+    public static double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {
         double latitude1 = Math.toRadians(firstCoordinate.getLatitude());
         double latitude2 = Math.toRadians(secondCoordinate.getLatitude());
         double longDiff = Math.toRadians(secondCoordinate.getLongitude() - firstCoordinate.getLongitude());
@@ -87,8 +88,9 @@ public class Utils {
         return  (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
     }
 
-    public static double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {
-        return (determineCourseBetweenTwoWaypointsForLocalization(firstCoordinate, secondCoordinate) - 90 + 360) % 360;
+    // zmienia o jedną oś w lewo, wykorzystywana do wyznaczania kursu między dwoma punktami
+    public static double determineCourseBetweenTwoWaypointsForAutonomicController(Coordinate firstCoordinate, Coordinate secondCoordinate) {
+        return (determineCourseBetweenTwoWaypoints(firstCoordinate, secondCoordinate) - 90 + 360) % 360;
     }
 
     public static void saveInitValToCsvForNotBasicAndKalmanAlgorithm(String fileName) {

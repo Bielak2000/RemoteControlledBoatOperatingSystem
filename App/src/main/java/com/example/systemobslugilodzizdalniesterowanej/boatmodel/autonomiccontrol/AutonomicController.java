@@ -95,7 +95,7 @@ public class AutonomicController {
     }
 
     private LinearAndAngularSpeed determinateLinearAndAngularSpeed(double distance) {
-        double newCourse = Utils.determineCourseBetweenTwoWaypoints(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
+        double newCourse = Utils.determineCourseBetweenTwoWaypointsForAutonomicController(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
         osmMap.setExpectedCourse(String.format("%.2f", newCourse));
         double linearSpeed = getLinearSpeed(distance);
         double angularSpeed = getAngularSpeed(newCourse, osmMap.getCurrentCourse());
