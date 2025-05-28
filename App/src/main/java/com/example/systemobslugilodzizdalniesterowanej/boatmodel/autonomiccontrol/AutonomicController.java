@@ -28,7 +28,7 @@ public class AutonomicController {
 
     @Setter
     @Getter
-    private boolean stopRotating = false;
+    private boolean stopRotating = true;
 
     @Setter
     @Getter
@@ -46,11 +46,13 @@ public class AutonomicController {
     }
 
     public LinearAndAngularSpeed designateRightEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(50.0, 0.0);
+        return new LinearAndAngularSpeed(50.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
     }
 
+    // jesli robi łuk to czyli, że prędkość prawego silnika jest za duza wzgledem lewego
+    // jesli bedzie do tylu to czyli ze predkosc lewego za duza wzgledem lewego
     public LinearAndAngularSpeed designateLeftEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(-80.0, 0.0);
+        return new LinearAndAngularSpeed(-80.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
     }
 
     public LinearAndAngularSpeed designateEnginesPower() {
@@ -83,15 +85,22 @@ public class AutonomicController {
         }
     }
 
+    public double designateAngularFactory(double courseDifference) {
+        return Utils.ANGULAR_FACTORY_NORMAL;
+//        if (courseDifference > Utils.COURSE_DIFFERENCE_FOR_MAX_ANGULAR_FACTORY) {
+//            return Utils.ANGULAR_FACTORY_MAX;
+//        } else return Utils.ANGULAR_FACTORY_NORMAL;
+    }
+
     public void incrementCourseCount() {
         this.courseCount++;
     }
 
     public LinearAndAngularSpeed clearAfterRotating() {
         this.courseCount = 0;
-        this.stopRotating = false;
+//        this.stopRotating = true;
         this.courseOnRotateStart = null;
-        return new LinearAndAngularSpeed(0, 0);
+        return new LinearAndAngularSpeed(0, 0, Utils.ANGULAR_FACTORY_NORMAL);
     }
 
     private LinearAndAngularSpeed determinateLinearAndAngularSpeed(double distance) {
@@ -100,7 +109,8 @@ public class AutonomicController {
         double linearSpeed = getLinearSpeed(distance);
         double angularSpeed = getAngularSpeed(newCourse, osmMap.getCurrentCourse());
         log.info("ANGULAR: " + angularSpeed);
-        return new LinearAndAngularSpeed(angularSpeed, linearSpeed);
+        double angularFactory = designateAngularFactory(Math.abs(newCourse));
+        return new LinearAndAngularSpeed(angularSpeed, linearSpeed, angularFactory);
     }
 
     /**
@@ -130,6 +140,12 @@ public class AutonomicController {
         double angle = Math.abs(courseDifference);
         int angularSpeed = (int) Math.round((angle / 180.0) * Utils.MAX_LINEAR_SPEED_PERCENTAGE);
         return direction * angularSpeed;
+    }
+
+    public int getAngularSpeedDirection(double expectedCourse, double currentCourse) {
+        // Różnica kąta (zakres -180 do +180)
+        double courseDifference = (expectedCourse - currentCourse + 540) % 360 - 180;
+        return courseDifference > 0 ? 1 : -1;
     }
 
 }

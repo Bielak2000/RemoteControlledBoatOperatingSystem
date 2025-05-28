@@ -7,7 +7,6 @@ public class Engines {
 
     private static int MAX_LEFT_ENGINE_PERCENTAGE_POWER = 50;
     private static int MAX_RIGHT_ENGINE_PERCENTAGE_POWER = 80;
-    private static double ANGULAR_FACTORY = 0.7;
 
     private int motorLeft;
     private int motorRight;
@@ -29,9 +28,15 @@ public class Engines {
         motorRight = MAX_RIGHT_ENGINE_PERCENTAGE_POWER;
     }
 
+    // -25 i -38, -24 i -37, -23 i -36, -26 i -39, -27 i -41
+    // jesli robi łuk to czyli, że prędkość prawego silnika jest za duza wzgledem lewego
+    // jesli bedzie do tylu to czyli ze predkosc lewego za duza wzgledem lewego
     public void turnLeft() {
-        motorRight = -1 * MAX_RIGHT_ENGINE_PERCENTAGE_POWER;
-        motorLeft = 0;
+        // tymczasowe do sprawdzenia jaka powinna byc moc zeby krecila sie w lewo w miejscu
+        motorRight = -35;
+        motorLeft = -25;
+//        motorRight = -1 * MAX_RIGHT_ENGINE_PERCENTAGE_POWER;
+//        motorLeft = 0;
     }
 
     public void turnRight() {
@@ -62,7 +67,11 @@ public class Engines {
 
     public void setEnginesPowerByAngularAndLinearSpeed(LinearAndAngularSpeed linearAndAngularSpeed) {
         if (linearAndAngularSpeed.getLinearSpeed() == 0) {
-            if (linearAndAngularSpeed.getAngularSpeed() != 0) {
+            // ZMIENIC NA USTALONE WARTOSCi PRZY TESTOWANIU KLAWISZAMI
+            if (linearAndAngularSpeed.getAngularSpeed() == -60) {
+                this.motorLeft = -20;
+                this.motorRight = -30;
+            } else if (linearAndAngularSpeed.getAngularSpeed() != 0) {
                 this.motorLeft = mapLeftEngineValue(Math.round((linearAndAngularSpeed.getAngularSpeed()) / 2));
                 this.motorRight = -1 * ((int) Math.round(-(linearAndAngularSpeed.getAngularSpeed()) / 2));
             } else {
@@ -71,8 +80,8 @@ public class Engines {
             }
         } else {
             if (linearAndAngularSpeed.getAngularSpeed() != 0) {
-                double leftValue = (linearAndAngularSpeed.getLinearSpeed() + ((linearAndAngularSpeed.getAngularSpeed() * ANGULAR_FACTORY))) / (1.0 + ANGULAR_FACTORY);
-                double rightValue = (linearAndAngularSpeed.getLinearSpeed() - ((linearAndAngularSpeed.getAngularSpeed() * ANGULAR_FACTORY))) / (1.0 + ANGULAR_FACTORY);
+                double leftValue = (linearAndAngularSpeed.getLinearSpeed() + ((linearAndAngularSpeed.getAngularSpeed() * linearAndAngularSpeed.getAngularFactory()))) / (1.0 + linearAndAngularSpeed.getAngularFactory());
+                double rightValue = (linearAndAngularSpeed.getLinearSpeed() - ((linearAndAngularSpeed.getAngularSpeed() * linearAndAngularSpeed.getAngularFactory()))) / (1.0 + linearAndAngularSpeed.getAngularFactory());
                 this.motorLeft = mapLeftEngineValue(leftValue);
                 this.motorRight = -1 * ((int) rightValue);
             } else {

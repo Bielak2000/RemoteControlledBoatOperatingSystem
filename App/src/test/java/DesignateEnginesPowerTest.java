@@ -19,7 +19,7 @@ public class DesignateEnginesPowerTest {
     @Test
     public void returnEnginesPowerEqualsZero() {
         // given
-        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(0.0, 0.0);
+        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(0.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
         // when
         engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
         // then
@@ -30,7 +30,7 @@ public class DesignateEnginesPowerTest {
     @Test
     public void returnEnginesPowerTurnRightWithLinearSpeedEqualsZero() {
         // given
-        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(10.0, 0.0);
+        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(10.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
         // when
         engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
         // then
@@ -41,7 +41,7 @@ public class DesignateEnginesPowerTest {
     @Test
     public void returnEnginesPowerTurnLeftWithLinearSpeedEqualsZero() {
         // given
-        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(-10.0, 0.0);
+        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(-10.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
         // when
         engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
         // then
@@ -52,7 +52,7 @@ public class DesignateEnginesPowerTest {
     @Test
     public void returnEnginesPowerTurnLeftAndGoAhead() {
         // given
-        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(-10.0, 40.0);
+        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(-10.0, 40.0, Utils.ANGULAR_FACTORY_NORMAL);
         // when
         engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
         // then
@@ -64,7 +64,7 @@ public class DesignateEnginesPowerTest {
     @Test
     public void returnEnginesPowerTurnRightAndGoAhead() {
         // given
-        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(10.0, 40.0);
+        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(10.0, 40.0, Utils.ANGULAR_FACTORY_NORMAL);
         // when
         engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
         // then
@@ -76,7 +76,7 @@ public class DesignateEnginesPowerTest {
     @Test
     public void returnEnginesPowerGoAhead() {
         // given
-        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(0.0, 50.0);
+        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(0.0, 50.0, Utils.ANGULAR_FACTORY_NORMAL);
         // when
         engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
         // then
@@ -88,7 +88,7 @@ public class DesignateEnginesPowerTest {
     @Test
     public void returnEnginesPowerGoBack() {
         // given
-        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(0.0, -50.0);
+        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(0.0, -50.0, Utils.ANGULAR_FACTORY_NORMAL);
         // when
         engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
         // then
@@ -100,7 +100,7 @@ public class DesignateEnginesPowerTest {
     @Test
     public void returnEnginesPowerGoRight() {
         // given
-        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(50.0, 0.0);
+        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(50.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
         // when
         engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
         // then
@@ -112,7 +112,7 @@ public class DesignateEnginesPowerTest {
     @Test
     public void returnEnginesPowerGoLeft() {
         // given
-        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(-80.0, 0.0);
+        LinearAndAngularSpeed linearAndAngularSpeed = new LinearAndAngularSpeed(-80.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
         // when
         engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
         // then
