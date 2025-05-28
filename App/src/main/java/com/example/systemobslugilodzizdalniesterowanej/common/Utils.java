@@ -15,7 +15,7 @@ import java.util.List;
 public class Utils {
 
     public static double ANGULAR_FACTORY_NORMAL = 1.5;//1.0, 1.2, 1.5, 2.0
-    public static double ANGULAR_FACTORY_MAX = 1000.0;//10.0;
+    public static double ANGULAR_FACTORY_MAX = 10.0;// dla 10 jest juz praktycznie tylko predkosc katowa, 10.0;
     public static double COURSE_DIFFERENCE_FOR_MAX_ANGULAR_FACTORY = 30.0;//stopnie
 
     public static int MAX_STARTING_BOAT_TIME_SECONDS = 20;
