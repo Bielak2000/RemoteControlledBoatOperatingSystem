@@ -217,7 +217,7 @@ public class Connection {
                 // nowy punkt !
                 if (waypointIndex != osmMap.getWaypointIndex()) {
                     // ustawianie sie do punktu
-                    lineUpTowardsTheTarget();
+//                    lineUpTowardsTheTarget();
 
                     // pobranie nowej predkosci itd.
                     linearAndAngularSpeed = autonomicController.designateEnginesPower();
@@ -227,7 +227,7 @@ public class Connection {
                     }
                 }
                 if (linearAndAngularSpeed.equals(oldLinearAndAngularSpeed)) {
-                    log.info("Designated new linear and angular speed but not changed ...");
+                    log.info("Designated new linear and angular speed but not changed: linear {}, agnular: {}, factory: {}", linearAndAngularSpeed.getLinearSpeed(), linearAndAngularSpeed.getAngularSpeed(), linearAndAngularSpeed.getAngularFactory());
                 } else {
                     sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
                     oldLinearAndAngularSpeed = linearAndAngularSpeed;
@@ -351,8 +351,9 @@ public class Connection {
             case FROM_BOAT_SENSOR_COURSE_MESSAGE:
                 log.info("Received course from SENSOR");
                 sendingValuesLock();
-                // TODO: upewnic sie ze zawsze to jest potrzebne, czasami trzeba czasami nie, sprawzic przed testami !!!!!!!!!!!!!!!
+                // TODO: converting course
                 String convertedCourse = String.valueOf(Math.abs((Double.parseDouble(array[1]))));// + 180) % 360));
+//                String convertedCourse = String.valueOf(Math.abs((Double.parseDouble(array[1]) + 180) % 360));
                 Platform.runLater(() -> {
                     this.sensorCourse.setText(convertedCourse);
                 });
@@ -380,7 +381,7 @@ public class Connection {
                         && chosenAlgorithm != PositionAlgorithm.ONLY_GPS) {
                     autonomicController.incrementCourseCount();
                     if (autonomicController.getCourseCount() > Utils.MAX_COURSE_COUNT_IN_AUTONOMIC_STARTING_MODE) {
-                        if (Math.abs(autonomicController.getCourseOnRotateStart() - Double.valueOf(convertedCourse)) <= Utils.COURSE_ACCURACY_WHILE_CALIBRATION) {
+                        if (autonomicController.getCourseOnRotateStart() != null && Math.abs(autonomicController.getCourseOnRotateStart() - Double.valueOf(convertedCourse)) <= Utils.COURSE_ACCURACY_WHILE_CALIBRATION) {
                             autonomicController.setStopRotating(true);
                         }
                     }

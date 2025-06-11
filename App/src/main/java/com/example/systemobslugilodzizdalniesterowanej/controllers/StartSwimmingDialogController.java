@@ -97,8 +97,7 @@ public class StartSwimmingDialogController {
                         log.error("Error while startAndStopRotatnig: {}", e.getMessage());
                     }
 
-                    // ustawianie sie do punktu
-                    connection.lineUpTowardsTheTarget();
+//                    connection.lineUpTowardsTheTarget();
                 }
                 Platform.runLater(() -> {
                     runningBoatInformation.setVisible(true);

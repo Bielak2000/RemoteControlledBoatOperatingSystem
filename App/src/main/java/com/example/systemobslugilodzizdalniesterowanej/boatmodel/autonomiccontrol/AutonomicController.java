@@ -52,7 +52,7 @@ public class AutonomicController {
     // jesli robi łuk to czyli, że prędkość prawego silnika jest za duza wzgledem lewego
     // jesli bedzie do tylu to czyli ze predkosc lewego za duza wzgledem lewego
     public LinearAndAngularSpeed designateLeftEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(-80.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
+        return new LinearAndAngularSpeed(-60.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
     }
 
     public LinearAndAngularSpeed designateEnginesPower() {
@@ -86,10 +86,9 @@ public class AutonomicController {
     }
 
     public double designateAngularFactory(double courseDifference) {
-        return Utils.ANGULAR_FACTORY_NORMAL;
-//        if (courseDifference > Utils.COURSE_DIFFERENCE_FOR_MAX_ANGULAR_FACTORY) {
-//            return Utils.ANGULAR_FACTORY_MAX;
-//        } else return Utils.ANGULAR_FACTORY_NORMAL;
+        if (courseDifference > Utils.COURSE_DIFFERENCE_FOR_MAX_ANGULAR_FACTORY) {
+            return Utils.ANGULAR_FACTORY_MAX;
+        } else return Utils.ANGULAR_FACTORY_NORMAL;
     }
 
     public void incrementCourseCount() {
@@ -104,12 +103,14 @@ public class AutonomicController {
     }
 
     private LinearAndAngularSpeed determinateLinearAndAngularSpeed(double distance) {
-        double newCourse = (Utils.determineCourseBetweenTwoWaypoints(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad()) + 270) % 360;
+        double newCourse = (Utils.determineCourseBetweenTwoWaypoints(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad())+ 270) % 360;// + 270) % 360;
         osmMap.setExpectedCourse(String.format("%.2f", newCourse));
         double linearSpeed = getLinearSpeed(distance);
         double angularSpeed = getAngularSpeed(newCourse, osmMap.getCurrentCourse());
         log.info("ANGULAR: " + angularSpeed);
-        double angularFactory = designateAngularFactory(Math.abs(newCourse));
+        double differenceCourse = Math.abs(newCourse - osmMap.getCurrentCourse());
+        double minDifference = Math.min(differenceCourse, 360.0 - differenceCourse);
+        double angularFactory = designateAngularFactory(Math.abs(minDifference));
         return new LinearAndAngularSpeed(angularSpeed, linearSpeed, angularFactory);
     }
 
