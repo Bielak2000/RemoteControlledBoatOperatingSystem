@@ -14,6 +14,17 @@ import java.util.List;
 @Slf4j
 public class Utils {
 
+    public static double ANGULAR_FACTORY_NORMAL = 1.5;
+    public static double ANGULAR_FACTORY_MAX = 10.0;
+    public static double COURSE_DIFFERENCE_FOR_MAX_ANGULAR_FACTORY = 10.0;
+
+    public static int MAX_STARTING_BOAT_TIME_SECONDS = 20;
+    public final static int MAX_COURSE_COUNT_IN_AUTONOMIC_STARTING_MODE = 20;
+    public final static int COURSE_ACCURACY_WHILE_CALIBRATION = 10;
+
+    public static double MAX_LINEAR_SPEED_PERCENTAGE = 80;
+    public static double MIN_LINEAR_SPEED_PERCENTAGE = 30.0;
+
     public static String FXML_RESOURCES_PATH = "/com/example/systemobslugilodzizdalniesterowanej/";
     public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm:ss");
 
@@ -51,24 +62,21 @@ public class Utils {
      * @return Odległość w metrach
      */
     public static double calculateDistance(Coordinate c1, Coordinate c2) {
-        // Konwersja stopni na radiany
-        double lat1Rad = Math.toRadians(c1.getLatitude());
-        double lon1Rad = Math.toRadians(c1.getLongitude());
-        double lat2Rad = Math.toRadians(c2.getLatitude());
-        double lon2Rad = Math.toRadians(c2.getLongitude());
-
-        // Różnica szerokości i długości geograficznej w radianach
-        double dLat = lat2Rad - lat1Rad;
-        double dLon = lon2Rad - lon1Rad;
-
-        // Obliczenie odległości za pomocą formuły Haversine
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        // Obliczenie odległości
-        return EARTH_RADIUS_KM * c * 1000;
+        if (c1 != null && c2 != null) {
+            double lat1Rad = Math.toRadians(c1.getLatitude());
+            double lon1Rad = Math.toRadians(c1.getLongitude());
+            double lat2Rad = Math.toRadians(c2.getLatitude());
+            double lon2Rad = Math.toRadians(c2.getLongitude());
+            double dLat = lat2Rad - lat1Rad;
+            double dLon = lon2Rad - lon1Rad;
+            double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+                            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return EARTH_RADIUS_KM * c * 1000;
+        } else {
+            return 0.0;
+        }
     }
 
     public static double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {

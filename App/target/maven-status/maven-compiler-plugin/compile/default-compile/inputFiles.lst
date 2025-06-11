@@ -1,10 +1,25 @@
-/home/kacperbielak/Programy/System obslugi lodzi zdalnie sterowanej/lodz/src/main/java/com/example/systemobslugilodzizdalniesterowanej/MainSystem.java
-/home/kacperbielak/Programy/System obslugi lodzi zdalnie sterowanej/lodz/src/main/java/com/example/systemobslugilodzizdalniesterowanej/DialogController.java
-/home/kacperbielak/Programy/System obslugi lodzi zdalnie sterowanej/lodz/src/main/java/com/example/systemobslugilodzizdalniesterowanej/ChoosePortController.java
-/home/kacperbielak/Programy/System obslugi lodzi zdalnie sterowanej/lodz/src/main/java/com/example/systemobslugilodzizdalniesterowanej/Lighting.java
-/home/kacperbielak/Programy/System obslugi lodzi zdalnie sterowanej/lodz/src/main/java/com/example/systemobslugilodzizdalniesterowanej/Map.java
-/home/kacperbielak/Programy/System obslugi lodzi zdalnie sterowanej/lodz/src/main/java/com/example/systemobslugilodzizdalniesterowanej/SystemController.java
-/home/kacperbielak/Programy/System obslugi lodzi zdalnie sterowanej/lodz/src/main/java/com/example/systemobslugilodzizdalniesterowanej/Connection.java
-/home/kacperbielak/Programy/System obslugi lodzi zdalnie sterowanej/lodz/src/main/java/com/example/systemobslugilodzizdalniesterowanej/App.java
-/home/kacperbielak/Programy/System obslugi lodzi zdalnie sterowanej/lodz/src/main/java/com/example/systemobslugilodzizdalniesterowanej/Engines.java
-/home/kacperbielak/Programy/System obslugi lodzi zdalnie sterowanej/lodz/src/main/java/com/example/systemobslugilodzizdalniesterowanej/Flaps.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/boatmodel/keyboardcontrol/KeyboardHandler.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/App.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/boatmodel/BoatMode.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/boatmodel/autonomiccontrol/LinearAndAngularSpeed.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/maps/OSMMap.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/boatmodel/BoatModeController.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/boatmodel/autonomiccontrol/AutonomicController.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/controllers/ExitDialogController.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/boatmodel/components/Flaps.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/controllers/StartSwimmingDialogController.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/controllers/SystemController.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/controllers/ProgressDialogController.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/boatmodel/components/Lighting.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/maps/OwnCoordinate.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/common/Utils.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/communication/Connection.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/maps/GoogleMap.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/boatmodel/components/Engines.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/controllers/ChoosePortController.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/boatmodel/autonomiccontrol/BasicCourseAndGpsAlgorithm.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/MainSystem.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/boatmodel/autonomiccontrol/AutonomicControlExecute.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/communication/exception/WrongMessageException.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/boatmodel/autonomiccontrol/PositionAlgorithm.java
+/home/kacperbielak/Programy/test/SystemObslugLodziZdalnieSterowanej/App/src/main/java/com/example/systemobslugilodzizdalniesterowanej/boatmodel/autonomiccontrol/KalmanFilterAlgorithm.java

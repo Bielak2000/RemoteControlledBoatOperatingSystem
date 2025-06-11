@@ -20,8 +20,9 @@ import java.util.concurrent.TimeUnit;
 public class AutonomicControlExecute {
 
     private final static int KALMAN_JOB_EXECUTE_SCHEDULER_MILLISECONDS = 300;
-    private final static int AUTONOMIC_CONTROL_JOB_EXECUTE_SCHEDULER_MILLISECONDS = 2000;
-    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+    private final static int AUTONOMIC_CONTROL_JOB_EXECUTE_SCHEDULER_MILLISECONDS = 700;
+    ScheduledExecutorService autonomicScheduler = Executors.newScheduledThreadPool(1);
+    ScheduledExecutorService kalmanScheduler = Executors.newScheduledThreadPool(1);
     BoatModeController boatModeController;
     Connection connection;
     KalmanFilterAlgorithm kalmanFilterAlgorithm;
@@ -68,22 +69,22 @@ public class AutonomicControlExecute {
         Runnable autonomicControlTask = () -> {
             BoatMode currentBoatMode = boatModeController.getBoatMode();
             if (currentBoatMode == BoatMode.AUTONOMIC_RUNNING) {
-                    connection.sendingValuesLock();
-                    try {
-                        connection.designateAndSendEnginesPowerByAutonomicController();
-                        saveDataToCSVFileWhileTesting();
-                    } catch (Exception ex) {
-                        log.error("Error while autonomic control task: {}", ex.getMessage());
-                    } finally {
-                        connection.sendingValuesUnlock();
-                    }
+                connection.sendingValuesLock();
+                try {
+                    connection.designateAndSendEnginesPowerByAutonomicController();
+                    saveDataToCSVFileWhileTesting();
+                } catch (Exception ex) {
+                    log.error("Error while autonomic control task: {}", ex.getMessage());
+                } finally {
+                    connection.sendingValuesUnlock();
+                }
             }
         };
 
         if (positionAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
-            scheduler.scheduleAtFixedRate(kalmanTask, 2000, KALMAN_JOB_EXECUTE_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);
+            kalmanScheduler.scheduleAtFixedRate(kalmanTask, 2000, KALMAN_JOB_EXECUTE_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);
         }
-        scheduler.scheduleAtFixedRate(autonomicControlTask, 5000, AUTONOMIC_CONTROL_JOB_EXECUTE_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);
+        autonomicScheduler.scheduleAtFixedRate(autonomicControlTask, 5000, AUTONOMIC_CONTROL_JOB_EXECUTE_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);
     }
 
     private void saveDataToCSVFileWhileTesting() throws IOException {

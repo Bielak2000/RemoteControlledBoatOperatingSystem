@@ -27,10 +27,10 @@
 
 
 // USTAWIĆ ODPOWIEDNIE PINY PO PODŁACZENIU
-#define LEFT_ENGINE 8
-#define RIGHT_ENGINE 9
-#define LEFT_FLAP 8
-#define RIGHT_FLAP 9
+#define LEFT_ENGINE 5
+#define RIGHT_ENGINE 6
+#define LEFT_FLAP 11
+#define RIGHT_FLAP 10
 #define LIGHTING 8
 
 // sprawdzic to czy 1 czy 0.5
@@ -121,7 +121,7 @@ const String LINEAR_ACCELARATION_ANGULAR_SPEED_ASSIGN = "7";
 
 double previousGpsCourse = 400;
 bool newGpsCourse = false;
-LiquidCrystal lcd(12, 11, 5, 4, 3, 6);
+// LiquidCrystal lcd(12, 11, 5, 4, 3, 6);
 
 void compassInterrupt() {
   newSensorValue = true;
@@ -151,16 +151,16 @@ void setup() {
   Serial3.begin(57600); // radionadanjnik
 
   // USTAWIĆ ODPOWIEDNIE PINY PO PODŁĄCZENIU - NAJLEPIEJ ZA POMOCĄ DEFINE I ODKOMENTOWAĆ FUNKCJE
-  // enginesInit();
-  // flapsInit();
+  enginesInit();
+  flapsInit();
   lightingInit();
 
   delay(500);
 
 // ********************************************************************************
 // *********************IMPLEMENTACJA TYLKO DO TESTOW******************************
-  Serial.begin(4800);
-  lcd.begin(16,2);
+  // Serial.begin(4800);
+  // lcd.begin(16,2);
 // ********************************************************************************    
 }
 
@@ -494,13 +494,13 @@ void readDataFromAppForAutonomicMode(char newChar) {
       buffIndex = 0;
       if(arrayIndex==2){
         newEnginesSpeed[1] = atoi(buff);
-                    lcd.setCursor(8, 1);         
-    lcd.print(newEnginesSpeed[1]);
+                    // lcd.setCursor(8, 1);         
+    // lcd.print(newEnginesSpeed[1]);
       }
       else if(arrayIndex==1) {
         newEnginesSpeed[0] = atoi(buff);
-        lcd.setCursor(0, 1);         
-        lcd.print(newEnginesSpeed[0]);
+        // lcd.setCursor(0, 1);         
+        // lcd.print(newEnginesSpeed[0]);
       }
       arrayIndex++;
       if (arrayIndex == 3) 
@@ -618,13 +618,13 @@ void setEnginePowerKeyboardMode(){
 
     enginesSpeed = map(currentEngineSpeeds[0], -100, 100, 1000, 2000);
     leftEngine.writeMicroseconds(enginesSpeed); 
-    lcd.setCursor(0, 0);         
-    lcd.print(enginesSpeed);
+    // lcd.setCursor(0, 0);         
+    // lcd.print(enginesSpeed);
 
     enginesSpeed = map(currentEngineSpeeds[1], -100, 100, 1000, 2000);
     rightEngine.writeMicroseconds(enginesSpeed);
-    lcd.setCursor(8, 0);         
-    lcd.print(enginesSpeed);
+    // lcd.setCursor(8, 0);         
+    // lcd.print(enginesSpeed);
 }
 
 void setEnginePowerAutonomicMode(){
@@ -635,8 +635,18 @@ void setEnginePowerAutonomicMode(){
         currentEngineSpeeds[i]=0;
         newDataForKeyboardHandler[i]=0;
       } else if (newEnginesSpeed[i] - currentEngineSpeeds[i] > 0) {
+        // if (i == 1 && (newEnginesSpeed[i] - currentEngineSpeeds[i]) > 1) {
+          // currentEngineSpeeds[i]=currentEngineSpeeds[i]+2;
+        // } else {
+          // currentEngineSpeeds[i]=currentEngineSpeeds[i]+1;
+        // }
         currentEngineSpeeds[i]=currentEngineSpeeds[i]+1;
       } else if(newEnginesSpeed[i] - currentEngineSpeeds[i] < 0) {
+        // if (i == 0 && (newEnginesSpeed[i] - currentEngineSpeeds[i]) < -1) {
+          // currentEngineSpeeds[i]=currentEngineSpeeds[i]-2;
+        // } else {
+          // currentEngineSpeeds[i]=currentEngineSpeeds[i]-1;
+        // }
         currentEngineSpeeds[i]=currentEngineSpeeds[i]-1;
       } else {
         newDataForKeyboardHandler[i]=0;
@@ -645,13 +655,13 @@ void setEnginePowerAutonomicMode(){
 
     enginesSpeed = map(currentEngineSpeeds[0], -100, 100, 1000, 2000);
     leftEngine.writeMicroseconds(enginesSpeed); 
-    lcd.setCursor(0, 0);         
-    lcd.print(enginesSpeed);
+    // lcd.setCursor(0, 0);         
+    // lcd.print(enginesSpeed);
 
     enginesSpeed = map(currentEngineSpeeds[1], -100, 100, 1000, 2000);
     rightEngine.writeMicroseconds(enginesSpeed);
-    lcd.setCursor(8, 0);         
-    lcd.print(enginesSpeed);
+    // lcd.setCursor(8, 0);         
+    // lcd.print(enginesSpeed);
 }
 
 void openOrCloseFlaps() {

@@ -123,7 +123,7 @@ public class KalmanFilterAlgorithm {
                     estimatedCoordinate.getY(), gpsLocalization.getX(), gpsLocalization.getY());
             return true;
         } else {
-            log.info("Starting kalman algorithm - failed because dont valid data.");
+            log.info("Starting kalman algorithm - failed because dont valid data: gps - {}, course - {}", gpsLocalization, currentCourse);
             return false;
         }
     }

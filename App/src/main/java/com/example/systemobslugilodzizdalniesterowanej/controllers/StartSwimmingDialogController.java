@@ -28,8 +28,6 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_
 @Slf4j
 public class StartSwimmingDialogController {
     ExecutorService executor = Executors.newFixedThreadPool(2);
-    // TODO: pamietac zeby to cofnac
-    private static int MAX_STARTING_BOAT_TIME_SECONDS = 5;
     private final static String BOAT_RUNNING_SWIMMING_INFORMATION = "Łódka porszua się po wyznaczonych punktach. Nie wyłączaj aplikacji i nie wykonuj żadnych czynności, czekaj na informację z łodzi o uzyskaniu docelowej pozycji. Możesz zastopować łódź przyciskiem STOP.";
     Stage stage;
     BoatModeController boatModeController;
@@ -88,16 +86,18 @@ public class StartSwimmingDialogController {
                     LinearAndAngularSpeed linearAndAngularSpeed;
                     linearAndAngularSpeed = autonomicController.designateRightEnginesPowerOnStart();
                     try {
-                        startAndStopRotating(linearAndAngularSpeed);
+                        connection.startAndStopRotating(linearAndAngularSpeed, osmMap.getCurrentCourse());
                     } catch (InterruptedException e) {
                         log.error("Error while startAndStopRotatnig: {}", e.getMessage());
                     }
                     linearAndAngularSpeed = autonomicController.designateLeftEnginesPowerOnStart();
                     try {
-                        startAndStopRotating(linearAndAngularSpeed);
+                        connection.startAndStopRotating(linearAndAngularSpeed, osmMap.getCurrentCourse());
                     } catch (InterruptedException e) {
                         log.error("Error while startAndStopRotatnig: {}", e.getMessage());
                     }
+
+//                    connection.lineUpTowardsTheTarget();
                 }
                 Platform.runLater(() -> {
                     runningBoatInformation.setVisible(true);
@@ -120,20 +120,4 @@ public class StartSwimmingDialogController {
         this.stage.close();
     }
 
-    private void startAndStopRotating(LinearAndAngularSpeed linearAndAngularSpeed) throws InterruptedException {
-        int waitingIteration = 0;
-        designateAndSendEngines(linearAndAngularSpeed);
-        autonomicController.setCourseOnRotateStart(osmMap.getCurrentCourse());
-        while (!autonomicController.isStopRotating() && waitingIteration < MAX_STARTING_BOAT_TIME_SECONDS) {
-            Thread.sleep(1000);
-            waitingIteration++;
-        }
-        linearAndAngularSpeed = autonomicController.clearAfterRotating();
-        designateAndSendEngines(linearAndAngularSpeed);
-        Thread.sleep(1000);
-    }
-
-    private void designateAndSendEngines(LinearAndAngularSpeed linearAndAngularSpeed) {
-        connection.sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
-    }
 }

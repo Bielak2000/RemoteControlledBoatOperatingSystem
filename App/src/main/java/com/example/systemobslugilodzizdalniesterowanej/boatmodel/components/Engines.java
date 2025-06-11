@@ -1,10 +1,12 @@
 package com.example.systemobslugilodzizdalniesterowanej.boatmodel.components;
 
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.LinearAndAngularSpeed;
+import com.example.systemobslugilodzizdalniesterowanej.common.Utils;
 
 public class Engines {
 
-    private static double ANGULAR_FACTORY = 0.5;
+    private static int MAX_LEFT_ENGINE_PERCENTAGE_POWER = 55;
+    private static int MAX_RIGHT_ENGINE_PERCENTAGE_POWER = 80;
 
     private int motorLeft;
     private int motorRight;
@@ -17,22 +19,22 @@ public class Engines {
     }
 
     public void movingForward() {
-        motorLeft = 80;
-        motorRight = -80;
+        motorLeft = MAX_LEFT_ENGINE_PERCENTAGE_POWER;
+        motorRight = -1 * MAX_RIGHT_ENGINE_PERCENTAGE_POWER;
     }
 
     public void movingBack() {
-        motorLeft = -80;
-        motorRight = 80;
+        motorLeft = -1 * MAX_LEFT_ENGINE_PERCENTAGE_POWER;
+        motorRight = MAX_RIGHT_ENGINE_PERCENTAGE_POWER;
     }
 
     public void turnLeft() {
-        motorRight = -80;
+        motorRight = -1 * MAX_RIGHT_ENGINE_PERCENTAGE_POWER;
         motorLeft = 0;
     }
 
     public void turnRight() {
-        motorLeft = 80;
+        motorLeft = MAX_LEFT_ENGINE_PERCENTAGE_POWER;
         motorRight = 0;
     }
 
@@ -59,19 +61,32 @@ public class Engines {
 
     public void setEnginesPowerByAngularAndLinearSpeed(LinearAndAngularSpeed linearAndAngularSpeed) {
         if (linearAndAngularSpeed.getLinearSpeed() == 0) {
-            if (linearAndAngularSpeed.getAngularSpeed() != 0) {
-                this.motorLeft = (int) Math.round((linearAndAngularSpeed.getAngularSpeed()) / 2);
+            // uneven engine operation
+            if (linearAndAngularSpeed.getAngularSpeed() == -60) {
+                this.motorLeft = -25;
+                this.motorRight = -20;
+            } else if (linearAndAngularSpeed.getAngularSpeed() != 0) {
+                this.motorLeft = mapLeftEngineValue(Math.round((linearAndAngularSpeed.getAngularSpeed()) / 2));
                 this.motorRight = -1 * ((int) Math.round(-(linearAndAngularSpeed.getAngularSpeed()) / 2));
             } else {
                 this.motorLeft = 0;
                 this.motorRight = 0;
             }
         } else {
-            double leftValue = (linearAndAngularSpeed.getLinearSpeed() + ((linearAndAngularSpeed.getAngularSpeed() * ANGULAR_FACTORY))) / (1.0 + ANGULAR_FACTORY);
-            double rightValue = (linearAndAngularSpeed.getLinearSpeed() - ((linearAndAngularSpeed.getAngularSpeed() * ANGULAR_FACTORY))) / (1.0 + ANGULAR_FACTORY);
-            this.motorLeft = (int) leftValue;
-            this.motorRight = -1 * ((int) rightValue);
+            if (linearAndAngularSpeed.getAngularSpeed() != 0) {
+                double leftValue = (linearAndAngularSpeed.getLinearSpeed() + ((linearAndAngularSpeed.getAngularSpeed() * linearAndAngularSpeed.getAngularFactory()))) / (1.0 + linearAndAngularSpeed.getAngularFactory());
+                double rightValue = (linearAndAngularSpeed.getLinearSpeed() - ((linearAndAngularSpeed.getAngularSpeed() * linearAndAngularSpeed.getAngularFactory()))) / (1.0 + linearAndAngularSpeed.getAngularFactory());
+                this.motorLeft = mapLeftEngineValue(leftValue);
+                this.motorRight = -1 * ((int) rightValue);
+            } else {
+                this.motorLeft = mapLeftEngineValue(linearAndAngularSpeed.getLinearSpeed());
+                this.motorRight = -1 * ((int) linearAndAngularSpeed.getLinearSpeed());
+            }
         }
         this.temp = true;
+    }
+
+    private int mapLeftEngineValue(double autonomicValue) {
+        return (int) (autonomicValue * (MAX_LEFT_ENGINE_PERCENTAGE_POWER / Utils.MAX_LINEAR_SPEED_PERCENTAGE));
     }
 }

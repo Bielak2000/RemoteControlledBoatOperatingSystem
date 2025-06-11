@@ -15,11 +15,9 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.calcu
 @Slf4j
 public class AutonomicController {
 
-    private static double MAX_PERCENTAGE_ENGINE_POWER = 50;
     private static double DISTANCE_ACCURACY_METERS = 1.5;
-    private static double MIN_DISTANCE_FOR_LINEAR_SPEED_METERS = 1.5;
-    private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 20.0;
-    private static double MIN_LINEAR_SPEED_PERCENTAGE = 10.0;
+    private static double MIN_DISTANCE_FOR_LINEAR_SPEED_METERS = 2.5;
+    private static double MAX_DISTANCE_FOR_LINEAR_SPEED_METERS = 15.0;
 
 
     private OSMMap osmMap;
@@ -30,7 +28,7 @@ public class AutonomicController {
 
     @Setter
     @Getter
-    private boolean stopRotating = false;
+    private boolean stopRotating = true;
 
     @Setter
     @Getter
@@ -48,11 +46,11 @@ public class AutonomicController {
     }
 
     public LinearAndAngularSpeed designateRightEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(50.0, 0.0);
+        return new LinearAndAngularSpeed(50.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
     }
 
     public LinearAndAngularSpeed designateLeftEnginesPowerOnStart() {
-        return new LinearAndAngularSpeed(-50.0, 0.0);
+        return new LinearAndAngularSpeed(-60.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
     }
 
     public LinearAndAngularSpeed designateEnginesPower() {
@@ -72,7 +70,7 @@ public class AutonomicController {
                 osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());
                 return determinateLinearAndAngularSpeed(distance);
             } else {
-                Platform.runLater(()->{
+                Platform.runLater(() -> {
                     osmMap.setStartWaypoint(null);
                     osmMap.setNextWaypointOnTheRoad(null);
                     osmMap.setFirstStartWaypointToCSV(null);
@@ -85,23 +83,32 @@ public class AutonomicController {
         }
     }
 
+    public double designateAngularFactory(double courseDifference) {
+        if (courseDifference > Utils.COURSE_DIFFERENCE_FOR_MAX_ANGULAR_FACTORY) {
+            return Utils.ANGULAR_FACTORY_MAX;
+        } else return Utils.ANGULAR_FACTORY_NORMAL;
+    }
+
     public void incrementCourseCount() {
         this.courseCount++;
     }
 
     public LinearAndAngularSpeed clearAfterRotating() {
         this.courseCount = 0;
-        this.stopRotating = false;
         this.courseOnRotateStart = null;
-        return new LinearAndAngularSpeed(0, 0);
+        return new LinearAndAngularSpeed(0, 0, Utils.ANGULAR_FACTORY_NORMAL);
     }
 
     private LinearAndAngularSpeed determinateLinearAndAngularSpeed(double distance) {
-        double newCourse = Utils.determineCourseBetweenTwoWaypoints(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad());
+        double newCourse = (Utils.determineCourseBetweenTwoWaypoints(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad()) + 270) % 360;// + 270) % 360;
         osmMap.setExpectedCourse(String.format("%.2f", newCourse));
         double linearSpeed = getLinearSpeed(distance);
         double angularSpeed = getAngularSpeed(newCourse, osmMap.getCurrentCourse());
-        return new LinearAndAngularSpeed(angularSpeed, linearSpeed);
+        log.info("ANGULAR: " + angularSpeed);
+        double differenceCourse = Math.abs(newCourse - osmMap.getCurrentCourse());
+        double minDifference = Math.min(differenceCourse, 360.0 - differenceCourse);
+        double angularFactory = designateAngularFactory(Math.abs(minDifference));
+        return new LinearAndAngularSpeed(angularSpeed, linearSpeed, angularFactory);
     }
 
     /**
@@ -113,23 +120,27 @@ public class AutonomicController {
      * @param distanceBetweenCurrentAndNextPositions
      * @return
      */
-    private double getLinearSpeed(double distanceBetweenCurrentAndNextPositions) {
+    public double getLinearSpeed(double distanceBetweenCurrentAndNextPositions) {
         if (distanceBetweenCurrentAndNextPositions <= MIN_DISTANCE_FOR_LINEAR_SPEED_METERS) {
-            return MIN_LINEAR_SPEED_PERCENTAGE;
+            return Utils.MIN_LINEAR_SPEED_PERCENTAGE;
         } else if (distanceBetweenCurrentAndNextPositions >= MAX_DISTANCE_FOR_LINEAR_SPEED_METERS) {
-            return MAX_PERCENTAGE_ENGINE_POWER;
+            return Utils.MAX_LINEAR_SPEED_PERCENTAGE;
         } else {
-            return (distanceBetweenCurrentAndNextPositions / (MAX_DISTANCE_FOR_LINEAR_SPEED_METERS - MIN_LINEAR_SPEED_PERCENTAGE)) * MAX_PERCENTAGE_ENGINE_POWER;
+            return (distanceBetweenCurrentAndNextPositions / (MAX_DISTANCE_FOR_LINEAR_SPEED_METERS - MIN_DISTANCE_FOR_LINEAR_SPEED_METERS)) * Utils.MAX_LINEAR_SPEED_PERCENTAGE;
         }
     }
 
-    private double getAngularSpeed(double expectedCourse, double currentCourse) {
-        double courseDifference = expectedCourse - currentCourse;
-        double angularSpeed = (courseDifference / 360.0) * MAX_PERCENTAGE_ENGINE_POWER;
-        if (Math.abs(courseDifference) < 180) {
-            angularSpeed = -1 * angularSpeed;
-        }
-        return angularSpeed;
+    public int getAngularSpeed(double expectedCourse, double currentCourse) {
+        double courseDifference = (expectedCourse - currentCourse + 540) % 360 - 180;
+        int direction = courseDifference > 0 ? 1 : -1;
+        double angle = Math.abs(courseDifference);
+        int angularSpeed = (int) Math.round((angle / 180.0) * Utils.MAX_LINEAR_SPEED_PERCENTAGE);
+        return direction * angularSpeed;
+    }
+
+    public int getAngularSpeedDirection(double expectedCourse, double currentCourse) {
+        double courseDifference = (expectedCourse - currentCourse + 540) % 360 - 180;
+        return courseDifference > 0 ? 1 : -1;
     }
 
 }
