@@ -14,6 +14,14 @@ import java.util.List;
 @Slf4j
 public class Utils {
 
+    public static double ANGULAR_FACTORY_NORMAL = 1.5;
+    public static double ANGULAR_FACTORY_MAX = 10.0;
+    public static double COURSE_DIFFERENCE_FOR_MAX_ANGULAR_FACTORY = 10.0;
+
+    public static int MAX_STARTING_BOAT_TIME_SECONDS = 20;
+    public final static int MAX_COURSE_COUNT_IN_AUTONOMIC_STARTING_MODE = 20;
+    public final static int COURSE_ACCURACY_WHILE_CALIBRATION = 10;
+
     public static double MAX_LINEAR_SPEED_PERCENTAGE = 80;
     public static double MIN_LINEAR_SPEED_PERCENTAGE = 30.0;
 
