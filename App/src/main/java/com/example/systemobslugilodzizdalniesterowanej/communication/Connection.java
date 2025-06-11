@@ -214,12 +214,8 @@ public class Connection {
                 kalmanFilterAlgorithm.setNextWaypoint(osmMap.getNextWaypointOnTheRoad());
             }
             if (linearAndAngularSpeed != null) {
-                // nowy punkt !
                 if (waypointIndex != osmMap.getWaypointIndex()) {
-                    // ustawianie sie do punktu
 //                    lineUpTowardsTheTarget();
-
-                    // pobranie nowej predkosci itd.
                     linearAndAngularSpeed = autonomicController.designateEnginesPower();
                     if (chosenAlgorithm.equals(PositionAlgorithm.KALMAN_FILTER)) {
                         kalmanFilterAlgorithm.setStartWaypoint(osmMap.getStartWaypoint());
@@ -549,7 +545,6 @@ public class Connection {
         return autonomicController.isArchiveLastWaypoint();
     }
 
-    // ustawianie sie do punktu
     public void lineUpTowardsTheTarget() {
         double expectedCourse = Double.parseDouble(osmMap.getExpectedCourse().getText());
         if (Math.abs(expectedCourse - osmMap.getCurrentCourse()) > Utils.COURSE_ACCURACY_WHILE_CALIBRATION) {

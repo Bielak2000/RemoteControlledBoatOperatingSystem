@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 public class AutonomicControlExecute {
 
     private final static int KALMAN_JOB_EXECUTE_SCHEDULER_MILLISECONDS = 300;
-    // pobawic sie czy nie mozna czesciej to wykonywac lub rzadziej
     private final static int AUTONOMIC_CONTROL_JOB_EXECUTE_SCHEDULER_MILLISECONDS = 700;
     ScheduledExecutorService autonomicScheduler = Executors.newScheduledThreadPool(1);
     ScheduledExecutorService kalmanScheduler = Executors.newScheduledThreadPool(1);

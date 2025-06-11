@@ -49,8 +49,6 @@ public class AutonomicController {
         return new LinearAndAngularSpeed(50.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
     }
 
-    // jesli robi łuk to czyli, że prędkość prawego silnika jest za duza wzgledem lewego
-    // jesli bedzie do tylu to czyli ze predkosc lewego za duza wzgledem lewego
     public LinearAndAngularSpeed designateLeftEnginesPowerOnStart() {
         return new LinearAndAngularSpeed(-60.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
     }
@@ -97,13 +95,12 @@ public class AutonomicController {
 
     public LinearAndAngularSpeed clearAfterRotating() {
         this.courseCount = 0;
-//        this.stopRotating = true;
         this.courseOnRotateStart = null;
         return new LinearAndAngularSpeed(0, 0, Utils.ANGULAR_FACTORY_NORMAL);
     }
 
     private LinearAndAngularSpeed determinateLinearAndAngularSpeed(double distance) {
-        double newCourse = (Utils.determineCourseBetweenTwoWaypoints(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad())+ 270) % 360;// + 270) % 360;
+        double newCourse = (Utils.determineCourseBetweenTwoWaypoints(osmMap.getCurrentBoatPosition(), osmMap.getNextWaypointOnTheRoad()) + 270) % 360;// + 270) % 360;
         osmMap.setExpectedCourse(String.format("%.2f", newCourse));
         double linearSpeed = getLinearSpeed(distance);
         double angularSpeed = getAngularSpeed(newCourse, osmMap.getCurrentCourse());
@@ -134,9 +131,7 @@ public class AutonomicController {
     }
 
     public int getAngularSpeed(double expectedCourse, double currentCourse) {
-        // Różnica kąta (zakres -180 do +180)
         double courseDifference = (expectedCourse - currentCourse + 540) % 360 - 180;
-        // >0 prawo, <0 lewo
         int direction = courseDifference > 0 ? 1 : -1;
         double angle = Math.abs(courseDifference);
         int angularSpeed = (int) Math.round((angle / 180.0) * Utils.MAX_LINEAR_SPEED_PERCENTAGE);
@@ -144,7 +139,6 @@ public class AutonomicController {
     }
 
     public int getAngularSpeedDirection(double expectedCourse, double currentCourse) {
-        // Różnica kąta (zakres -180 do +180)
         double courseDifference = (expectedCourse - currentCourse + 540) % 360 - 180;
         return courseDifference > 0 ? 1 : -1;
     }
