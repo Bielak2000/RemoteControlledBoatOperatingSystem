@@ -63,30 +63,22 @@ public class Utils {
      */
     public static double calculateDistance(Coordinate c1, Coordinate c2) {
         if (c1 != null && c2 != null) {
-            // Konwersja stopni na radiany
             double lat1Rad = Math.toRadians(c1.getLatitude());
             double lon1Rad = Math.toRadians(c1.getLongitude());
             double lat2Rad = Math.toRadians(c2.getLatitude());
             double lon2Rad = Math.toRadians(c2.getLongitude());
-
-            // Różnica szerokości i długości geograficznej w radianach
             double dLat = lat2Rad - lat1Rad;
             double dLon = lon2Rad - lon1Rad;
-
-            // Obliczenie odległości za pomocą formuły Haversine
             double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                     Math.cos(lat1Rad) * Math.cos(lat2Rad) *
                             Math.sin(dLon / 2) * Math.sin(dLon / 2);
             double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-            // Obliczenie odległości
             return EARTH_RADIUS_KM * c * 1000;
         } else {
             return 0.0;
         }
     }
 
-    // wykrzystywana do zmainu ukladu na lokalny
     public static double determineCourseBetweenTwoWaypoints(Coordinate firstCoordinate, Coordinate secondCoordinate) {
         double latitude1 = Math.toRadians(firstCoordinate.getLatitude());
         double latitude2 = Math.toRadians(secondCoordinate.getLatitude());
