@@ -2,7 +2,7 @@ package com.example.systemobslugilodzizdalniesterowanej.controllers;
 
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
-import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicControlExecute;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicAndKalmanControlExecute;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.KalmanFilterAlgorithm;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.PositionAlgorithm;
@@ -40,7 +40,7 @@ import static com.example.systemobslugilodzizdalniesterowanej.common.Utils.FXML_
 @Slf4j
 public class SystemController implements Initializable {
     KalmanFilterAlgorithm kalmanFilterAlgorithm;
-    AutonomicControlExecute autonomicControlExecute;
+    AutonomicAndKalmanControlExecute autonomicAndKalmanControlExecute;
     ExecutorService executorService;
     AutonomicController autonomicController;
     Stage stage;
@@ -92,8 +92,8 @@ public class SystemController implements Initializable {
         this.choosenAlgorithmText.setText(chosenAlgorithm.getDescription());
         exit.setCancelButton(true);
         exit.setFocusTraversable(false);
-        this.autonomicControlExecute = new AutonomicControlExecute(this.boatModeController, this.connection, this.kalmanFilterAlgorithm, this.osmMap, this.designatedCourse, this.chosenAlgorithm);
-        this.autonomicControlExecute.start();
+        this.autonomicAndKalmanControlExecute = new AutonomicAndKalmanControlExecute(this.boatModeController, this.connection, this.kalmanFilterAlgorithm, this.osmMap, this.designatedCourse, this.chosenAlgorithm);
+        this.autonomicAndKalmanControlExecute.start();
         this.connection.sendInitConnection();
     }
 

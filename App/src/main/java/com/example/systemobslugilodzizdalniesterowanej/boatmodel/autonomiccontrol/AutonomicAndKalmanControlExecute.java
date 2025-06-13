@@ -17,7 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class AutonomicControlExecute {
+public class AutonomicAndKalmanControlExecute {
 
     private final static int KALMAN_JOB_EXECUTE_SCHEDULER_MILLISECONDS = 300;
     private final static int AUTONOMIC_CONTROL_JOB_EXECUTE_SCHEDULER_MILLISECONDS = 700;
@@ -32,7 +32,7 @@ public class AutonomicControlExecute {
     private String testingCsvFileName;
     private LocalDateTime now = LocalDateTime.now();
 
-    public AutonomicControlExecute(BoatModeController boatModeController, Connection connection, KalmanFilterAlgorithm kalmanFilterAlgorithm, OSMMap osmMap, Label designatedCourse, PositionAlgorithm positionAlgorithm) {
+    public AutonomicAndKalmanControlExecute(BoatModeController boatModeController, Connection connection, KalmanFilterAlgorithm kalmanFilterAlgorithm, OSMMap osmMap, Label designatedCourse, PositionAlgorithm positionAlgorithm) {
         this.boatModeController = boatModeController;
         this.connection = connection;
         this.kalmanFilterAlgorithm = kalmanFilterAlgorithm;
