@@ -43,26 +43,6 @@ import static jssc.SerialPort.MASK_RXCHAR;
 @Slf4j
 public class Connection {
 
-    // MESSAGE TO BOAT
-    private final static String FROM_APP_KEYBOARD_CONTROL_MODE_MARKING = "0";
-    private final static String FROM_APP_MOVE_TO_AUTONOMIC_MODE = "1";
-    private final static String FROM_APP_AUTONOMOUS_MODE_CONTROL = "2";
-    private final static String FINISH_SWIMMING_BY_WAYPOINTS = "3";
-    private final static String FROM_APP_INIT_CONNECTION = "4";
-
-    // MESSAGE FROM BOAT
-    private final static int FROM_BOAT_LIGHTING_MESSAGE = 0;
-    private final static int FROM_BOAT_GPS_MESSAGE = 1;
-    private final static int FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS = 2;
-
-    private final static String BOAT_FINISHED_SWIMMING_INFORMATION = "Łódka dopłyneła do ostaniego waypointa, zmieniono tryb sterowania na tryb manualny. Jeśli chcesz ponownie wyznaczyć trasę wykonaj odpowiednie czynności jak poprzednio.";
-    private final static String BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION = "Ręcznie przerwano pływanie łodzi po waypointach, zmieniono tryb sterowania na tryb manualny.";
-
-    // TODO: do testow
-    private final static int FROM_BOAT_GPS_COURSE_MESSAGE = 5;
-    private final static int FROM_BOAT_SENSOR_COURSE_MESSAGE = 6;
-    private final static int LINEAR_ACCELERATION_ANGULAR_SPEED_ASSIGN = 7;
-
     @Getter
     private Lock sendingValuesLock = new ReentrantLock();
     private BasicCourseAndGpsAlgorithm basicCourseAndGpsAlgorithm;
@@ -165,7 +145,7 @@ public class Connection {
     public void sendInitConnection() {
         try {
             if (boatModeController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
-                String sentInfo = (FROM_APP_INIT_CONNECTION + "_" + chosenAlgorithm.getMaking() + "_");
+                String sentInfo = (ConnectionConsts.FROM_APP_INIT_CONNECTION + "_" + chosenAlgorithm.getMaking() + "_");
                 serialPort.writeString(sentInfo);
                 log.info("Sent init connection: {}", sentInfo);
             }
@@ -177,7 +157,7 @@ public class Connection {
     public void sendParameters() {
         try {
             if (boatModeController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
-                String sentInfo = (FROM_APP_KEYBOARD_CONTROL_MODE_MARKING + "_"
+                String sentInfo = (ConnectionConsts.FROM_APP_KEYBOARD_CONTROL_MODE_MARKING + "_"
                         + String.valueOf((int) engines.getMotorLeft()) + "_" + String.valueOf((int) engines.getMotorRight()) + "_"
                         + String.valueOf((int) lighting.getPower()) + "_"
                         + String.valueOf((int) flaps.getFirstFlap()) + "_" + flaps.getSecondFlap() + "_");
@@ -194,7 +174,7 @@ public class Connection {
             engines.setEnginesPowerByAngularAndLinearSpeed(linearAndAngularSpeed);
             try {
                 if (boatModeController.getBoatMode() == BoatMode.AUTONOMIC_RUNNING || boatModeController.getBoatMode() == BoatMode.AUTONOMIC_STARTING) {
-                    String sentInfo = (FROM_APP_AUTONOMOUS_MODE_CONTROL + "_"
+                    String sentInfo = (ConnectionConsts.FROM_APP_AUTONOMOUS_MODE_CONTROL + "_"
                             + String.valueOf((int) engines.getMotorLeft()) + "_" + String.valueOf((int) engines.getMotorRight()) + "_");
                     serialPort.writeString(sentInfo);
                     log.info("Sent: {}", sentInfo);
@@ -240,7 +220,7 @@ public class Connection {
 
     public void sendStopSwimmingInfo() {
         try {
-            String sentInfo = FINISH_SWIMMING_BY_WAYPOINTS;
+            String sentInfo = ConnectionConsts.FINISH_SWIMMING_BY_WAYPOINTS;
             serialPort.writeString(sentInfo);
             log.info("Sent message: {}", sentInfo);
         } catch (SerialPortException e) {
@@ -251,7 +231,7 @@ public class Connection {
     public void sendMoveToAutonomicInfo() {
         try {
             if (boatModeController.getBoatMode() == BoatMode.KEYBOARD_CONTROL) {
-                String sentInfo = FROM_APP_MOVE_TO_AUTONOMIC_MODE;
+                String sentInfo = ConnectionConsts.FROM_APP_MOVE_TO_AUTONOMIC_MODE;
                 serialPort.writeString(sentInfo);
                 log.info("Sent: {}", sentInfo);
             }
@@ -262,12 +242,12 @@ public class Connection {
 
     private void receivedMessageHandler(int messageSign, String[] array) throws IOException, InterruptedException {
         switch (messageSign) {
-            case FROM_BOAT_LIGHTING_MESSAGE:
+            case ConnectionConsts.FROM_BOAT_LIGHTING_MESSAGE:
                 lighting.setPower(Integer.parseInt(array[1]));
                 setLightPowerLabel();
                 log.info("New light power: {}", array[1]);
                 break;
-            case FROM_BOAT_GPS_MESSAGE:
+            case ConnectionConsts.FROM_BOAT_GPS_MESSAGE:
                 log.info("Received localization");
                 String[] localization = {"", ""};
                 if (!array[1].equals("-1") && !array[1].equals("INVALID")) {
@@ -280,7 +260,7 @@ public class Connection {
                     sendingValuesUnlock();
                 }
                 break;
-            case FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS:
+            case ConnectionConsts.FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS:
                 log.info("Received boat finished swimming by waypoints.");
                 sendingValuesLock();
                 if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
@@ -296,9 +276,9 @@ public class Connection {
                     osmMap.setStartWaypoint(null);
                     osmMap.setWaypointIndex(0);
                     if (autonomicController.isManuallyFinishSwimming()) {
-                        showInformationDialog("Przerwano pływanie łodzi", BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION, 500);
+                        showInformationDialog("Przerwano pływanie łodzi", ConnectionConsts.BOAT_MANUALLY_FINISHED_SWIMMING_INFORMATION, 500);
                     } else {
-                        showInformationDialog("Łódka osiągneła punkt docelowy", BOAT_FINISHED_SWIMMING_INFORMATION, 700);
+                        showInformationDialog("Łódka osiągneła punkt docelowy", ConnectionConsts.BOAT_FINISHED_SWIMMING_INFORMATION, 700);
                         autonomicController.setManuallyFinishSwimming(true);
                     }
                 });
@@ -314,7 +294,7 @@ public class Connection {
                 }
                 sendingValuesUnlock();
                 break;
-            case FROM_BOAT_GPS_COURSE_MESSAGE:
+            case ConnectionConsts.FROM_BOAT_GPS_COURSE_MESSAGE:
                 log.info("Received course from GPS");
                 Double gpsCourse = ((Double.parseDouble(array[1])));
                 Platform.runLater(() -> {
@@ -344,7 +324,7 @@ public class Connection {
                 }
                 sendingValuesUnlock();
                 break;
-            case FROM_BOAT_SENSOR_COURSE_MESSAGE:
+            case ConnectionConsts.FROM_BOAT_SENSOR_COURSE_MESSAGE:
                 log.info("Received course from SENSOR");
                 sendingValuesLock();
                 // TODO: converting course
@@ -384,7 +364,7 @@ public class Connection {
                 }
                 sendingValuesUnlock();
                 break;
-            case LINEAR_ACCELERATION_ANGULAR_SPEED_ASSIGN:
+            case ConnectionConsts.LINEAR_ACCELERATION_ANGULAR_SPEED_ASSIGN:
                 log.info("Received linear acceleration and angular speed from SENSOR");
                 if (chosenAlgorithm == PositionAlgorithm.KALMAN_FILTER) {
                     String[] linearAccelerationAndAngularSpeed = array[1].split(",");
@@ -489,18 +469,18 @@ public class Connection {
     private boolean checkCorrectlyReceivedData(String[] receivedData) {
         if (receivedData.length == 1) {
             try {
-                return Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS;
+                return Integer.parseInt(receivedData[0]) == ConnectionConsts.FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS;
             } catch (NumberFormatException ex) {
                 return false;
             }
         } else if (receivedData.length == 2) {
             try {
-                return Integer.parseInt(receivedData[0]) == FROM_BOAT_LIGHTING_MESSAGE ||
-                        Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_MESSAGE ||
-                        Integer.parseInt(receivedData[0]) == FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS ||
-                        Integer.parseInt(receivedData[0]) == FROM_BOAT_GPS_COURSE_MESSAGE ||
-                        Integer.parseInt(receivedData[0]) == FROM_BOAT_SENSOR_COURSE_MESSAGE ||
-                        Integer.parseInt(receivedData[0]) == LINEAR_ACCELERATION_ANGULAR_SPEED_ASSIGN;
+                return Integer.parseInt(receivedData[0]) == ConnectionConsts.FROM_BOAT_LIGHTING_MESSAGE ||
+                        Integer.parseInt(receivedData[0]) == ConnectionConsts.FROM_BOAT_GPS_MESSAGE ||
+                        Integer.parseInt(receivedData[0]) == ConnectionConsts.FROM_BOAT_BOAT_FINISHED_SWIMMING_BY_WAYPOINTS ||
+                        Integer.parseInt(receivedData[0]) == ConnectionConsts.FROM_BOAT_GPS_COURSE_MESSAGE ||
+                        Integer.parseInt(receivedData[0]) == ConnectionConsts.FROM_BOAT_SENSOR_COURSE_MESSAGE ||
+                        Integer.parseInt(receivedData[0]) == ConnectionConsts.LINEAR_ACCELERATION_ANGULAR_SPEED_ASSIGN;
             } catch (NumberFormatException ex) {
                 return false;
             }
