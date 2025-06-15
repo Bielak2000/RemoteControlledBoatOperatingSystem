@@ -2,11 +2,11 @@ package com.example.systemobslugilodzizdalniesterowanej.boatmodel.components;
 
 public class Lighting {
     private int power;
-    private boolean temp;
+    private boolean changed;
 
     public Lighting() {
         power = 0;
-        temp = false;
+        changed = false;
     }
 
     public void setPower(int power) {
@@ -17,12 +17,12 @@ public class Lighting {
         return this.power;
     }
 
-    public void setTemp(boolean temp) {
-        this.temp = temp;
+    public void setChanged(boolean changed) {
+        this.changed = changed;
     }
 
-    public boolean getTemp() {
-        return temp;
+    public boolean getChanged() {
+        return changed;
     }
 }
 

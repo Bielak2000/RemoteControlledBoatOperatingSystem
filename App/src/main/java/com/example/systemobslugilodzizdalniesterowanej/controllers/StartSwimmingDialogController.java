@@ -5,6 +5,7 @@ import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeControl
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.AutonomicController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.LinearAndAngularSpeed;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.autonomiccontrol.PositionAlgorithm;
+import com.example.systemobslugilodzizdalniesterowanej.common.Utils;
 import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
 import com.example.systemobslugilodzizdalniesterowanej.maps.OSMMap;
 import javafx.application.Platform;
@@ -61,7 +62,7 @@ public class StartSwimmingDialogController {
             alert.setHeaderText("Wybrałeś zbyt dużo punktów, możesz wybrać maksymalnie 5 waypointów.");
             alert.showAndWait();
             this.stage.close();
-        } else if (autonomicController.designateEnginesPower() == null) {
+        } else if (autonomicController.designateSpeeds() == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Błędne dane");
             alert.setHeaderText("Wybrałeś błędne pozycje.");
@@ -118,6 +119,20 @@ public class StartSwimmingDialogController {
     @FXML
     void notSwimming(ActionEvent event) {
         this.stage.close();
+    }
+
+    private void startAndStopRotating(LinearAndAngularSpeed linearAndAngularSpeed, double courseToEnd) throws InterruptedException {
+        int waitingIteration = 0;
+        autonomicController.setStopRotating(false);
+        connection.sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
+        autonomicController.setCourseOnRotateStart(courseToEnd);
+        while (!autonomicController.isStopRotating() && waitingIteration < Utils.MAX_STARTING_BOAT_TIME_SECONDS) {
+            Thread.sleep(1000);
+            waitingIteration++;
+        }
+        linearAndAngularSpeed = autonomicController.clearAfterRotating();
+        connection.sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
+        Thread.sleep(1000);
     }
 
 }

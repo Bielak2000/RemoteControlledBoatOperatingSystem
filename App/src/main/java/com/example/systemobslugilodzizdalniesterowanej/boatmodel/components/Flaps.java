@@ -3,12 +3,12 @@ package com.example.systemobslugilodzizdalniesterowanej.boatmodel.components;
 public class Flaps {
     private int firstFlap;
     private int secondFlap;
-    private boolean temp;
+    private boolean changed;
 
     public Flaps() {
         firstFlap = 0;
         secondFlap = 0;
-        temp = false;
+        changed = false;
     }
 
     public int getFirstFlap() {
@@ -19,12 +19,12 @@ public class Flaps {
         return secondFlap;
     }
 
-    public boolean getTemp() {
-        return temp;
+    public boolean getChanged() {
+        return changed;
     }
 
-    public void setTemp(boolean temp1) {
-        this.temp = temp1;
+    public void setChanged(boolean temp1) {
+        this.changed = temp1;
     }
 
     public void onLeftFlap() {

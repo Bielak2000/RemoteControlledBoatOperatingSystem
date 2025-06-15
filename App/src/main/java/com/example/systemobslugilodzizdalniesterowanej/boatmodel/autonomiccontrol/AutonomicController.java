@@ -53,7 +53,7 @@ public class AutonomicController {
         return new LinearAndAngularSpeed(-60.0, 0.0, Utils.ANGULAR_FACTORY_NORMAL);
     }
 
-    public LinearAndAngularSpeed designateEnginesPower() {
+    public LinearAndAngularSpeed designateSpeeds() {
         if (osmMap.getNextWaypointOnTheRoad() == null || osmMap.getFirstStartWaypointToCSV() == null) {
             osmMap.setNextWaypointOnTheRoad(osmMap.getDesignatedWaypoints().get(osmMap.getWaypointIndex()).getPosition());
             osmMap.setStartWaypoint(osmMap.getCurrentBoatPosition());

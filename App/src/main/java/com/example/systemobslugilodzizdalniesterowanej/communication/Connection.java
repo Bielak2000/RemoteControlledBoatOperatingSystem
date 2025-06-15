@@ -188,7 +188,7 @@ public class Connection {
     public void designateAndSendEnginesPowerByAutonomicController() throws IOException {
         if (!autonomicController.isArchiveLastWaypoint()) {
             int waypointIndex = osmMap.getWaypointIndex();
-            LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateEnginesPower();
+            LinearAndAngularSpeed linearAndAngularSpeed = autonomicController.designateSpeeds();
             if (chosenAlgorithm.equals(PositionAlgorithm.KALMAN_FILTER)) {
                 kalmanFilterAlgorithm.setStartWaypoint(osmMap.getStartWaypoint());
                 kalmanFilterAlgorithm.setNextWaypoint(osmMap.getNextWaypointOnTheRoad());
@@ -196,7 +196,7 @@ public class Connection {
             if (linearAndAngularSpeed != null) {
                 if (waypointIndex != osmMap.getWaypointIndex()) {
 //                    lineUpTowardsTheTarget();
-                    linearAndAngularSpeed = autonomicController.designateEnginesPower();
+                    linearAndAngularSpeed = autonomicController.designateSpeeds();
                     if (chosenAlgorithm.equals(PositionAlgorithm.KALMAN_FILTER)) {
                         kalmanFilterAlgorithm.setStartWaypoint(osmMap.getStartWaypoint());
                         kalmanFilterAlgorithm.setNextWaypoint(osmMap.getNextWaypointOnTheRoad());
@@ -283,7 +283,7 @@ public class Connection {
                     }
                 });
                 boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
-                engines.setTemp(false);
+                engines.setChanged(false);
                 autonomicController.setArchiveLastWaypoint(false);
                 boatModeController.setBoatMode(BoatMode.KEYBOARD_CONTROL);
                 modeChooser.setSelected(false);
@@ -525,32 +525,19 @@ public class Connection {
         return autonomicController.isArchiveLastWaypoint();
     }
 
-    public void lineUpTowardsTheTarget() {
-        double expectedCourse = Double.parseDouble(osmMap.getExpectedCourse().getText());
-        if (Math.abs(expectedCourse - osmMap.getCurrentCourse()) > Utils.COURSE_ACCURACY_WHILE_CALIBRATION) {
-            log.info("Lining up towards the point ...");
-            int direction = autonomicController.getAngularSpeedDirection(expectedCourse, osmMap.getCurrentCourse());
-            LinearAndAngularSpeed linearAndAngularSpeed = direction > 0 ? autonomicController.designateRightEnginesPowerOnStart() : autonomicController.designateLeftEnginesPowerOnStart();
-            try {
-                startAndStopRotating(linearAndAngularSpeed, expectedCourse);
-            } catch (InterruptedException e) {
-                log.error("Error while startAndStopRotatnig: {}", e.getMessage());
-            }
-            log.info("They lined up towards the point.");
-        }
-    }
+//    public void lineUpTowardsTheTarget() {
+//        double expectedCourse = Double.parseDouble(osmMap.getExpectedCourse().getText());
+//        if (Math.abs(expectedCourse - osmMap.getCurrentCourse()) > Utils.COURSE_ACCURACY_WHILE_CALIBRATION) {
+//            log.info("Lining up towards the point ...");
+//            int direction = autonomicController.getAngularSpeedDirection(expectedCourse, osmMap.getCurrentCourse());
+//            LinearAndAngularSpeed linearAndAngularSpeed = direction > 0 ? autonomicController.designateRightEnginesPowerOnStart() : autonomicController.designateLeftEnginesPowerOnStart();
+//            try {
+//                startAndStopRotating(linearAndAngularSpeed, expectedCourse);
+//            } catch (InterruptedException e) {
+//                log.error("Error while startAndStopRotatnig: {}", e.getMessage());
+//            }
+//            log.info("They lined up towards the point.");
+//        }
+//    }
 
-    public void startAndStopRotating(LinearAndAngularSpeed linearAndAngularSpeed, double courseToEnd) throws InterruptedException {
-        int waitingIteration = 0;
-        autonomicController.setStopRotating(false);
-        sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
-        autonomicController.setCourseOnRotateStart(courseToEnd);
-        while (!autonomicController.isStopRotating() && waitingIteration < Utils.MAX_STARTING_BOAT_TIME_SECONDS) {
-            Thread.sleep(1000);
-            waitingIteration++;
-        }
-        linearAndAngularSpeed = autonomicController.clearAfterRotating();
-        sendEnginesPowerInAutonomicMode(linearAndAngularSpeed);
-        Thread.sleep(1000);
-    }
 }

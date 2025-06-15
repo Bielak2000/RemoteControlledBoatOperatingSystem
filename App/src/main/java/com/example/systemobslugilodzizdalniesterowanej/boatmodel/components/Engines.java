@@ -10,12 +10,12 @@ public class Engines {
 
     private int motorLeft;
     private int motorRight;
-    private boolean temp;
+    private boolean changed;
 
     public Engines() {
         motorLeft = 0;
         motorRight = 0;
-        temp = false;
+        changed = false;
     }
 
     public void movingForward() {
@@ -51,12 +51,12 @@ public class Engines {
         return motorRight;
     }
 
-    public void setTemp(boolean temp) {
-        this.temp = temp;
+    public void setChanged(boolean changed) {
+        this.changed = changed;
     }
 
-    public boolean getTemp() {
-        return temp;
+    public boolean getChanged() {
+        return changed;
     }
 
     public void setEnginesPowerByAngularAndLinearSpeed(LinearAndAngularSpeed linearAndAngularSpeed) {
@@ -83,7 +83,7 @@ public class Engines {
                 this.motorRight = -1 * ((int) linearAndAngularSpeed.getLinearSpeed());
             }
         }
-        this.temp = true;
+        this.changed = true;
     }
 
     private int mapLeftEngineValue(double autonomicValue) {

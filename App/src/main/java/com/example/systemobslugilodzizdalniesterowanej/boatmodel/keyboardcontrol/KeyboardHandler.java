@@ -55,65 +55,65 @@ public class KeyboardHandler {
                         case UP:
                             moveUp.arm();
                             engines.movingForward();
-                            if (!engines.getTemp()) {
+                            if (!engines.getChanged()) {
                                 connection.sendParameters();
-                                engines.setTemp(true);
+                                engines.setChanged(true);
                             }
                             break;
                         case DOWN:
                             moveDown.arm();
                             engines.movingBack();
-                            if (!engines.getTemp()) {
+                            if (!engines.getChanged()) {
                                 connection.sendParameters();
-                                engines.setTemp(true);
+                                engines.setChanged(true);
                             }
                             break;
                         case LEFT:
                             moveLeft.arm();
                             engines.turnLeft();
-                            if (!engines.getTemp()) {
+                            if (!engines.getChanged()) {
                                 connection.sendParameters();
-                                engines.setTemp(true);
+                                engines.setChanged(true);
                             }
                             break;
                         case RIGHT:
                             moveRight.arm();
                             engines.turnRight();
-                            if (!engines.getTemp()) {
+                            if (!engines.getChanged()) {
                                 connection.sendParameters();
-                                engines.setTemp(true);
+                                engines.setChanged(true);
                             }
                             break;
                         case T:
                             leftFlap.arm();
                             flaps.onLeftFlap();
-                            if (!flaps.getTemp()) {
+                            if (!flaps.getChanged()) {
                                 connection.sendParameters();
-                                flaps.setTemp(true);
+                                flaps.setChanged(true);
                             }
                             break;
                         case Y:
                             rightFlap.arm();
                             flaps.onRightFlap();
-                            if (!flaps.getTemp()) {
+                            if (!flaps.getChanged()) {
                                 connection.sendParameters();
-                                flaps.setTemp(true);
+                                flaps.setChanged(true);
                             }
                             break;
                         case Q:
                             lightDown.arm();
-                            if (!lighting.getTemp()) {
+                            if (!lighting.getChanged()) {
                                 lighting.setPower(0);
                                 connection.sendParameters();
-                                lighting.setTemp(true);
+                                lighting.setChanged(true);
                             }
                             break;
                         case E:
                             lightUp.arm();
-                            if (!lighting.getTemp()) {
+                            if (!lighting.getChanged()) {
                                 lighting.setPower(100);
                                 connection.sendParameters();
-                                lighting.setTemp(true);
+                                lighting.setChanged(true);
                             }
                             break;
                     }
@@ -131,47 +131,47 @@ public class KeyboardHandler {
                             moveUp.disarm();
                             engines.turnOff();
                             connection.sendParameters();
-                            engines.setTemp(false);
+                            engines.setChanged(false);
                             break;
                         case DOWN:
                             moveDown.disarm();
                             engines.turnOff();
                             connection.sendParameters();
-                            engines.setTemp(false);
+                            engines.setChanged(false);
                             break;
                         case LEFT:
                             moveLeft.disarm();
                             engines.turnOff();
                             connection.sendParameters();
-                            engines.setTemp(false);
+                            engines.setChanged(false);
                             break;
                         case RIGHT:
                             moveRight.disarm();
                             engines.turnOff();
                             connection.sendParameters();
-                            engines.setTemp(false);
+                            engines.setChanged(false);
                             break;
                         case T:
                             leftFlap.disarm();
                             flaps.offLeftFlap();
-                            flaps.setTemp(false);
+                            flaps.setChanged(false);
                             break;
                         case Y:
                             rightFlap.disarm();
                             flaps.offRightFlap();
-                            flaps.setTemp(false);
+                            flaps.setChanged(false);
                             break;
                         case Q:
                             lightDown.disarm();
                             lighting.setPower(-1);
                             connection.sendParameters();
-                            lighting.setTemp(false);
+                            lighting.setChanged(false);
                             break;
                         case E:
                             lightUp.disarm();
                             lighting.setPower(-1);
                             connection.sendParameters();
-                            lighting.setTemp(false);
+                            lighting.setChanged(false);
                             break;
                     }
                 }
@@ -186,18 +186,18 @@ public class KeyboardHandler {
         moveDown.disarm();
         moveUp.disarm();
         engines.turnOff();
-        engines.setTemp(false);
+        engines.setChanged(false);
 
         leftFlap.disarm();
         rightFlap.disarm();
         flaps.offLeftFlap();
         flaps.offRightFlap();
-        flaps.setTemp(false);
+        flaps.setChanged(false);
 
         lightUp.disarm();
         lightDown.disarm();
         lighting.setPower(-1);
-        lighting.setTemp(false);
+        lighting.setChanged(false);
 
         connection.sendParameters();
     }
