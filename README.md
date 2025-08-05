@@ -32,7 +32,7 @@ This project presents an integrated system designed to control a boat remotely v
 ## Technical Details
 
 - **Microcontroller Software:**  
-  Developed to interface with the radio module, process commands, and control boat actuators based on instructions received from the Java application.
+  Written in **C**, the firmware interfaces with the radio module and additionally supports GPS and IMU modules for enhanced navigation and state estimation. It processes commands and controls boat actuators based on instructions received from the Java application.
 
 - **Java/JavaFX Application:**  
   Provides a graphical user interface (GUI) for configuration, manual steering, route planning, and status monitoring. The application handles serial communication with the microcontroller through the selected port.
