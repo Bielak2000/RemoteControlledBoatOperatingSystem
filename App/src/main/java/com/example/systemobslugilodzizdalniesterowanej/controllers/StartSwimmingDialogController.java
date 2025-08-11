@@ -87,18 +87,16 @@ public class StartSwimmingDialogController {
                     LinearAndAngularSpeed linearAndAngularSpeed;
                     linearAndAngularSpeed = autonomicController.designateRightEnginesPowerOnStart();
                     try {
-                        connection.startAndStopRotating(linearAndAngularSpeed, osmMap.getCurrentCourse());
+                        startAndStopRotating(linearAndAngularSpeed, osmMap.getCurrentCourse());
                     } catch (InterruptedException e) {
                         log.error("Error while startAndStopRotatnig: {}", e.getMessage());
                     }
                     linearAndAngularSpeed = autonomicController.designateLeftEnginesPowerOnStart();
                     try {
-                        connection.startAndStopRotating(linearAndAngularSpeed, osmMap.getCurrentCourse());
+                        startAndStopRotating(linearAndAngularSpeed, osmMap.getCurrentCourse());
                     } catch (InterruptedException e) {
                         log.error("Error while startAndStopRotatnig: {}", e.getMessage());
                     }
-
-//                    connection.lineUpTowardsTheTarget();
                 }
                 Platform.runLater(() -> {
                     runningBoatInformation.setVisible(true);

@@ -58,13 +58,10 @@ public class Connection {
     private List<String> portNames = new ArrayList<>();
     private Label connectionStatus;
     private Label lightPower;
-
-    // TODO: do testow
     private Label gpsCourse;
     @Getter
     private Label sensorCourse;
     private Label designatedCourse;
-
     private Boolean networkStatus;
     private OSMMap osmMap;
     private Stage stage;
@@ -195,7 +192,6 @@ public class Connection {
             }
             if (linearAndAngularSpeed != null) {
                 if (waypointIndex != osmMap.getWaypointIndex()) {
-//                    lineUpTowardsTheTarget();
                     linearAndAngularSpeed = autonomicController.designateSpeeds();
                     if (chosenAlgorithm.equals(PositionAlgorithm.KALMAN_FILTER)) {
                         kalmanFilterAlgorithm.setStartWaypoint(osmMap.getStartWaypoint());
@@ -327,9 +323,7 @@ public class Connection {
             case ConnectionConsts.FROM_BOAT_SENSOR_COURSE_MESSAGE:
                 log.info("Received course from SENSOR");
                 sendingValuesLock();
-                // TODO: converting course
-                String convertedCourse = String.valueOf(Math.abs((Double.parseDouble(array[1]))));// + 180) % 360));
-//                String convertedCourse = String.valueOf(Math.abs((Double.parseDouble(array[1]) + 180) % 360));
+                String convertedCourse = String.valueOf(Math.abs((Double.parseDouble(array[1]))));
                 Platform.runLater(() -> {
                     this.sensorCourse.setText(convertedCourse);
                 });
@@ -388,15 +382,11 @@ public class Connection {
     }
 
     public void sendingValuesLock() {
-//        log.info("locking in function");
         sendingValuesLock.lock();
-//        log.info("locked in function");
     }
 
     public void sendingValuesUnlock() {
-//        log.info("unlocking in function");
         sendingValuesLock.unlock();
-//        log.info("unlocked in function");
     }
 
     // TODO: zrefaktoryzować funckje

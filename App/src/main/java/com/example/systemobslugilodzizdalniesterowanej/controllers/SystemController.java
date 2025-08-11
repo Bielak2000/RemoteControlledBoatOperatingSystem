@@ -220,7 +220,6 @@ public class SystemController implements Initializable {
     void changeMode(ActionEvent event) throws IOException {
         if (modeChooser.isSelected()) {
             if (osmMap.getFoundBoatPosition()) {
-//            if (true) {
                 keyboardHandler.stopBoat();
                 executorService.execute(new Runnable() {
                     @Override
@@ -254,7 +253,6 @@ public class SystemController implements Initializable {
     @FXML
     void startSwimming(ActionEvent event) throws IOException {
         if (osmMap.getFoundBoatPosition() && osmMap.designatedWaypoints() && osmMap.getCurrentCourse() != null) {
-//        if (true) {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_RESOURCES_PATH + "start-swimming-dialog.fxml"));
             Stage mainStage = new Stage();
             StartSwimmingDialogController startSwimmingDialogController = new StartSwimmingDialogController(chosenAlgorithm, mainStage, boatModeController, connection, osmMap, autonomicController, runningBoatInformation);

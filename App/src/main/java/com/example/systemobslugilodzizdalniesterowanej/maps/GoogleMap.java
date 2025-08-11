@@ -42,27 +42,11 @@ public class GoogleMap implements MapComponentInitializedListener, DirectionsSer
         map = mapView.createMap(mapOptions);
         LatLong latLong = new LatLong(50.0650887, 19.9245536);
         map.setCenter(latLong);
-
         Marker marker1 = new Marker(markerOptions);
         Marker marker2 = new Marker(markerOptions);
         marker1.setPosition(new LatLong(50.0750887, 19.9345536));
         marker2.setPosition(new LatLong(50.0850887, 19.9445536));
         map.addMarker(marker1);
-
-//  Marker marker1 = new Marker(markerOptions);
-//  Marker marker2 = new Marker(markerOptions);
-//  Marker marker3 = new Marker(markerOptions);
-//  Marker marker4 = new Marker(markerOptions);
-//  marker1.setPosition(new LatLong(50.0750887,19.9345536));
-//  marker2.setPosition(new LatLong(50.0850887,19.9445536));
-//  marker3.setPosition(new LatLong(50.0950887,19.9545536));
-//  marker4.setPosition(new LatLong(50.1050887,19.9645536));
-//  map.addMarker(marker1);
-//  map.addMarker(marker2);
-//  map.addMarker(marker3);
-//  map.addMarker(marker4);
-
-
     }
 
     @Override

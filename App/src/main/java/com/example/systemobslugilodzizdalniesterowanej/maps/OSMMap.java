@@ -108,7 +108,7 @@ public class OSMMap {
 //        }
 //    };
 
-//    TODO: 06-04 wieczorem - KRK
+//    TODO: 06-04 - KRK
 //    @Getter
 //    private Coordinate startTestingCoordinate = new Coordinate(50.09076, 19.858646);
 //

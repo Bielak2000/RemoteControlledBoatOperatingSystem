@@ -1,10 +1,10 @@
 package com.example.systemobslugilodzizdalniesterowanej.boatmodel.keyboardcontrol;
 
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatMode;
+import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Engines;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Flaps;
 import com.example.systemobslugilodzizdalniesterowanej.boatmodel.components.Lighting;
-import com.example.systemobslugilodzizdalniesterowanej.boatmodel.BoatModeController;
 import com.example.systemobslugilodzizdalniesterowanej.communication.Connection;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
