@@ -40,3 +40,5 @@ This project presents an integrated system designed to control a boat remotely v
 ## Summary
 
 This project combines embedded systems programming with desktop application development to create a versatile and efficient boat control system. It enables both direct manual operation and autonomous navigation, showcasing integration of hardware communication with modern user interface design.
+
+A presentation of the project is available in a video at the following link: https://youtu.be/9EfeOhkxhsQ?feature=shared.
